@@ -1,0 +1,35 @@
+﻿Build started 9/13/2016 20:00:03.
+     1>Project "C:\Projects\DSL\3rdparty\lpng1625\projects\vstudio\zlib\zlib.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /Wall /WX /Ox /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D Z_SOLO /Gm- /EHsc /MT /GS- /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release Library\\" /Fd"x64\Release Library\vc120.pdb" /FR"x64\Release Library\\" /Gd /TC /wd4255 /wd4668 /wd4710 /wd4711 /wd4746 /wd4820 /wd4996 /wd4127 /wd4131 /wd4242 /wd4244 /errorReport:prompt "..\..\..\..\zlib-1.2.8\adler32.c" "..\..\..\..\zlib-1.2.8\compress.c" "..\..\..\..\zlib-1.2.8\crc32.c" "..\..\..\..\zlib-1.2.8\deflate.c" "..\..\..\..\zlib-1.2.8\infback.c" "..\..\..\..\zlib-1.2.8\inffast.c" "..\..\..\..\zlib-1.2.8\inflate.c" "..\..\..\..\zlib-1.2.8\inftrees.c" "..\..\..\..\zlib-1.2.8\trees.c" "..\..\..\..\zlib-1.2.8\uncompr.c" "..\..\..\..\zlib-1.2.8\zutil.c"
+         adler32.c
+         compress.c
+         crc32.c
+         deflate.c
+         infback.c
+         inffast.c
+         inflate.c
+         inftrees.c
+         trees.c
+         uncompr.c
+         zutil.c
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\Lib.exe /OUT:"C:\Projects\DSL\3rdparty\lpng1625\projects\vstudio\x64\Release Library\zlib.lib" /NOLOGO /MACHINE:X64 /LTCG "x64\Release Library\adler32.obj"
+         "x64\Release Library\compress.obj"
+         "x64\Release Library\crc32.obj"
+         "x64\Release Library\deflate.obj"
+         "x64\Release Library\infback.obj"
+         "x64\Release Library\inffast.obj"
+         "x64\Release Library\inflate.obj"
+         "x64\Release Library\inftrees.obj"
+         "x64\Release Library\trees.obj"
+         "x64\Release Library\uncompr.obj"
+         "x64\Release Library\zutil.obj"
+         zlib.vcxproj -> C:\Projects\DSL\3rdparty\lpng1625\projects\vstudio\x64\Release Library\zlib.lib
+       BscMake:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\bscmake.exe /nologo /o"C:\Projects\DSL\3rdparty\lpng1625\projects\vstudio\x64\Release Library\zlib.bsc" "x64\Release Library\adler32.sbr" "x64\Release Library\compress.sbr" "x64\Release Library\crc32.sbr" "x64\Release Library\deflate.sbr" "x64\Release Library\infback.sbr" "x64\Release Library\inffast.sbr" "x64\Release Library\inflate.sbr" "x64\Release Library\inftrees.sbr" "x64\Release Library\trees.sbr" "x64\Release Library\uncompr.sbr" "x64\Release Library\zutil.sbr"
+     1>Done Building Project "C:\Projects\DSL\3rdparty\lpng1625\projects\vstudio\zlib\zlib.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.78

@@ -1,0 +1,45 @@
+Matrix<Int32> m2 = (dtInt32 | 10 | 20 | 30) ^
+				  (dtInt32 | 40 | 50 | 60);
+Matrix<Int32> m3 = m2(0,1,1,1);
+m2++;
+for (auto it=m3.rows->begin(); it!=m3.rows->end(); it++)
+	cout << *it << endl;
+
+Matrix<Float> m(3, 2, 0.0f, oColMajor);
+
+m.val(0,0) = 1;
+m.val(1,0) = 2;
+m.val(2,0) = 3;
+m.val(0,1) = 4;
+m.val(1,1) = 5;
+m.val(2,1) = 6;
+auto it_rows_end = m.rows->end();
+auto it_cols_end = m.cols->end();
+//m++;
+cout << endl << "INT" << endl;
+auto it1 = m.rows->begin();
+for (auto i=0;i<~m;i++, it1++) {
+	cout << *it1 << endl;
+}
+cout << endl << "IT1" << endl;
+for (auto it=m.rows->begin(); it != m.rows->end(); it++) {
+	cout << *it << endl;
+}
+cout << endl << "IT2" << endl;
+for (auto it=m.cols->begin(); it != m.cols->end(); it++) {
+	cout << *it << endl;
+}
+cout << endl << "IT3" << endl;
+for (auto r=m.rows.begin();r != m.rows.end(); r++) {
+	for (auto c=r->begin();c != r->end(); c++) {
+		cout << *c << endl;
+	}
+	cout << "next row" << endl;
+}
+cout << endl << "IT4" << endl;
+for (auto c=m.cols.begin();c != m.cols.end(); c++) {
+	for (auto r=c->begin();r != c->end(); r++) {
+		cout << *r << endl;
+	}
+	cout << "next col" << endl;
+}

@@ -1,0 +1,13 @@
+- PNG data type
+- Killswitch for main slice (Table.clearAll() clears the table an all its children, brothers and sisters)
+- LMDB
+- General Caffe model
+- Plug-in for Caffe model
+- Extra layer for wavelength selection
+- ArrayFire SVD and other interfaces
+- LDA
+- PCA
+- Multiple classifiers in pipeline by ctTarget order
+- kNN classifiers
+
+

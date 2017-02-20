@@ -1,0 +1,6 @@
+﻿  pngtest.c
+  Generating code
+  Finished generating code
+  pngtest.vcxproj -> C:\Projects\DSL\3rdparty\lpng1625\projects\vstudio\x64\Release\pngtest.exe
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(203,5): error MSB3073: The command ""C:\Projects\DSL\3rdparty\lpng1625\projects\vstudio\x64\Release\pngtest.exe" ..\..\..\pngtest.png "x64\Release\pngout.png"
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(203,5): error MSB3073: :VCEnd" exited with code 255.

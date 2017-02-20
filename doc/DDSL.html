@@ -1,0 +1,1819 @@
+<html>
+<head>
+<style>
+
+body {
+	background-color: rgb(255, 255, 255);
+	font-family: "Verdana", sans-serif;
+}
+
+ul {
+	font-size: 12pt;
+	color: darkblue;
+}
+
+h1 {
+	margin-top: 0px;
+}
+
+div.text {
+	border-style: solid;
+	border-width: 1px;
+	padding: 50px;
+	background-color: rgb(255,255,240);
+	margin: 100px;
+}
+
+div.code {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 12pt;
+	color: red;
+	margin: 10px;
+}
+
+div.comment {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 12pt;
+	color: green;
+	margin: 0px;
+}
+
+div.inlinecode {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 12pt;
+	display:inline;
+}
+
+td {
+	vertical-align: text-top;
+}
+
+table {
+	padding: 3px;	
+	spacing: 3px;
+	border: 1px solid black;
+}
+
+td {
+	spacing: 3px;
+	border: 1px solid silver;
+}
+</style>
+
+<title>Dijkstra's Data Science Language</title>
+</head>
+<body>
+
+<div class="text">
+	<h1>Dijkstra's Data Science Language (DDSL) documentation</h1>
+	Author: Klaas Dijkstra (NHL University of Applied Sciences)<br/>
+	Date: 31-08-2016<br/>
+</div>
+
+<div class="text">
+	<h1>Introduction</h1>	
+	Dijkstra's Data Science Language or DDSL (pronounced with a silent first D) is a data science/machine learning language written in C++. DDSL makes use of C++ templates and is fully writted as header file code (in hpp files). DDSL is symbiotic with C++ which means that an ANSI compliant C++ compiler fully understands DDSL code. <br/><br/>
+	
+	The key design concept is to have a short, flexible but powerfull syntax for data science software applications, while maintaining the speed and flexibility of C++. Extensive overloading of operators makes DDSL more a language than a library. While almost all operators are redefined and have a different meaning in DDSL, each operator's shape follows its function. For example, the '|' operator is used as a column seperator while the '!' detaches two matrices or detaches the execution pipeline from the main thread. Printing a DDSL object as compilable DDSL code is done with the print operator '++'.<br/><br/>
+	
+	DDSL is designed with focus on performance and efficient memory usage through the copy-on-write paradigm extended with a smart pointer mechanism. DDSL is inspired by functional languages such as R and Matlab but is quite different because DDSL code can be directly compiled by a C++ compiler. Therefor no special run-time environment is needed for DDSL compiled code. That is an advantage compared to the other languages.<br/><br/>
+	
+	An interpreter for DDSL code is not yet available. DDSL can only exist as a symbiot to another language and therefor does not define loops and branches. DDSL is mainly an expression language. Operators can be chained to create expressions. Models can be chained to create machine learning pipelines. Currently the following models are implemented in DDSL:
+	<ul>
+	<li>Export: Export Table data to a text or csv file.</li>
+	<li>Import: Import Table data from a text or csv file.</li>
+	<li>ZScore: Z-Score scaling of input features.</li>
+	<li>MMScale: Min/max scaling of input features.</li>
+	<li>GenGauss: For generating samples from a muli-dimensional (rotated) Gaussian distribution.</li>
+	<li>NaiveBayes: The naive Bayes classifier.</li>
+	<li>Random: Random classifier.</li>
+	</ul>
+	
+	Interfaces to other libraries are available through the following models:
+	<ul>
+	<li>CaffeMLP: Multilayer Perceptron classifier running in Caffe on NVIDIA GPUs.</li>
+	<li>SVM: Support Vector Machine classifier using libsvm.</li>
+	</ul>
+	
+	The following models are in development:
+	<ul>
+	<li>PCA: Principle Components Analysis projection of input features.</li>
+	<li>LDA: Linear Discriminant Analysis projection of input features.</li>
+	<li>Caffe: Caffe Deep Learning model.</li>
+	</ul>
+	
+	</div>
+<div>
+
+<style>
+td.head {
+	font-weight: bold;
+}
+td.op {
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bold;
+}
+td.op2 {
+	font-family: "Courier New", Courier, monospace;
+}
+
+td.subhead {
+	font-style: italic;
+	font-weight: bold;
+}
+
+</style>
+<div class="text">
+<h1>DDSL Cheat sheet / Summary</h1>
+<table>
+<tr><td class="subhead">Data structures</td></tr>
+<tr><td>Structure</td><td>Either a Matrix or a Table</td></tr>
+<tr><td>Object</td><td>Either a structure or Model</td></tr>
+<tr><td>Matrix</td><td>An instance of the class Matrix</td></tr>
+<tr><td>Index</td><td>Either a row or a column</td></tr>
+<tr><td>Column Vector</td><td>An instance of the class Matrix with one column</td></tr>
+<tr><td>Row Vector</td><td>An instance of the class Matrix with one row</td></tr>
+<tr><td>Scalar</td><td>An instance of the class Matrix with one row and one column</td></tr>
+<tr><td>Constant</td><td>An ordinary variable</td></tr>
+<tr><td>Table</td><td>An instance of the class Table containing Matrices by key ContentType/DataType</td></tr>
+<tr><td>Column Tuple</td><td>An instance of the class Table with one column</td></tr>
+<tr><td>Row Tuple</td><td>An instance of the class Table with one row</td></tr>
+<tr><td>Model</td><td>An instance of the class Model</td></tr>
+<tr><td>Pipeline</td><td>An instance of the class Model with additional Models in its double linked list</td></tr>
+<tr><td class="subhead">Naming</td></tr>
+<tr><td>Element</td><td>A single cell</td></tr>
+<tr><td>Row</td><td>A horizontal sequence of elements</td></tr>
+<tr><td>Column</td><td>A vertical sequence of elements</td></tr>
+<tr><td>Idx</td><td>Index of a row or column</td></tr>
+<tr><td>Idxs</td><td>Plural of idx</td></tr>
+<tr><td>Id</td><td>Id of a row or column</td></tr>
+<tr><td>Ids</td><td>Plural of id</td></tr>
+<tr><td>Row Major</td><td>Each element in a row is adjecent in memory</td></tr>
+<tr><td>Column Major</td><td>Each element in a column is adjecent in memory</td></tr>
+<tr><td>Operator</td><td>C++ operator like +, -, /, etc.</td></tr>
+<tr><td>Expression</td><td>C++ expression with a sequence of operators</td></tr>
+</table>
+<br/>
+<table>
+<tr><td class="subhead">Types</td></tr>
+<tr><td class="op2">Float, Double, Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, String, TableId, TableIdx, MatrixIdx, Literal, VoidPointer</td></tr>
+<tr><td class="subhead">DataTypes</td></tr>
+<tr><td class="op2">dtUnknown, dtDouble, dtFloat, dtUInt8, dtUInt16, dtUInt32, dtUInt64, dtInt8, dtInt16, dtInt32, dtInt64, dtString, dtCString, dtContentType, dtDataType, dtMatrixDouble, dtMatrixInt32, dtMatrixUInt32, dtMatrixString, dtVoidPointer, dtCaffeBlobDouble</td></tr>
+<tr><td class="subhead">ContentTypes</td></tr>
+<tr><td class="op2">ctUnknown, ctFeature, ctTarget, ctResult, ctSplit, ctConfusion, ctIndex, ctParameter, ctConfidence</td></tr>
+<tr><td class="subhead">Order</td></tr>
+<tr><td class="op2">oRowMajor, oColMajor</td></tr>
+</table>
+<br/>
+<table>
+<tr><td class="head">Operator</td><td class="head">Name</td><td class="head">Matrix<></td><td class="head">Table<></td><td class="head">Model<> / Pipeline</td></tr>
+<tr><td class="subhead">Static Initialization</td></tr>
+<tr><td class="op">|<td>Column seperator</td><td>Append Matrix or Constant</td><td>Append Table</td><td>Append synchronous Model</td></tr>
+<tr><td class="op">^<td>Row seperator</td><td>Append Matrix or Constant</td><td>Append Table</td><td>Append asynchronous Model</td></tr>
+<tr><td class="op">| (rhs)<td>Row Id specifier</td><td>NA</td><td>Set row Ids</td><td>NA</td></tr>
+<tr><td class="op">^ (rhs)<td>Column Id specifier</td><td>NA</td><td>Set column Ids</td><td>NA</td></tr>
+<tr><td class="subhead">Assignment</td></tr>
+<tr><td class="op">=<td>Assign</td><td>Assign Matrix, or Constant to all elements</td><td>Assign Matrix, Table, or Constant to all sub-matrices with the same type</td><td>NA</td></tr>
+<tr><td class="op">+=<td>Transpose</td><td>Transpose Matrix</td><td>NA</td><td>NA</td></tr>
+<tr><td class="op">*=<td>Multiplication</td><td>Matrix multiplication</td><td>NA</td><td>NA</td></tr>
+<tr><td class="op">|=<td>Force column majority</td><td>Force Matrix to column major</td><td>NA</td><td>NA</td></tr>
+<tr><td class="op">^=<td>Force row majority</td><td>Force matrix to row major</td><td>NA</td><td>NA</td></tr>
+<tr><td class="subhead">Slicing</td></tr>
+<tr><td class="op">()<td>Slice</td><td>Slice row and/or column by idx and/or length or by Matrix of idxs</td><td>Slice row and/or column by idx and/or length and/or id, or by DataType(s) and/or ContentType(s), or by Matrix of idxs, DataTypes and/or ContentTypes</td><td>Slice pipeline by length</td></tr>
+<tr><td class="op">[]<td>Slice column</td><td>Slice column by idx or by Matrix of idxs</td><td>Slice column by index, id, DataType or ContentType, or by Matrix of idxs, DataTypes or ContentTypes</td><td>Get single Model from the pipeline</td></tr>
+<tr><td class="subhead">Set Logic</td></tr>
+<tr><td class="op">&&<td>Intersection</td><td>Intersect two vectors</td><td>NA</td><td>NA</td></tr>
+<tr><td class="op">||<td>Union</td><td>Merge two vectors</td><td>NA</td><td>NA</td></tr>
+<tr><td class="subhead">Counting</td></tr>
+<tr><td class="op">~<td>Count</td><td>Number of elements</td><td>Number of elements</td><td>Number of Models in pipeline</td></tr>
+<tr><td class="subhead">Printing</td></tr>
+<tr><td class="op">++<td>Print</td><td>Print in DDSL syntax</td><td>Print in DDSL syntax</td><td>Print in DDSL syntax</td></tr>
+<tr><td class="op">--<td>Print less</td><td>Print meta-data summary</td><td>Print meta-data summary</td><td>Print structure without hyper-parameters</td></tr>
+<tr><td class="subhead">Streaming</td></tr>
+<tr><td class="op">><td>Train</td><td>NA</td><td>NA</td><td>Train a pipeline by streaming a Table through it</td></tr>
+<tr><td class="op">>><td>Apply</td><td>NA</td><td>NA</td><td>Apply a pipeline by streaming a Table through it</td></tr>
+<tr><td class="op"><<td>Train</td><td>NA</td><td>NA</td><td>Train a pipeline until a Model</td></tr>
+<tr><td class="op"><<<td>Apply</td><td>NA</td><td>NA</td><td>Apply a pipeline until a Model</td></tr>
+<tr><td class="op">>><td>Output stream</td><td>Stream to an ostream or file</td><td>Stream to an ostream or file</td><td>Stream to an ostream or file</td></tr>
+<tr><td class="op"><<<td>Input stream</td><td>Stream from an istream or file</td><td>Stream from an istream or file</td><td>Stream from an istream or file</td></tr>
+<tr><td class="subhead">Passthrough</td></tr>
+<tr><td class="op">+<td>Pass all</td><td>See arithmetic</td><td>See arithmetic</td><td>Pass all input columns to output</td></tr>
+<tr><td class="op">-<td>Pass none</td><td>See arithmetic</td><td>See arithmetic</td><td>Pass no input columns to output</td></tr>
+<tr><td class="subhead">Break and Copy</td></tr>
+<tr><td class="op">!<td>Break</td><td>Break all references and copy data after assignment</td><td>Break all references of all internal matrices</td><td>Enable asynchonous pipeline or wait for pipeline</td></tr>
+<tr><td class="op">*<td>Copy</td><td>Copy Matrix before assignment</td><td>Copy Table before assignment</td><td>NA</td></tr>
+</table>
+<br/>
+<table>
+<tr><td class="head">Notation</td></tr>
+<tr><td>@ = Operator<br/>&#9642; = Contant or Scalar<br/>&#9481; = Row Vector/Tuple<br/>&#9479; = Column Vector/Tuple<br/>&#9638; = Structure (Matrix or Table)</td></tr>
+<tr><td class="head">Arithmetic</td><td>This is Row and Column Id aware for Tables</td></tr>
+<tr><td class="subhead">Types of operators @</td><td>+, -, /, *, pow(), %</td></tr>
+<tr><td class="subhead">Effect of operators @</td></tr>
+<tr><td>&#9638; @ &#9638;</td><td>Apply per Element operation between Structures</td>
+<tr><td>&#9638; @ &#9479;</td><td>Apply Vector to each Column</td>
+<tr><td>&#9638; @ &#9481;</td><td>Apply Vector to each Row</td>
+<tr><td>&#9638; @ &#9642;</td><td>Apply Constant or Scalar to each Element</td>
+<tr><td>&#9479; @ &#9479;</td><td>Apply per Element operation between Structures</td>
+<tr><td>&#9479; @ &#9642;</td><td>Apply Constant or Scalar operation to each Element</td>
+<tr><td>&#9481; @ &#9481;</td><td>Apply per Element operation between Structures</td>
+<tr><td>&#9481; @ &#9642;</td><td>Apply Constant or Scalar operation to each Element</td>
+<tr><td class="head">Testing</td><td>This is Row and Column Id aware for Tables</td></tr>
+<tr><td class="subhead">Types of operators @</td><td>==, !=, >=, <=, >, <</td></tr>
+<tr><td class="subhead">Effect of operators @</td></tr>
+<tr><td>&#9638; @ &#9638;</td><td>Return a Scalar if both Structures are equal, otherwise return empty Matrix</td>
+<tr><td>&#9638; @ &#9479;</td><td>Return a Row Vector with column indices of each Column which tests positive</td>
+<tr><td>&#9638; @ &#9481;</td><td>Return a Column Vector with row indices of each Row which tests positive</td>
+<tr><td>&#9638; @ &#9642;</td><td>Return a Matrix with two Columns containing Row and Column indices which test positive</td>
+<tr><td>&#9479; @ &#9479;</td><td>Return a Scalar if both Vectors are equal, otherwise return empty Matrix</td>
+<tr><td>&#9479; @ &#9642;</td><td>Return a Column Vector with indices which test positive</td>
+<tr><td>&#9481; @ &#9481;</td><td>Return a Scalar if both Vectors are equal, otherwise return empty Matrix</td>
+<tr><td>&#9481; @ &#9642;</td><td>Return a Row Vector with indices which test positive</td>
+</table>
+<br/>
+
+<table>
+<tr><td class="head">Data handling</td></tr>
+<tr><td class="subhead">Matrix Function</td><td class="subhead">Description</td></tr>
+<tr><td class="op">.vec()</td><td>Access Matrix as a Vector</td><tr>
+<tr><td class="op">.vec(n)</td><td>Get n-th Variable of a Vector</td><tr>
+<tr><td class="op">.vec.val(n)</td><td>Get n-th Variable of a Vector</td><tr>
+<tr><td class="op">.val(r, c)</td><td>Get Variable at the r-th Row and c-th Column</td><tr>
+<tr><td class="op">.rows</td><td>Access Rows of a Matrix</td><tr>
+<tr><td class="op">.columns</td><td>Access Columns of a Matrix</td><tr>
+<tr><td class="op">.clear()</td><td>Clear Matrix</td><tr>
+<tr><td class="op">.T()</td><td>Implicitly castable to variable (left-top value)</td><tr>
+<tr><td class="subhead">Table Function</td><td class="subhead">Description</td></tr>
+<tr><td class="op">.rows</td><td>Access Rows of a Table</td><tr>
+<tr><td class="op">.rows.idxs()</td><td>Get all Row indices of a Table</td><tr>
+<tr><td class="op">.rows.ids()</td><td>Get all Row ids of a Table</td><tr>
+<tr><td class="op">.columns</td><td>Access Columns of a Table</td><tr>
+<tr><td class="op">.columns.idxs()</td><td>Get all Columns indices of a Table</td><tr>
+<tr><td class="op">.columns.ids()</td><td>Get all Columns ids of a Table</td><tr>
+<tr><td class="op">.clear()</td><td>Clear Table</td><tr>
+<tr><td class="op">.Mat&ltT&gt(n)</td><td>Get the n-th Matrix in the Table and cast to Matrix&ltT&gt</td><tr>
+<tr><td class="op">(DataType, ContentType)</td><td>Gives a Table with zero or one Matrices</td><tr>
+<tr><td class="op">.Matrix&ltT&gt()</td><td>Implicitly castable to .Mat&ltT&gt if only contains one Matrix</td><tr>
+<tr><td class="subhead">Model Function</td><td class="subhead">Description</td></tr>
+<tr><td class="op">.tab()</td><td>Get Model's output Table</td><tr>
+<tr><td class="op">.progressLoop()</td><td>Wait for Pipeline to complete and print progress</td><tr>
+<tr><td class="op">.wait(t)</td><td>Wait t milliseconds for Model to complete (and all before)</td><tr>
+<tr><td class="op">.printProgress()</td><td>Print progress of the Pipeline</td><tr>
+<tr><td class="op">.reset()</td><td>Reset internal Model</td><tr>
+<tr><td class="op">.clear()</td><td>Clear output Table</td><tr>
+<tr><td class="op">.next()</td><td>Next model in the Pipeline</td><tr>
+<tr><td class="op">.prev()</td><td>Previous model in the Pipeline</td><tr>
+<tr><td class="op">.last()</td><td>Last model in the Pipeline</td><tr>
+<tr><td class="op">.first()</td><td>First model in the Pipeline</td><tr>
+</table>
+<br/>
+
+<table>
+<tr><td class="head">Matrix iterators</td></tr>
+<tr><td class="subhead">Function</td><td class="subhead">Iterator</td><td class="subhead">Description</td></tr>
+<tr><td class="op">.rows.begin() and .rows.end()</td><td>Index::Iterator</td><td>Get Row iterator</td></tr>
+<tr><td class="op">.cols.begin() and .cols.end()</td><td>Index::Iterator</td><td>Get Column iterator</td></tr>
+<tr><td class="op">.rows->begin() and .rows->end()</td><td>CellsRegion::Iterator</td><td>Get Row Element iterator of first Element or last Element in the Matrix</td></tr>
+<tr><td class="op">.cols->begin() and .cols->end()</td><td>CellsRegion::Iterator</td><td>Get Column Element iterator of first Element or last Element in the Matrix</td></tr>
+<tr><td class="op">.rows[r]->begin() and .rows[r]->end()</td><td>CellsContinuous::Iterator</td><td>Get Row Element iterator of first Element of the r-th Row or last Element of the r-th Row</td></tr>
+<tr><td class="op">.cols[c]->begin() and .cols[c]->end()</td><td>CellsContinuous::Iterator</td><td>Get Column Element iterator of first Element of the c-th Column or last Element of the c-th Column</td></tr>
+<tr><td class="op">.rows[r][c]</td><td>CellsContinuous::Iterator</td><td>Get Row Element iterator of c-th Element of the r-th Row</td></tr>
+<tr><td class="op">.cols[c][r]</td><td>CellsContinuous::Iterator</td><td>Get Column Element iterator of r-th Element of the c-th Column</td></tr>
+<tr><td class="op">.vec().begin() and .vec().end()</td><td>CellsContinuous::Iterator</td><td>Get Vector Element iterator</td></tr>
+<tr><td class="op">.vec()[n]</td><td>CellsContinuous::Iterator</td><td>Get n-th Vector Element iterator</td></tr>
+</table>
+</div>
+
+<div class="text">
+<h1>Types</h1>
+	DDSL defines three data types: 
+	<ul>
+	<li>Matrix: 2D homogeneous data structure</li>
+	<li>Table: 2D heterogeneous data structure with row ids, column ids and content types</li>
+	<li>Model: Trainable model which can be chained and executed either synchronous or asynchronous</li>
+	</ul>	
+	Various predefined simple data types are defined in the DSTypes namespace: Double, Float, Int32, UInt32, String, etc. More advanced types are: MatrixDouble, MatrixString, VoidPointer, etc.
+	<h2>Classes</h2>
+		A type is defined in three class templates: <ul><li>Matrix&ltT, TIdx&gt</li><li>Table&ltTIdx, TId&gt</li><li>Model&ltTIdx, TId&gt</li></ul>
+	<h2>Namespaces</h2>	
+		The code and definitions of each type exist in three namespaces:
+		<ul>
+		<li>DSLib defines all core functionality such as the class type definitions.</li>
+		<li>DSLang defines all operators for the language definition.</li>
+		<li>DSFunc defined all functions which work on the varous object types.</li>
+		</ul>
+		Additional namespaces are DSTypes which contains all the types and DSUtil which contains convenient utility functions.
+	<h2>Files</h2>
+	The DDSL language source files are either .h, .hpp or .cpp. When using header file code just <div class="inlinecode">#include "ddsl.hpp"</div>.
+	The .h files contains function prototypes and class declarations. The .hpp files contain function and class definitions. The .cpp files contain explicit template instantiations. DS_Types.* contains all types and DS_Util.* contains utility functions. Generally a filename consists of the prefix DS_ and the typename and namespace. For example DS_MatrixLang.hpp contains the code for the matrix language definition. DDSL can be used in a project in two ways. Either <div class="inlinecode">#include "ddsl.h"</div> and link to static object files created from the .cpp files OR just <div class="inlinecode">#include "ddsl.hpp"</div> and do not link to the static objects.
+</div>
+
+<div class="text">
+<h1>Matrix</h1>
+	Matrix is a 2 dimensional homogeneous data type structure which can either be row-major or column-major memory aligned. A Matrix starts at index 0. And 1 row or 1 column matrix can be accessed as a vector. A Matrix can be instantiated for each datatype. The following code will create a Matrix object called mat containing doubles and being row-major aligned.
+	<div class="code">Matrix&ltDouble&gt mat(oRowMajor);</div>
+	Matrix supports static initialization, assignment, slicing, set logic, arithmetic, counting, printing and streaming.<br>
+	Typically a Matrix will never copy if this is not needed (for example when assigning one Matrix to another or when slicing a continuous region). In the code snippet below, b will point to a.
+	<div class="code">
+	Matrix&ltDouble&gt a;<br/>
+	Matrix&ltDouble&gt b;<br/>
+	b = a;
+	</div>
+	<h2>Matrix language definition in DS_MatrixLang.h</h2>
+		
+		<h3>Static initialization</h3>
+		Various methods for static initialization exist. '|' is a column seperator and '^' is a row seperator.
+		<div class="code">
+		<div class="comment">//Creates a row major Matrix with one row and 3 columns containing doubles.<br/></div>
+		Matrix&ltDouble&gt m1 = (dtDouble | 1.0 | 2.0 | 3.0);<br/>
+		<div class="comment">//This example with the range operator creates a matrix with one row containing double values 1, 2, 7, 8, 9, 10.<br/></div>
+		Matrix&ltDouble&gt m2 = (dtDouble | 1.0 | 2.0 | 7.0 || 10.0);<br/>
+		<div class="comment">//Creates a column major Matrix with one row and three columns containing unsigned 32 bits integers. <br/></div>
+		Matrix&ltUInt32&gt m3 = (dtUInt32 ^ 1U ^ 2U ^ 3U);<br/>
+		<div class="comment">//Creates a row major Matrix with three rows and one column containing signed 32 bits integers. <br/></div>
+		Matrix&ltInt32&gt m4 = ((dtInt32 | 1) ^ 2 ^ 3);<br/>
+		<div class="comment">//Creates a col major Matrix with one row and three columns containing floats.<br/></div>
+		Matrix&ltFloat&gt m5 = ((dtFloat ^ 1.0f) | 2.0f | 3.0f);<br/>
+		<div class="comment">//Creates a row major 3 x 3 identity matrix containing unsigned 32 bits integers.<br/></div>
+		Matrix&ltInt32&gt m6 = (dtInt32 | 1 | 0 | 0) ^ (dtInt32 | 0 | 1 | 0) ^ (dtInt32 | 0 | 0 | 1);<br/>
+		<div class="comment">//Creates a row major 2 x 1 matrix containing a row major 1 x 3 matrix and a row major 1 x 4 matrix.<br/></div>
+		Matrix&ltMatrix&ltDouble&gt&gt m7 = (dtMatrixInt32 | (dtInt32 | 1 | 2 | 3)) ^ (dtMatrixInt32 | (dtInt32 | 4 | 5 | 6 | 7));<br/>
+		<div class="comment">//Use ++ to print the content of a Matrix</div>
+		m1++;m2++;m3++;m4++;m5++;m6++;m7++;
+		</div>
+		
+		<h3>Assignment</h3>
+		Various assignment operators and methods exits. Depending on the situation a reference to the source matrix is created<br/>
+		Below are some code examples to demonstrate the various assignment methods.
+		<div class="code">
+		<div class="comment">//Reference matrix a to b.<br/></div>
+		Matrix&ltInt32&gt a = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 5 | 6) ^ (dtInt32 | 7 | 8 | 9);<br/>
+		Matrix&ltInt32&gt b = a;<br/>
+		a++;<br/>
+		<div class="comment">//This will also change a<br/></div>
+		b.val(1,1) = 25;<br/>
+		a++;b++;<br/>
+		<div class="comment">//This forces the connection between a and b to break. And b will be copied from a<br/></div>
+		!b<br/>
+		<div class="comment">//This will now only change b<br/></div>
+		b.val(1,1) = 35;<br/>
+		a++;b++;<br/>
+		<div class="comment">//To duplicate a to c use dereference<br/></div>
+		Matrix&ltInt32&gt c = *a;<br/>
+		<div class="comment">//This will now only change c<br/></div>
+		c.val(1,1) = 40;<br/>
+		a++;c++;<br/>
+		<div class="comment">//If two matrices of the same size are assigned they will be copied. This is used for direct slice assignment (see Slicing).<br/></div>
+		Matrix&ltInt32&gt d(3,3);<br/>
+		d = a;<br/>
+		<div class="comment">//This will now only change d<br/></div>
+		d.val(1,1) = 35;<br/>
+		a++;d++;<br/>
+		<div class="comment">//This will assign the value 1 to each matrix element<br/></div>
+		a = 1;<br/>
+		a++;<br/>
+		<div class="comment">//This will assign the top left value of a to the variable e.<br/></div>
+		Int32 e = a(0,1,0,1);<br/>
+		cout << e;
+		</div>
+		Several assignment methods exists for converting matrices.
+		<div class="code">
+		Matrix&ltInt32&gt a = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 5 | 6) ^ (dtInt32 | 7 | 8 | 9);<br/>
+		Matrix&ltInt32&gt b;
+		<div class="comment">//This will transpose matrix a and assign it to matrix b (a is unchanged)<br/></div>
+		b += a;<br/>
+		b++;<br/>
+		<div class="comment">//This will matrix multiply b with a and assign the result to b<br/></div>
+		b *= a;<br/>
+		b++;<br/>
+		<div class="comment">//This forces b to column major after copying from a<br/></div>
+		b |= a;<br/>
+		b++;<br/>
+		<div class="comment">//This forces b to row major<br/></div>
+		b ^= b;<br/>
+		b++;<br/>
+		</div>
+		
+		<h3>Slicing</h3>
+		Many slicing methods are support by DDSL. Generally the '()' operator will slice rows and columns. The '[]' operator will only slice columns. Slicing operator will always return a new matrix. When slices are a rectangular region only a reference is made. This helps minimizing memory consumption. See below for some code examples.
+		<div class="code">
+		Matrix&lt;Int32&gt; a = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 5 | 6) ^ (dtInt32 | 7 | 8 | 9);<br/>
+		<div class="comment">//Return a slice of the first row</div>
+		a(0)++;<br/>
+		<div class="comment">//Return a copy of a slice of the second row</div>
+		*a(1)++;<br/>
+		<div class="comment">//Return a slice with 2 rows from row 1, and all columns</div>
+		a(1, 2)++;<br/>
+		<div class="comment">//Return a slice with 2 rows from 1, and only column 1</div>
+		a(1, 2, 1)++;<br/>
+		<div class="comment">//Return a slice with 2 rows from row 1, and two columns from column 2</div>
+		a(1, 2, 0, 2)++;<br/>
+		<div class="comment">//Return a slice of column 1, and all rows</div>
+		a[1]++;<br/>
+		<div class="comment">//Return a slice from row 0,1,2 and column 1 and 2</div>
+		a(dtUInt32 | 0U | 1U | 2U, dtUInt32 | 1U | 2U)++;<br/>
+		<div class="comment">//The example below will create new matrices because the slices are not continuous rectangular regions</div>
+		<div class="comment">//Return a slice of row 0 and 2, and all columns</div>
+		a(dtUInt32 | 0U | 2U)++;<br/>
+		<div class="comment">//Return a slice of row 0 and 2, and column 1 and 2</div>
+		a(dtUInt32 | 0U | 2U, dtUInt32 | 1U | 2U)++;<br/>
+		<div class="comment">//Return a slice of row 0 and 2, and column 1</div>
+		a(dtUInt32 | 0U | 2U, 1)++;<br/>
+		<div class="comment">//Return a slice of row 0 and 2, and column 0 to column 1</div>
+		a(dtUInt32 | 0U | 2U, 0, 2)++;<br/>
+		<div class="comment">//Return a slice of row 1, and column 0 and column 2</div>
+		a(1, dtUInt32 | 0U | 2U)++;<br/>
+		<div class="comment">//Return a slice of row 0 to row 2, and column 0 and column 2</div>
+		a(0, 3, dtUInt32 | 0U | 2U)++;<br/>
+		</div>
+		Most slicing methods above will create a reference to the source matrix. The examples below is for direct slice assignment and will copy (parts) of the matrix.
+		<div class="code">		
+		Matrix&ltInt32&gt a = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 5 | 6) ^ (dtInt32 | 7 | 8 | 9);<br/>
+		Matrix&ltInt32&gt b = (dtInt32 | 10 | 11 | 12) ^ (dtInt32 | 13 | 14 | 15) ^ (dtInt32 | 16 | 17 | 18);<br/>
+		a++;b++;<br/>
+		<div class="comment">//Assign a slice of b to a slice of a (direct slice assignment)<br/></div>
+		a(0,2,0,2) = b(1,2,1,2);<br/>
+		a++;b++;<br/>
+		<div class="comment">//Assign a value of 25 to each element of the slice of b (this will not change a, but will change part of b)<br/></div>
+		b(0,2,0,2) = 25;<br/>
+		a++;b++;<br/>
+		</div>		
+
+		<h3>Testing</h3>
+		DDSL supports testing of values and returning indices of rows and columns which conform to the test. This is convenient to make slices based on the contents of the matrix.<br/><br/>
+
+		When a matrix is tested against a row vector (a matrix with size 1 x n) the row indices which test positive are returned. In this case the amount of columns in both matrices should be equal.
+		<div class="code">
+		Matrix&ltInt32&gt a = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 5 | 6) ^ (dtInt32 | 7 | 8 | 9);<br/>
+		<div class="comment">//Test which rows are equal to the given row. Example returns row vector with the value 0</div>
+		(a == (dtInt32 | 1 | 2 | 3))++;<br/>
+		<div class="comment">//Test which rows are greater than the given row (for each value in the corrosponding row). Example returns row vector with the value 1 and 2</div>
+		(a > (dtInt32 | 1 | 2 | 3))++;<br/>
+		<div class="comment">//Other examples using >=, <= and != operators are trivial</div>
+		</div>
+
+		When a matrix is tested against a column vector (a matrix with size n x 1) the column indices which test positive are returned. In this case the amount of rows in both matrices should be equal.
+		<div class="code">
+		Matrix&ltInt32&gt b = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 5 | 6) ^ (dtInt32 | 7 | 8 | 9);<br/>
+		<div class="comment">//Test which columns are equal to the given columns. Example returns column vector with the value 0</div>
+		(b == (dtInt32 ^ 1 ^ 4 ^ 7))++;<br/>
+		<div class="comment">//Test which columns are greater than the given columns (for each value in the corrosponding row). Example returns column vector with the value 1 and 2</div>
+		(b > (dtInt32 ^ 1 ^ 4 ^ 7))++;<br/>
+		<div class="comment">//Other examples using >=, <= and != operators are trivial</div>
+		</div>
+		
+		When a column vector is tested against a value, the row indices which test positive are returned.
+		<div class="code">
+		Matrix&ltInt32&gt c = (dtInt32 ^ 1 ^ 2 ^ 3);<br/>
+		<div class="comment">//Test which values in the column vector are equal to the given value. Example returns column vector with the value 0</div>
+		(c == 1)++;<br/>
+		<div class="comment">//Test which values in the column vector are greater than the given value. Example returns column vector with the value 1 and 2</div>
+		(c > 1)++;<br/>
+		<div class="comment">//Other examples using >=, <= and != operators are trivial</div>
+		</div>
+
+		When a row vector is tested against a value, the column indices which test positive are returned.
+		<div class="code">
+		Matrix&ltInt32&gt d = (dtInt32 | 1 | 2 | 3);<br/>
+		<div class="comment">//Test which values in the row vector are equal to the given value. Example returns row vector with the value 0</div>
+		(d == 1)++;<br/>
+		<div class="comment">//Test which values in the row vector are greater than the given value. Example returns row vector with the value 1 and 2</div>
+		(d > 1)++;<br/>
+		<div class="comment">//Other examples using >=, <= and != operators are trivial</div>
+		</div>
+
+		When a matrix is tested agains a matrix of equal size, the result contains a value is they test positive, otherwise an empty matrix is returned.
+		<div class="code">
+		Matrix&ltInt32&gt e = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 5 | 6) ^ (dtInt32 | 7 | 8 | 9);<br/>
+		Matrix&ltInt32&gt f = (dtInt32 | 10 | 20 | 30) ^ (dtInt32 | 40 | 50 | 60) ^ (dtInt32 | 70 | 80 | 90);<br/>
+		<div class="comment">//Test if values are equal. Example returns an empty matrix</div>
+		(e == f)++;<br/>
+		<div class="comment">//Test if all values in f are greater than all values in e. Example returns a 1 x 1 matrix</div>
+		(f > e)++;<br/>
+		<div class="comment">//Other examples using >=, <= and != operators are trivial</div>
+		</div>
+
+		When a matrix is tested agains a value, the result contains a matrix with two columns, the first columns contains the rows which test positive and the second columns contains columns which test positive.
+		<div class="code">
+		Matrix&ltInt32&gt g = (dtInt32 | 1 | 2 | 3) ^ (dtInt32 | 4 | 2 | 6) ^ (dtInt32 | 7 | 2 | 9);<br/>		
+		<div class="comment">//Test if values are equal. Example returns a 3 x 2 matrix containing (0 | 1) ^ (1 | 1) ^ (2 | 1)</div>
+		(g == 2)++;<br/>
+		<div class="comment">//Other examples using >=, <= and != operators are trivial</div>
+		</div>
+		
+		<h3>Set logic</h3>
+		DDSL supports union and intersection of vectors. This is convenient to merge or intersect row and column indices produces by the testing operators.
+		<div class="code">
+		Matrix&ltInt32&gt a = (dtInt32 | 1 | 2 | 3 | 4);<br/>
+		Matrix&ltInt32&gt b = (dtInt32 | 3 | 4 | 5 | 6);<br/>
+		a++;b++;<br/>
+		<div class="comment">//Union between a and b</div>
+		(a || b)++;	<br/>
+		<div class="comment">//Intersection between a and b</div>
+		(a && b)++;<br/>
+		Matrix&lt;Int32&gt; c = (dtInt32 | 1 | 2 | 3)^(dtInt32 | 4 | 5 | 6)^(dtInt32 | 7 | 8 | 9)^(dtInt32 | 1 | 2 | 3);<br/>
+		<div class="comment">//Slice and select rows which equal either one of the given rows</div>
+		c((c == (dtInt32 | 1 | 2 | 3)) || (c == (dtInt32 | 7 | 8 | 9)))++;<br/>
+		</div>
+				
+		<h3>Arithmetic</h3>
+		Arithmetic operators are always executed in place to be memory efficient. All major arithmetic operators are supported by DDSL (+, -, /, *, pow and %). Also the unary - is supported.
+		<div class="code">
+		Matrix&ltDouble&gt a = (dtDouble | 1.0 | 2.0 | 3.0)++;<br/>
+		Matrix&lt;Int32&gt; b = (dtInt32 | 1 | 2 | 3)++;<br/>
+		<div class="comment">//Negate all values of a</div>
+		(-a)++;<br/>
+		<div class="comment">//Add 2 to each element of a</div>
+		(a + 21.0)++;<br/>
+		<div class="comment">//Modulo each element of b with 2</div>
+		(b % 2)++;<br/>
+		<div class="comment">//Square each element of a</div>
+		pow(a, 2.0)++;<br/>
+		<div class="comment">//Square root each element of a</div>
+		pow(a, 0.5)++;<br/>
+		<div class="comment">//Multiply one matrix with another element wise</div>
+		(a * (dtDouble | 2.0 | 4.0 | 6.0))++;<br/>
+		</div>
+
+		Arithmetic on with row vectors
+		<div class="code">
+		Matrix&ltDouble&gt c = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 5.0 | 6.0)<br/>
+		<div class="comment">//Multiply each row of c with row vector</div>
+		(c * (dtDouble | 3.0 | 6.0))++;<br/>
+		<div class="comment">//Add 1 to the first column and 2 to the second column of c</div>
+		(c + (dtDouble | 1.0 | 2.0))++;<br/>
+		</div>
+
+		Arithmetic on with column vectors
+		<div class="code">
+		Matrix&ltDouble&gt d = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 5.0 | 6.0)<br/>
+		<div class="comment">//Multiply each column of d with column vector</div>
+		(d * (dtDouble ^ 3.0 ^ 6.0 ^ 9.0))++;<br/>
+		<div class="comment">//Add 1 to the first row, 2 to the second row, and 3 to the third row of d</div>
+		(d + (dtDouble ^ 1.0 ^ 2.0 ^ 3.0))++;<br/>
+		</div>
+
+		Combinations of assign, check, slice and arithmetic
+		<div class="code">
+		Matrix&ltDouble&gt e = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 1.0 | 2.0)<br/>
+		<div class="comment">//Add the second row to each row of e. Because of side effects the first row is copied with '*'.</div>
+		(e + *e(1))++;<br/>
+		<div class="comment">//Add 1 to each row of e which is equal to the (1.0 | 2.0).</div>
+		(e(e == (dtDouble | 1.0 | 2.0)) + 1.0)++;<br/>
+		<div class="comment">//multiply each row of e with 2 if the row is equal to the first row.</div>
+		(e(e == e(0)) * 2.0)++;<br/>
+		</div>
+		
+		<h3>Counting</h3>		
+		The '~' operator counts all elements of a matrix. Below are some examples.
+		<div class="code">
+		Matrix&ltDouble&gt a = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 5.0 | 6.0);<br/>
+		Matrix&ltDouble&gt b = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 5.0 | 6.0);<br/>
+		<div class="comment">//Count elements of a. Example returns 6.</div>
+		cout << ~a << endl;<br/>
+		<div class="comment">//Count rows of a. Example returns 3.</div>
+		cout << ~a[1] << endl;<br/>
+		<div class="comment">//Count columns of a. Example returns 2.</div>
+		cout << ~a(1) << endl;<br/>
+		<div class="comment">//Return true if a and b are equal.</div>
+		cout << (~(a == b) == 1) << endl;<br/>
+		<div class="comment">//Return true if a and b are not equal.</div>
+		cout << (~(a == b) == 0) << endl;<br/>
+		cout << (~(a != b) == 1) << endl;<br/>		
+		</div>
+		
+		<h3>Printing</h3>
+		The DDSL print operator '++' can be used to print matrices is DDSL code. The print less operator '--' is used to print metadata of the matrix.
+		<div class="code">
+		Matrix&ltDouble&gt a = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 5.0 | 6.0);<br/>
+		<div class="comment">//Print matrix a.</div>
+		a++;
+		<div class="comment">//Print metadata of matrix a.</div>
+		a--;		
+		</div>
+		
+		Printing operators are powerfull for debugging and printing intermediate results.
+		<div class="code">
+		Matrix&ltDouble&gt m = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 5.0 | 6.0);<br/>
+		<div class="comment">//Print the first print n, then print the first row of m, then print the first rows of m where 2 has been subtracted, then print m (with adjusted first row).</div>
+		(m(m++ == m(0)++) - 2.0)++;<br/>
+		</div>
+				
+		<h3>Streaming</h3>
+		Streaming matrices to binary formats can done with streaming operators.
+		<div class="code">
+		Matrix&ltDouble&gt a = (dtDouble | 1.0 | 2.0) ^ (dtDouble | 3.0 | 4.0) ^ (dtDouble | 5.0 | 6.0);<br/>
+		Matrix&ltDouble&gt b = (dtDouble | 7.0 | 8.0) ^ (dtDouble | 9.0 | 10.0) ^ (dtDouble | 11.0 | 12.0);<br/>
+		Matrix&ltDouble&gt c,d,e,f;
+		<div class="comment">//Stream a and b to file stream.</div>
+		ofstream ofs("test.ddsl");<br/>
+		ofs << a << b;<br/>
+		ofs.close();<br/>
+		<div class="comment">//Stream a to filestream, add 2 to each element of a, and then stream to file again.</div>
+		ofstream ofs2("test2.ddsl");<br/>
+		((a >> ofs2) + 2.0) >> ofs2;<br/>
+		ofs2.close();<br/>
+		<div class="comment">//Stream c and d from file stream.</div>
+		ifstream ifs("test.ddsl");<br/>
+		ifs >> c >> d;<br/>
+		ifs.close();<br/>
+		c++;d++;<br/>
+		<div class="comment">//Stream e and f from file stream and subtract f from e.</div>
+		ifstream ifs2("test2.ddsl");<br/>
+		(e << ifs2) - (f << ifs2);<br/>
+		ifs2.close();<br/>
+		e++;f++;<br/>
+		</div>
+
+		Streaming matrices can also be done with regular streaming operators
+		<div class="code">
+		Matrix&ltDouble&gt g = (dtDouble | 10.0 | 20.0) ^ (dtDouble | 30.0 | 40.0) ^ (dtDouble | 50.0 | 60.0);<br/>
+		Matrix&ltDouble&gt h;
+		<div class="comment">//Stream a to file.</div>
+		g >> "test3.ddsl";
+		<div class="comment">//Stream b from file.</div>
+		h << "test3.ddsl";
+		h++;<br/>
+		</div>
+		
+	<h2>Matrix type in DS_Matrix.h</h2>
+		<h3>Access functions</h3>
+		The Matrix type has various convenient access functions.
+		<div class="code">
+		<div class="comment">//Create a 3 x 3 identity Matrix</div>
+		Matrix&ltInt32&gt m = (dtInt32 | 1 | 0 | 0) ^ (dtInt32 | 0 | 1 | 0) ^ (dtInt32 | 0 | 0 | 1);<br/>
+		<div class="comment">//Access row 3 and column 1 of matrix m</div>
+		UInt32 a = m.val(2,1);<br/>
+		<div class="comment">//Assign the value 3 to row 3 and column 1 of matrix m</div>
+		m.val(2,1) = 3;<br/>
+		<div class="comment">//Create a 1 x 3 Matrix</div>
+		Matrix&ltInt32&gt v = (dtInt32 | 1 | 2 | 3);<br/>
+		<div class="comment">//Access the matrix as a vector and access the first element</div>
+		UInt32 a = v.vec(0);<br/>
+		UInt32 a = v.vec().val(0);<br/>
+		<div class="comment">//Assign 3 to the last vector element</div>
+		v.vec(2) = 3;<br/>
+		</div>
+		The fastest access functions are the raw memory pointer access functions. These functions are considered advanced. The raw memory pointer is given through <div class="inlinecode">Matrix::GetData()</div>. Additional functions for getting the stride, lines and data type are also available.
+		<h3>Iterators</h3>
+		The Matrix type supports C++ iterators for various access methods. DDSL iterators are compatible with the standard C++ functions which act on forward_iterator such as <div class="inlinecode">std::copy()</div>. Iterators are typically much faster than the regular access functions. Generally the Matrix iterator access function will give the correct iterators. Three iterator types exist:		
+		<ul>
+		<li>Matrix::Index::Iterator will iterate over the index. An index is either a row or a column.</li>
+		<li>CellsContinuous::Iterator will iterate over the elements in the matrix. This iterator is the fastests, but assumes the matrix consists of data with fixed stride. Therefor this iterator cannot be used to automatically skip the stride of a region if the matrix is a slice. To avoid problems this iterator should only be used when iterating over cells in a single row or columns (Index)</li>
+		<li>CellsRegion::Iterator will iterate over the elements in the matrix and is aware of the stride of a matrix slice. This iterator is slower than the CellsContinuous iterators but can be used to skip over to the next row/column automatically.</li>
+		</ul>		
+		The fields <div class="inlinecode">Matrix.rows</div> and <div class="inlinecode">Matrix.cols</div> are of the type <div class="inlinecode">Matrix::Index</div>.<br/><br/>
+		
+		The <div class="inlinecode">Matrix::Index</div> factory will return an <div class="inlinecode">Matrix::Index::Iterator</div> when calling <div class="inlinecode">Matrix::Index.begin()</div>, <div class="inlinecode">Matrix::Index.end()</div> or <div class="inlinecode">Matrix::Index.operator[]</div>.<br/><br/>
+
+		The <div class="inlinecode">Matrix::Index</div> factory will return an <div class="inlinecode">CellsRegion::Iterator</div> when calling <div class="inlinecode">Matrix::Index->begin()</div>, <div class="inlinecode">Matrix::Index->end()</div> or <div class="inlinecode">Matrix::Index->operator[]</div>.<br/><br/>
+
+		The <div class="inlinecode">Matrix::Index</div> factory will return an <div class="inlinecode">CellsContinuous::Iterator</div> when calling <div class="inlinecode">Matrix::Index::Iterator->begin()</div>, <div class="inlinecode">Matrix::Index::Iterator->end()</div> or <div class="inlinecode">Matrix::Index::Iterator->operator[]</div>.<br/><br/>
+		
+		The <div class="inlinecode">CellsRegion</div> factory will return an <div class="inlinecode">CellsRegion::Iterator</div> when calling <div class="inlinecode">CellsRegion::Iterator.begin()</div>, <div class="inlinecode">CellsRegion::Iterator.end()</div> or <div class="inlinecode">CellsRegion::Iterator.operator[]</div>.<br/><br/>
+
+		The <div class="inlinecode">CellsContinuos</div> factory will return an <div class="inlinecode">CellsContinuos::Iterator</div> when calling <div class="inlinecode">CellsContinuos::Iterator.begin()</div>, <div class="inlinecode">CellsContinuos::Iterator.end()</div> or <div class="inlinecode">CellsContinuos::Iterator.operator[]</div>.<br/><br/>
+		
+		Below are some code examples.
+		<div class="code">
+		<div class="comment">//Create the matrix</div>
+		Matrix&ltDouble&gt m = (dtDouble | 1.0 | 2.0 | 3.0) ^ (dtDouble | 4.0 | 5.0 | 6.0);<br/>
+		MatrixIdx r = 1;<br/>
+		MatrixIdx c = 1;<br/>
+		<div class="comment">//get Matrix::Index::Iterator to the second row</div>
+		m.rows[1];<br/>
+		<div class="comment">//get CellsContinuous::Iterator from row begin to row end</div>
+		m.rows[r][c];<br/>
+		<div class="comment">//get CellsContinuous::Iterator from col begin to col end</div>
+		m.cols[c][r];<br/>
+		<div class="comment">//get CellsContinuous::Iterator from row begin to row end</div>
+		m.rows[r]->begin();<br/>
+		m.rows[r]->end();<br/>
+		<div class="comment">//get CellsContinuous::Iterator from col begin to col end</div>
+		m.cols[r]->begin();<br/>
+		m.cols[r]->end();<br/>
+		<div class="comment">//get CellsRegion::Iterator from first row begin to last row end. Iterator traverses rows</div>
+		m.rows->begin();<br/>
+		m.rows->end();<br/>
+		<div class="comment">//get CellsRegion::Iterator from first col begin to last col end. Iterator traverses cols</div>
+		m.cols->begin();<br/>
+		m.cols->end();<br/>
+		<div class="comment">//get Matrix::Index::Iterator from first row to last row</div>
+		m.rows.begin();<br/>
+		m.rows.end();<br/>
+		<div class="comment">//get Matrix::Index::Iterator from first col to last col</div>
+		m.cols.begin();<br/>
+		m.cols.end();<br/>
+		<div class="comment">//same as Matrix.rows[0]->begin()</div>
+		m.rows.begin()->begin();<br/>
+		<div class="comment">//same as Matrix.rows[0]->end()</div>
+		m.rows.end()->end();<br/>
+		<div class="comment">//Pitfall: Traversing these will not always give the desired effect (CellsContinuous iterators are not region aware)</div>
+		m.rows[0]->begin();<br/>
+		m.rows[5]->end();<br/>
+		<div class="comment">//Traversing these will give the desired effect (CellsRegion iterators are region aware)</div>
+		dynamic_cast<CellsRegion&ltDouble&gt&>(m.rows[0].cells(citRegion)).begin();<br/>
+		dynamic_cast<CellsRegion&ltDouble&gt&>(m.rows[5].cells(citRegion)).end();<br/>
+		</div>
+		
+		Below are some examples for their usage. Generally the '->' operator will return an iterator which traverses cells and the '.' operator will give an iterator which traverses an index (columns or rows)
+		<div class="code">
+		<div class="comment">//Create the matrix and the std::vector</div>
+		Matrix&ltDouble&gt m = (dtDouble | 1.0 | 2.0 | 3.0) ^ (dtDouble | 4.0 | 5.0 | 6.0);<br/>
+		vector&ltDouble&gt v;<br/>
+		<br/>
+		<div class="comment">//Copy the entire matrix m to a std::vector v using std::copy</div>
+		v.resize(~m);<br/>
+		copy(m.rows->begin(), m.rows->end(), v.begin());<br/>
+		Matrix&ltDouble&gt(v)++;<br/>
+		<br/>
+		<div class="comment">//Copy the entire matrix m to a std::vector v using a for loop (but this time running over the columns which will be faster if the matrix is column major aligned)</div>
+		v.resize(~m);<br/>
+		auto v_it = v.begin();<br/>
+		for (auto m_it = m.cols->begin(); m_it != m.cols->end(); m_it++, v_it++)<br/>
+		&nbsp;*v_it = *m_it;<br/>
+		Matrix&ltDouble&gt(v)++;<br/>
+		<br/>
+		<div class="comment">//Copy the first row to std::vector v using std::copy</div>
+		v.resize(m.cols.count());<br/>
+		copy(m.rows[0]->begin(), m.rows[0]->end(), v.begin());<br/>
+		Matrix&ltDouble&gt(v)++;<br/>
+		<br/>
+		<div class="comment">//Copy the second column as a Vector to std::vector v using std::copy</div>
+		v.resize(m.rows.count());<br/>
+		copy(m[1].vec().begin(), m[1].vec().end(), v.begin());<br/>
+		Matrix&ltDouble&gt(v)++;<br/>
+		<br/>
+		<div class="comment">//Copy the entire matrix m to a std::vector v using a for loop (but this time running over the rows which will be faster if the matrix is row major aligned)</div>
+		v.resize(~m);<br/>
+		v_it = v.begin();<br/>
+		for (auto m_it = m.rows->begin(); m_it != m.rows->end(); m_it++, v_it++)<br/>
+		&nbsp;&nbsp;*v_it = *m_it;<br/>
+		Matrix&ltDouble&gt(v)++;<br/>
+		<br/>
+		<div class="comment">//Copy the entire matrix m to a std::vector v using two for loops (this will force the use of the faster CellsContinuous::Iterator)</div>
+		v_it = v.begin();<br/>
+		for (auto idx_it = m.rows.begin(); idx_it != m.rows.end(); idx_it++)<br/>
+		&nbsp;&nbsp;for (auto c_it = idx_it->begin(); c_it != idx_it->end(); c_it++, v_it++)<br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;*v_it = *c_it;<br/>
+		Matrix&ltDouble&gt(v)++;<br/>
+		</div>
+		
+	<h2>Matrix function in DS_MatrixFunc.h</h2>
+		This file contains functions with regular C++ code using the Matrix type.
+
+</div>
+<div class="text">
+<h1>Table</h1>
+	A table is 2 dimensional heterogeneous data type structure. A table actually consists of multiple matrices and adds row names or column names (called ids in DDSL). A table assigns a content type to each column. This content type gives information to the exection pipeline. For example: ctFeature are columns which act as input features, ctTarget act as the target classification or regression. ctSplit content type acts as a column defining which sample belongs to which set (training, evaluation or testing). Table supports: static initialization, assignment, slicing, arithmetic, counting, printing and streaming. Many of the operators which work on tables also work directy on the underlying matrices. <br/><br/>
+
+	The matrices in a table are identified by their unique key. The key consists of a DataType and ContentType. When merging two tables with different keys only a reference is made to the source matrices. However when two tables are merged and they both contain a matrix under the same key (for example key: dtDouble/ctFeature) then the underlying matrices are merged. Merging compared to referencing is a performance penalty.
+
+	<h2>Table language definition in DS_TableLang.h</h2>
+		<h3>Static initialization</h3>
+			A table is initialized by first creating a matrix and then adding the content type. See code below.
+			<div class="code">
+			<div class="comment">//Create a table with one matrix under key dtDouble/ctFeature</div>
+			Table&lt&gt a = ctFeature | ((dtDouble | 1.0 | 2.0 | 3.0) ^ (dtDouble | 4.0 | 5.0 | 6.0));<br/>
+			<div class="comment">//Create a table with two matrices under key dtDouble/ctFeature and dtString/ctTarget</div>
+			Table&lt&gt b = (ctFeature | ((dtDouble | 1.0 | 2.0 | 3.0) ^ (dtDouble | 4.0 | 5.0 | 6.0))) | (ctTarget | (dtString ^ "a" ^ "b"));<br/>			
+			a++;b++;<br/>
+			</div>			
+			
+			Adding column and row ids to a table can be done by adding a matrix to the left hand side of the table. Columns and row ids should be unique.
+			<div class="code">
+			Table&lt&gt c = (ctFeature | ((dtDouble | 1.0 | 2.0 | 3.0) ^ (dtDouble | 4.0 | 5.0 | 6.0))) | (ctTarget | (dtString ^ "a" ^ "b"));<br/>			
+			<div class="comment">//Add column ids to a table</div>
+			(dtString | "feature1" | "feature2" | "feature3" | "target") ^ c;<br/>
+			<div class="comment">//Add row ids to a table</div>
+			(dtString | "sample1" | "sample2") | c; <br/>
+			c++;<br/>
+			</div>			
+			
+			The merging of two tables in DDSL is aware of the column and row ids, this is called weaving. See below for an example.
+			<div class="code">
+			Table&lt&gt d = (dtString | "Feature1" | "Feature2") ^ (ctFeature | (((dtInt32|0)^1^2^3^4) | ((dtInt32|5)^6^7^8^9)));<br/>
+			<div class="comment">//Note the flipped "Feature1" and "Feature2"</div>
+			Table&lt&gt e = (dtString | "Feature2" | "Feature1") ^ (ctFeature | (((dtInt32|5)^6^7^8^9) | ((dtInt32|0)^1^2^3^4)));<br/>
+			<div class="comment">//When adding extra rows to table d from table e, columns with corresponding ids are merged.</div>
+			d ^ e;<br/>
+			<div class="comment">//This will fail because it would produce duplicate column ids.</div>
+			// d | e;<br/>
+			d++;<br/>
+			<br/>			
+			Table&lt&gt f = (dtString | "Row1"|"Row2"|"Row3"|"Row4"|"Row5") | (ctFeature | (((dtInt32|0)^1^2^3^4) | ((dtInt32|5)^6^7^8^9)));<br/>
+			<div class="comment">//Note the flipped "Row1" and "Row2"</div>
+			Table&lt&gt g = (dtString | "Row2"|"Row1"|"Row3"|"Row4"|"Row5") | (ctFeature | (((dtInt32|5)^6^7^8^9) | ((dtInt32|0)^1^2^3^4)));<br/>
+			<div class="comment">//When adding extra columns to table f from table g, rows with corresponding ids are merged.</div>
+			f | g;<br/>
+			<div class="comment">//This will fail because it would produce duplicate row ids.</div>
+			// f ^ g;<br/>
+			f++;<br/>
+			</div>
+			Be carefull with row ids because weaving can be a performance penalty.
+			
+		<h3>Assignment</h3>
+			Working directly on tables is difficult because of the heterogeneous content. To work on the table it is better to extract the tables and work on them.
+			<div class="code">
+			Table&lt&gt a = (dtString | "Feature1" | "Feature2" | "Target") ^ ((ctFeature | ((dtInt32^0^1^2^3^4) | (dtInt32^5^6^7^8^9))) | (ctTarget | (dtString^"a"^"a"^"b"^"b"^"c")));<br/>
+			<div class="comment">//This will slice the columns by key (content type and data type). Because this is guaranteed to produce a table with one matrix it can be assigned to a new matrix.</div>
+			Matrix&ltInt32&gt b = a(ctFeature, dtInt32);<br/>
+			<div class="comment">//Because the matrix inside the table is only referenced, this will assign the value 500 to the top 3 values of each of the two features inside the table.</div>
+			b(0,3,0,2) = 500;<br/>
+			a++;<br/>
+			<div class="comment">//Assign a to c (creates a reference)</div>
+			Table<> c = a;<br/>
+			<div class="comment">//To copy of a to c (copy after assignment)</div>
+			!c;<br/>
+			<div class="comment">//Duplicate a and then assign to c (copy before asignment).</div>
+			c = *a;<br/>
+			</div>
+			
+		<h3>Slicing</h3>
+			Extensive slicing of tables is supported. This is implemented using variadic templates which means that the number of parameters passed to a slicing function is variable. Technically the compiler will generate a specific slicing function for each call to one of the slicing template operators. Calling the <div class="inlinecode">Table(...)</div> operator supports a number of parameter types in multiple orders:
+			<ul>
+			<li>Idx: Slice based on an index start and length of row and column indices.</li>
+			<li>Id: Slice based on an id of a row or column. Ids will be translated to an index start and index length.</li>
+			<li>DataType: Slice based on the data type of a column in the table.</li>
+			<li>ContentType: Slice based on the content type of a column in the table.</li>
+			<li>Matrix&ltIdx&gt: Slice based on a vector of row or column indices.</li>
+			<li>Matrix&ltId&gt: Slice based on a vector of row or column ids (which are converted to indices).</li>
+			<li>Matrix&ltContentType&gt: Slice columns based on a vector of column content types.</li>
+			<li>Matrix&ltDataTypes&gt: Slice columns based on a vector of column data types.</li>
+			</ul>
+			
+			Below is some code to show the slicing options. Many other slicing combinations can be made, but the examples below should give a good idea about the possibilities.
+			<div class="code">
+				<div class="comment">//Create a table with Double and Int32 features. Also assign a target and a split column.</div>
+				Table<> t = ((dtString|"F1"|"F2"|"F3"|"F4"|"F5"|"F6"|"Target"|"Split") ^<br/>
+							((ctFeature |<br/>
+								(dtDouble | 0.0 | 0.1 | 0.2) ^<br/>
+								(dtDouble | 1.0 | 1.1 | 1.2) ^<br/>
+								(dtDouble | 2.0 | 2.1 | 2.2) ^<br/>
+								(dtDouble | 3.0 | 3.1 | 3.2)<br/>
+							) | (ctFeature |<br/>
+								(dtInt32 | 00 | 01 | 02) ^<br/>
+								(dtInt32 | 10 | 11 | 12) ^<br/>
+								(dtInt32 | 20 | 21 | 22) ^<br/>
+								(dtInt32 | 30 | 31 | 32)<br/>
+							) | (ctTarget |<br/>
+								dtString ^ "a" ^ "a" ^ "b" ^ "b"<br/>
+							) | (ctSplit |<br/>
+								dtUInt32 ^ 0U ^ 1U ^ 0U ^ 1U<br/>
+							)));<br/>
+				t++<br/>
+				<div class="comment">//Slice row 4</div>
+				t(1)++;<br/>
+				<div class="comment">//Slice from row 1, a length of 3 rows</div>
+				t(1,3)++;<br/>
+				<div class="comment">//Slice all but the last row, and column 6</div>
+				t(0,3,6)++;<br/>
+				<div class="comment">//Slice all rows, and from column 2 to length 6</div>
+				t(0,4,2,6)++;<br/>
+				<br/>
+				<div class="comment">//Slice all rows, and column 1 to column "F5"</div>
+				t(0, 4, 1, "F5")++;<br/>
+				<div class="comment">//Slice all rows, and column "F3" to column "Target"</div>
+				t(0, 4, "F3", "Target")++;<br/>
+				<div class="comment">//Slice row 2 and columns of content type ctFeature</div>
+				t(2, ctFeature)++;<br/>
+				<div class="comment">//Slice all rows and columns with data type dtDouble and dtInt32</div>
+				t(0, 4, dtDouble, dtInt32)++;<br/>
+				<br/>
+				<div class="comment">//Slice column 3</div>
+				t[3]++;<br/>
+				<div class="comment">//Slice column id F3</div>
+				t["F3"]++;<br/>
+				<div class="comment">//Slice column data type dtDouble</div>
+				t[dtDouble]++;<br/>
+				<div class="comment">//Slice column content type ctSplit</div>
+				t[ctSplit]++;<br/>
+				<br/>
+				<div class="comment">//Slice on multiple data types</div>
+				t(dtDouble, dtUInt32, dtString)++;<br/>
+				<div class="comment">//Slice on multiple content types</div>
+				t(ctTarget, ctSplit)++;<br/>
+				<br/>
+				<div class="comment">//Slice on content type and data type</div>
+				t(ctFeature, dtInt32)++;<br/>
+				<div class="comment">//Slice on multiple content types and data types</div>
+				t(ctFeature, dtInt32, ctSplit, dtUInt32)++;<br/>
+				<div class="comment">//Slice all dtFeature content types with either data type dtInt32 or data type dtDouble</div>
+				t(ctFeature, dtDouble, dtInt32)++;<br/>
+				<br/>
+				<div class="comment">//Slice rows 1,3</div>
+				t(dtUInt32|1U|3U)++;<br/>
+				<div class="comment">//Slice rows 1,3, and columns 2 and 6</div>
+				t(dtUInt32|1U|3U, dtUInt32|2U|6U)++;<br/>
+				<div class="comment">//Slice rows 1 through 3, and columns 2 and 6</div>
+				t(dtUInt32|1U||3U, dtUInt32|2U|6U)++;<br/>
+				<div class="comment">//Slice all rows , and column "F1", "F6" and "Target"</div>
+				t(0,t.rows.count(), dtString|"F1"|"F6"|"Target")++;<br/>
+				<div class="comment">//Slice all rows, and data types types dtDouble and dtUInt32</div>
+				t(0, 4, (dtDataType|dtDouble|dtUInt32))++;<br/>
+				<div class="comment">//Slice all rows, and content type dtTarget</div>
+				t(dtUInt32|0U||3U, (dtContentType|ctTarget))++;<br/>
+				<div class="comment">//Slice all rows and all columns</div>
+				t(t.rows.idxs(), t.cols.ids())++;<br/>
+				<br/>
+				<div class="comment">//Slice the table on the split and extract features and targets.</div>
+				Table<> train = t(t[ctSplit] == 0U, ctFeature, ctTarget)++;<br/>
+				Table<> test = t(t[ctSplit] == 1U, ctFeature, ctTarget)++;<br/>
+			</div>
+			
+			
+		<h3>Testing</h3>
+			DDSL supports testing of values and returns indices of rows which conform to the test. Because the columns of a table can consist of heterogeneous data types, testing with column vectors is nog allowed.
+			
+			<div class="code">
+			<div class="comment">//Create a table with Double and Int32 features. Also assign a target and a split column.</div>
+			Table<> t = ((dtString|"F1"|"F2"|"F3"|"F4"|"F5"|"F6"|"Target"|"Split") ^<br/>
+						((ctFeature |<br/>
+							(dtDouble | 0.0 | 0.1 | 0.2) ^<br/>
+							(dtDouble | 1.0 | 1.1 | 1.2) ^<br/>
+							(dtDouble | 2.0 | 2.1 | 2.2) ^<br/>
+							(dtDouble | 3.0 | 3.1 | 3.2)<br/>
+						) | (ctFeature |<br/>
+							(dtInt32 | 00 | 01 | 02) ^<br/>
+							(dtInt32 | 10 | 11 | 12) ^<br/>
+							(dtInt32 | 20 | 21 | 22) ^<br/>
+							(dtInt32 | 30 | 31 | 32)<br/>
+						) | (ctTarget |<br/>
+							dtString ^ "a" ^ "a" ^ "b" ^ "b"<br/>
+						) | (ctSplit |<br/>
+							dtUInt32 ^ 0U ^ 1U ^ 0U ^ 1U<br/>
+						)));<br/>
+			<div class="comment">//Return all rows indices where F1 is greater equal to 2 and F2 is greater equal to 3</div>
+			(t >= ((dtString|"F1"|"F3") ^ (ctFeature|(dtDouble|1.0|2.0))))++;<br/>
+			<div class="comment">//Return row indices where which test positive to column with id "Target" == "a" and column id "Split" == 1</div>
+			(t == ((dtString|"Target"|"Split") ^ ((ctTarget|(dtString|"a")) | (ctSplit|(dtUInt32|1U)))))++;<br/>
+			<div class="comment">//Test which rows are equal to row 1</div>
+			(t == t(1))++;<br/>
+			<div class="comment">//Other examples using >, <= and != operators are trivial</div>
+			</div>
+			
+			When the content of a table can be implicitly casted to a matrix (the table only contains one matrix) then column vector testing and value testing can be performed.
+			<div class="code">
+			<div class="comment">//Tests which columns of the double features in table t are equal to</div>
+			(t(dtDouble, ctFeature) == (dtDouble ^ 0.1 ^ 1.1 ^ 2.1 ^ 3.1))++;
+			<div class="comment">//Tests which values of the int 32 features in table t are greater than 21</div>
+			(t(dtInt32, ctFeature) > (dtInt32|21))++;
+			</div>
+			
+		<h3>Arithmetic</h3>
+		
+		Arithmetic acts on each matrix inside the table. The arithmetic is automatically applied only to the corrosponding matrix type inside the table. See code examples/
+		<div class="code">
+		Table<> t = ((dtString|"F1"|"F2"|"F3"|"F4"|"F5"|"F6"|"Split") ^<br/>
+		((ctFeature |<br/>
+			(dtDouble | 0.0 | 0.1 | 0.2) ^<br/>
+			(dtDouble | 1.0 | 1.1 | 1.2) ^<br/>
+			(dtDouble | 2.0 | 2.1 | 2.2) ^<br/>
+			(dtDouble | 3.0 | 3.1 | 3.2)<br/>
+		) | (ctFeature |<br/>
+			(dtInt32 | 00 | 01 | 02) ^<br/>
+			(dtInt32 | 10 | 11 | 12) ^<br/>
+			(dtInt32 | 20 | 21 | 22) ^<br/>
+			(dtInt32 | 30 | 31 | 32)<br/>
+		) | (ctSplit |<br/>
+			dtUInt32 ^ 0U ^ 1U ^ 0U ^ 1U<br/>
+		)));<br/>
+		<div class="comment">//Adds 1 to the matrix in the table with the corresponding data type (in this case F4, F5 and F6)</div>
+		(t + 1)++;
+		<div class="comment">//Adds 10 to the matrix in the table with the corresponding data type (in this case F1, F2 and F3)</div>
+		(t + 10.0)++;
+		<div class="comment">//Adds 100 to the matrix in the table with the corresponding data type (in this case Split)</div>
+		(t + 100U)++;
+
+		<div class="comment">//Subtracts this row from each matrix row with the corresponding data type</div>
+		(t - (dtDouble|10.0|5.0|2.0))++;
+		<div class="comment">//Subtracts this column from each matrix column with the corresponding data type</div>
+		(t - (dtInt32^20^30^40^50))++;
+		</div>	
+		<h3>Counting</h3>
+		Counting of cells, can be done with the '~' operator. By creating a slice the rows and columns can be counted.
+		<div class="code">
+		Table<> t = ((dtString|"F1"|"F2"|"F3"|"F4"|"F5"|"F6"|"Split") ^<br/>
+		((ctFeature |<br/>
+			(dtDouble | 0.0 | 0.1 | 0.2) ^<br/>
+			(dtDouble | 1.0 | 1.1 | 1.2) ^<br/>
+			(dtDouble | 2.0 | 2.1 | 2.2) ^<br/>
+			(dtDouble | 3.0 | 3.1 | 3.2)<br/>
+		) | (ctFeature |<br/>
+			(dtInt32 | 00 | 01 | 02) ^<br/>
+			(dtInt32 | 10 | 11 | 12) ^<br/>
+			(dtInt32 | 20 | 21 | 22) ^<br/>
+			(dtInt32 | 30 | 31 | 32)<br/>
+		) | (ctSplit |<br/>
+			dtUInt32 ^ 0U ^ 1U ^ 0U ^ 1U<br/>
+		)));<br/>
+		<div class="comment">//Count the cells</div>
+		cout << ~t << endl;<br/>
+		<div class="comment">//Count rows</div>
+		cout << ~t[0] << endl;
+		<div class="comment">//Count columns</div>
+		cout << ~t(0) << endl;
+		</div>
+		
+		<h3>Streaming</h3>
+		Streaming tables to binary formats can done with streaming operators.
+		<div class="code">
+		Table<> a = ((dtString|"F1"|"F2"|"F3"|"F4"|"F5"|"F6"|"Target"|"Split") ^<br/>
+				((ctFeature |<br/>
+					(dtDouble | 0.0 | 0.1 | 0.2) ^<br/>
+					(dtDouble | 1.0 | 1.1 | 1.2) ^<br/>
+					(dtDouble | 2.0 | 2.1 | 2.2) ^<br/>
+					(dtDouble | 3.0 | 3.1 | 3.2)<br/>
+				) | (ctFeature |<br/>
+					(dtInt32 | 00 | 01 | 02) ^<br/>
+					(dtInt32 | 10 | 11 | 12) ^<br/>
+					(dtInt32 | 20 | 21 | 22) ^<br/>
+					(dtInt32 | 30 | 31 | 32)<br/>
+				) | (ctTarget |<br/>
+					dtString ^ "a" ^ "a" ^ "b" ^ "b"<br/>
+				) | (ctSplit |<br/>
+					dtUInt32 ^ 0U ^ 1U ^ 0U ^ 1U<br/>
+				)));<br/>
+		Table<> b = (ctFeature |<br/>
+						(dtDouble | 0.0 | 0.1 | 0.2) ^<br/>
+						(dtDouble | 1.0 | 1.1 | 1.2) ^<br/>
+						(dtDouble | 2.0 | 2.1 | 2.2) ^<br/>
+						(dtDouble | 3.0 | 3.1 | 3.2)<br/>
+					);<br/>
+		Table<> c,d,e;<br/>
+
+		<div class="comment">//Stream table a to filestream</div>
+		ofstream ofs("test1.ddsl");<br/>
+		a >> ofs;<br/>
+		<div class="comment">//Stream table b to filestream, add 10 and stream again</div>
+		((b >> ofs) + 10.0) >> ofs;<br/>
+		ofs.close();<br/>
+
+		ifstream ifs("test1.ddsl");<br/>
+		<div class="comment">//Stream to table c (equal to table a)</div>
+		c << ifs;<br/>
+		<div class="comment">//Stream to table d (equal to table b)</div>
+		d << ifs;<br/>
+		<div class="comment">//Stream to table e (equal to table b + 10.0)</div>
+		e << ifs;<br/>
+		ifs.close();<br/>
+		c++;d++;e++;
+		
+		<div class="comment">//Stream table a to file</div>
+		a >> "test2.ddsl";<br/>
+		<div class="comment">//Stream to table c (equal to table a)</div>
+		c << "test2.ddsl";<br/>
+		c++;
+		</div>
+		
+	<h2>Table type in DS_Table.h</h2>
+	Table has various access functions
+	<div class="code">
+	Table<> t = ((dtString|"F1"|"F2"|"F3"|"F4"|"F5"|"F6"|"Target"|"Split") ^<br/>
+		((ctFeature |<br/>
+			(dtDouble | 0.0 | 0.1 | 0.2) ^<br/>
+			(dtDouble | 1.0 | 1.1 | 1.2) ^<br/>
+			(dtDouble | 2.0 | 2.1 | 2.2) ^<br/>
+			(dtDouble | 3.0 | 3.1 | 3.2)<br/>
+		) | (ctFeature |<br/>
+			(dtInt32 | 00 | 01 | 02) ^<br/>
+			(dtInt32 | 10 | 11 | 12) ^<br/>
+			(dtInt32 | 20 | 21 | 22) ^<br/>
+			(dtInt32 | 30 | 31 | 32)<br/>
+		) | (ctTarget |<br/>
+			dtString ^ "a" ^ "a" ^ "b" ^ "b"<br/>
+		) | (ctSplit |<br/>
+			dtUInt32 ^ 0U ^ 1U ^ 0U ^ 1U<br/>
+		)));<br/>
+	<div class="comment">//Get column ids</div>
+	t.cols.ids()++;<br/>
+	<div class="comment">//Get row indices</div>
+	t.rows.idxs()++;<br/>
+	<div class="comment">//Get matrix with index 1 and cast to Matrix&ltInt32&gt</div>
+	t.mat&ltInt32&gt(1)++;<br/>
+	</div>	
+	<h2>Table functions in DS_TableFunc.h</h2>
+	This file contains C++ functions for calls on DDSL tables.
+</div>
+
+<div class="text">
+<h1>Model</h1>
+A model in DDSL represents a trainable mathematical model such as a classifier or a transformation. Models can also generate data (GenGauss) or output data (Export). Different models can be created and a table containing the data can be streamed through the model. A model takes inputs from a table and also outputs a table. In fact, because Model inherits from Table the model actually is its own output. 
+
+	<h2>Model language definition in DS_ModelLang.h</h2>
+
+		<h3>Data passing</h3>
+		Each model only uses input columns from specific content types and will output columns from specific content types. For example, a NaiveBayes classifier model takes ctFeature and ctTarget as an input and outputs ctResult and ctConfidence. See below for some code examples.
+
+		<div class="code">
+			<div class="comment">//Create a small table with two classes and 4 samples</div>
+			Table<> tab = (dtString|"X"|"Y"|"Target"|"Set") ^ (<br/>
+				((ctFeature|(dtDouble|1.0|1.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|2.0|2.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|3.0|1.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|4.0|2.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"t"))));<br/>
+			<div class="comment">//Define classes in a vector</div>
+			Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+			<div class="comment">//Stream the table through the model and display results</div>
+			(tab > NaiveBayes&ltString&gt(classes))++;<br/>
+		</div>
+
+		<h3>Passthrough types</h3>
+		By default a model can be considered a transformation. This means that all columns which act as an input to the model will not be passed to the output. This is particularly usefull when scaling input features (MMScale, ZScore). In this case only the scaled features will be output by the model, while the original features are not in the output.<br/><br/>
+
+		The default passthrough type can be overridden by operators. Passthrough is efficient because unused inputs will only be passed as a reference to the output (not actually copied). Three passthrough types are available:
+		<ul>
+		<li>pttRelevant: The default passthrough type will only pass table columns which are not used in the input.</li>
+		<li>pttAll (+ operator): This passthrough type will pass all input columns to the output, regardless if they are used by the model. This could potentially be a penalty on performance, because of merging of internal matrices in tables if the matrix keys are the same.</li>
+		<li>pttNone (- operator): This passthrough type will not pass input columns. This is usefull when the amount of rows in the output does not correspond to the rows in the input (When calculating a confusion matrix for example).</li>
+		</ul>
+
+		Below are some examples for passthrough:
+		<div class="code">
+			<div class="comment">//Create a small table with two classes and 4 samples</div>
+			Table<> tab = (dtString|"X"|"Y"|"Target"|"Set") ^ (<br/>
+				((ctFeature|(dtDouble|1.0|1.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|2.0|2.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|3.0|1.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|4.0|2.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"t"))));<br/>
+			
+			<div class="comment">//Define classes in a vector</div>
+			Matrix&ltString&gt classes = (dtString|"a"|"b");
+			
+			<div class="comment">//Passthrough only scaled inputs</div>
+			Table<> res_zs = tab > +ZScore<>();<br/>
+			res_zs++;<br/>
+			
+			<div class="comment">//Passthrough all inputs</div>
+			Table<> res_nb = res_zs > +NaiveBayes&ltString&gt(classes);<br/>
+			res_nb++;<br/>
+
+			<div class="comment">//Passthrough none of the inputs (because the dimensions of confusion are different)</div>
+			Table<> res_c = res_nb > -Confusion&ltString&gt(classes);<br/>
+			res_c++;<br/>
+		</div>
+
+		<h3>Training and applying</h3>
+			A model has two streaming operators, one for training the model ('>'), and one for applying the model ('>>').
+			<div class="code">
+			<div class="comment">//Create a small set where the last two samples cannot be inferred from the training set.</div>
+			Table<> tab = (dtString|"X"|"Y"|"Target"|"Set") ^ (	<br/>
+				((ctFeature|(dtDouble|1.0|1.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|2.0|1.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"e"))) ^<br/>
+				((ctFeature|(dtDouble|2.0|2.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|1.0|2.0)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"e"))) ^<br/>
+				((ctFeature|(dtDouble|3.0|1.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|4.0|1.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"e"))) ^<br/>
+				((ctFeature|(dtDouble|4.0|2.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"t"))) ^<br/>
+				((ctFeature|(dtDouble|3.0|2.0)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"e"))) ^<br/>
+				((ctFeature|(dtDouble|3.5|1.5)) | (ctTarget|(dtString|"a")) | (ctSplit|(dtString|"e"))) ^<br/>
+				((ctFeature|(dtDouble|1.5|1.5)) | (ctTarget|(dtString|"b")) | (ctSplit|(dtString|"e"))));<br/>
+			
+			<div class="comment">//Define classes</div>
+			Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+
+			<div class="comment">//Extract the training part and the evaluation part</div>
+			Table<> train = tab(tab[ctSplit] == "t");<br/>
+			Table<> eval = tab(tab[ctSplit] == "e");<br/>
+			train++;<br/>
+			eval++;<br/>
+			
+			<div class="comment">//Create a naive bayes classifier</div>
+			NaiveBayes&ltString&gt nb = +NaiveBayes&ltString&gt(classes);<br/>
+
+			<div class="comment">//Train with the training set</div>
+			(train > nb)++;<br/>
+			
+			<div class="comment">//Apply model with the evaluation set</div>
+			auto out = eval >> nb;<br/>
+			
+			<div class="comment">//Calculate confusion</div>
+			(out >> -Confusion&ltString&gt(classes))++;<br/>
+		</div>
+
+		<h3>Reading and writing</h3>		
+		Reading and writing of models is supported to file. For some more advanced models (CaffeMLP) additional files are written with other extensions.
+		<div class="code">
+		<div class="comment">//Generate 2d point clouds from 2 random Guassian distributions. Assign a target and a random splitting column</div>
+		const UInt32 cnt = 100;<br/>
+		Table<> tab =	((Table>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) |<br/>
+						(ctTarget|(Matrix&ltString&gt(cnt,1,"a") ^ Matrix&ltString&gt(cnt,1,"b"))) |<br/>
+						(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U))));<br/>
+		
+		<div class="comment">//Define classes</div>
+		Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+
+		<div class="comment">//Extract the training part and the evaluation part</div>
+		Table<> train = tab(tab[ctSplit] == 0U);<br/>
+		Table<> eval = tab(tab[ctSplit] == 1U);<br/>
+		
+		<div class="comment">//Create a naive bayes classifier, train it, and then save it</div>
+		NaiveBayes&ltString&gt nb = +NaiveBayes&ltString&gt(classes);<br/>
+		train > nb;<br/>
+		nb >> "nb.ddsl";<br/>
+		
+		<div class="comment">//Load naive bayes classifier</div>
+		NaiveBayes&ltString&gt nb2;<br/>
+		nb2 << "nb.ddsl";<br/>
+		
+		<div class="comment">//Apply model with the evaluation set and calculate confusion</div>
+		(eval >> nb2 >> -Confusion&ltString&gt(classes))++;<br/>
+		</div>
+
+		<h2>Model type in DS_Model.h</h2>
+		Model inherits from Table. It can be casted back using <div class="inlinecode">Model.tab()</div>. This is usefull when manipulating the output of a model. For example, when streaming to file.
+		<div class="code">
+		NaiveBayes<> nb = NaiveBayes<>();
+		<div class="comment">//Assign model output to a table.</div>
+		Table<> t = nb;
+		<div class="comment">//Export model to file</div>
+		nb >> "NaiveBayes.ddsl";
+		<div class="comment">//Use the cast helper to export the output table of the model to file</div>
+		nb.tab() >> "NaiveBayesOutput.ddsl";
+		</div>
+	<h2>Model functions in DS_ModelFunc.h</h2>
+	Additional C++ function for handling models can be found in this file.
+	</div>
+
+<div class="text">
+<h1>Pipeline</h1>
+	A pipeline is a sequence of models. The pipeline, or individual models can be executed either synchronous or asynchronous by streaming a table through it. Generally, in a pipeline, each model transforms input columns to output columns. Unused columns are automatically passed through to the next model in the pipeline. In some cases it is usefull to pass all columns (including the input) or sometimes it is convenient to pass no columns at all, but only produce an output. This can be achieved by specifying the passThroughType (See chapter about Models for more info). <br/>
+	<br/>
+	Passthrough is efficient because it will only pass input columns as a slice. The pipeline will try to minimize the amount of copying needed for passthrough. Each model is automatically a pipeline. Hence no seperate class for a pipeline exists. This is implemented by making the model a double linked list.
+
+	<h2>Model language definition in DS_ModelLang.h</h2>
+	<h3>Inline pipeline</h3>
+	An inline pipeline in constructed as a temporary. Because each model is its own output (Model inherits from Table), either a Table or a Model can be streamed through the next model. This will effectively create a pipeline. A example is below:
+	<div class="code">
+	<div class="comment">//Generate a random 2d point cloud from a Gaussian distribution. Calculate the Z Score and apply a Random classifier (just output Random classes)</div>
+	(Table<>(10) > GenGauss<>(dtDouble|10.0|10.0, dtDouble|0.0|0.0) > ZScore<>() > Random&ltString&gt(dtString|"a"|"b"))++;<br/>
+	<div class="comment">//Also show the input features by using passthrough operator '+' (all)</div>
+	(Table<>(10) > GenGauss<>(dtDouble|10.0|10.0, dtDouble|0.0|0.0) > +ZScore<>() > Random&ltString&gt(dtString|"a"|"b"))++;<br/>
+	</div>
+	
+	By default a pipeline is synchronous. A pipeline can be represented by any model in the pipeline (but usually the first). The below code gives a typical pipeline with prescaling, classification and evaluation. The pipeline is trained with the first split, and applied to the second.
+	<h3>Synchronous pipeline</h3>
+	<div class="code">
+	<div class="comment">//Create 200 random points with two classes and two sets.</div>
+	const UInt32 cnt = 100;<br/>
+	<div class="comment">Matrix&ltString&gt classes = (dtString|"a"|"b");</div>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U))));<br/>
+	<div class="comment">//Create the pipeline</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);	
+	<div class="comment">//Train pipeline and display output (in this case confusion between classes)</div>
+	(tab(tab[ctSplit] == 0U) > p)++;<br/>
+	<div class="comment">//Evaluate pipeline and display output (in this case confusion between classes)</div>
+	(tab(tab[ctSplit] == 1U) >> p)++;<br/>
+	</div>
+	
+	<h3>Asynchronous pipelines</h3>	
+	Pipelines can be executed asynchonous. This is useful to monitor progress on time consuming pipelines. It is also usefull when two or more pipelines need to be executed simultaneously. Before executing a pipeline the memory required by the pipeline is prepared. This preperation step is executed synchronous. Also inline (temporary) pipelines cannot be executed asynchronously. A pipeline is detatched and re-attached from the main thread by the '!' operator.
+	<div class="code">
+	<div class="comment">//Create a data table with 200K samples</div>
+	const UInt32 cnt = 100000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U))));<br/>
+	<div class="comment">//Create a pipeline</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);<br/>
+	<div class="comment">//Execute pipeline and save data to the deferred output (out)</div>
+	Table<> out = tab > !p;<br/>
+	cout << "out is currently filling with data!" << endl;<br/>
+	<div class="comment">//Re-attach (wait for) pipeline</div>
+	!p;<br/>
+	<div class="comment">//Show deferred output</div>
+	out++;<br/>
+	<br/>
+	<div class="comment">//Execute pipeline and save data to the deferred output while showing progress(out)</div>
+	Table<> out2 = tab > !p;<br/>
+	<div class="comment">//Wait for pipeline ans print progress</div>
+	p.progressLoop();<br/>
+	<div class="comment">//Show deferred output</div>
+	out++;<br/>
+	</div>
+	
+	Also the actual intermedia results can be calculated asynchronously. The code below execute the naive bayes classifier, and while the classifier runs it calculates the confusion matrix. One should be carefull though. Only slicing of DDSL objects is synchronized. This means that reading the data is oke, while writing could lead to exceptions.
+	
+	<div class="code">
+	<div class="comment">//Create a data table with 200K samples</div>
+	const UInt32 cnt = 100000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U))));<br/>
+
+	<div class="comment">//Create a pipeline</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes);<br/>
+
+	<div class="comment">//Alloc and execute pipeline and show currently produced output data.</div>
+	Table<> out = tab > !p;<br/>
+	<div class="comment">//Display intermediate confusion</div>
+	do {<br/>	
+	&nbsp&nbsp(out > -Confusion&ltString&gt(classes))++;<br/>
+	} while (!p.last().wait(10));<br/>
+	<div class="comment">//Display the final confusion</div>
+	(out > -Confusion&ltString&gt(classes))++;<br/>
+	</div>
+	
+	Also models within the pipeline can be asynchronous. Synchronous models are attached to the pipeline using the blocking operator '|' and asynchronous models are added with the skip over '^' operator. Below is some code to generate a random point cloud parallel. And secondly a pipeline with two asynchronous models is create as an ensemble.
+	<div class="code">		
+	Matrix&ltString&gt classes = (dtString|"a"|"b");	
+	const int c = 1000;	
+	<div class="comment">//Create features in parallel (using the asynchronous pipeline operator '^')</div>
+	GenGauss<> gauss_p_a = GenGauss<>((dtDouble|10.0|10.0),(dtDouble|20.0|20.0)) ^ GenGauss<>((dtDouble|10.0|10.0),(dtDouble|20.0|20.0));<br/>
+	GenGauss<> gauss_p_b = GenGauss<>((dtDouble|10.0|10.0),(dtDouble|40.0|40.0)) ^ GenGauss<>((dtDouble|10.0|10.0),(dtDouble|40.0|40.0));<br/>	
+	<div class="comment">//Execute both pipelines asynchronous</div>
+	auto gauss_a = Table<>(c) > !gauss_p_a;<br/>
+	auto gauss_b = Table<>(c) > !gauss_p_b;	<br/>
+	<div class="comment">//Wait for both pipelines</div>
+	!gauss_p_a;<br/>
+	!gauss_p_b;	<br/>
+	<div class="comment">//Create final table</div>
+	Table<> tab = (gauss_a ^ gauss_b) | (ctTarget ^ (Matrix&ltString&gt(c, 1, classes[0]) ^ Matrix&ltString&gt(c, 1, classes[1])));<br/>
+	<br/>
+	<div class="comment">//Classify with an ensemble of 2 classifiers (Both classifiers work parallel with the skip over operator '^')</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) ^ +Random&ltString&gt(classes);<br/>
+	<div class="comment">//Execute pipeline</div>
+	auto out = tab > p;<br/>
+	<div class="comment">//Show result of Random</div>
+	((out[ctResult][0] | out[ctTarget]) > -Confusion&ltString&gt(classes))++;<br/>
+	<div class="comment">//Show result of NaiveBayes</div>
+	((out[ctResult][1] | out[ctTarget]) > -Confusion&ltString&gt(classes))++;<br/>
+	</div>
+	
+	<h3>Moving and copying</h3>
+	DDSL pipeline use the deep move and shallow copy paradigmn. This means that when a model is copied through the copy constructor the connections from the linked list of the models are disconnected, then the classifier data is copied. This means you cannot copy pipelines without copying individual models and reconstructing the pipeline. This is to prevent accidental deep copying of large pipelines.	When a pipeline is moved the connections from the linked list are always copied. The deep move, shallow copy method also prevents models to be included in more than one pipeline.
+	<div class="code">
+	<div class="comment">//Create 2000 random samples drawn from a gaussian distribution</div>
+	const UInt32 cnt = 1000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U))));<br/>
+	<div class="comment">//The pipeline which is constructed at the rhs is moved to the lhs (deep move)</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);<br/>
+	<div class="comment">//Train pipeline</div>
+	(tab > p)++;<br/>
+	<div class="comment">//Shallow copy ZScore from p</div>
+	ZScore<> p2 = p[0];<br/>
+	<div class="comment">//Then add NaiveBayes and Confusion to p2 by a shallow copy from p</div>
+	p2 | p[1] | p[2];<br/>
+	<div class="comment">//Show output of the copied p2</div>
+	(tab >> p2)++;<br/>
+	</div>
+	<h2>Slicing</h2>
+	A model has limited slicing options. Slicing is usefull for viewing results of intermediate steps of the pipeline.
+	<div class="code">
+	<div class="comment">//Create 2000 random samples drawn from a gaussian distribution</div>
+	const UInt32 cnt = 1000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U))));<br/>	
+	<div class="comment">//The pipeline which is constructed at the rhs is moved to the lhs (deep move)</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);<br/>
+	tab > p;<br/>
+	<div class="comment">//Slice model 2 (Confusion) and show result</div>
+	p[2].tab()++;<br/>	
+	<div class="comment">//slice model 1 (NaiveBayes) and show first 2 rows</div>
+	p[1].tab()(0,2)++;<br/>
+	<div class="comment">//Assign confusion model of p to a model reference (This means that conf will still reference the Confusion instance in the pipeline)</div>
+	Model<> & conf = p[2];<br/>
+	<div class="comment">//Assign confusion output to conf_res. Because tables are not assigned but referenced, conf_res will be a reference to the output of the Confusion model</div>
+	Table<> conf_res = p[2];<br/>
+	conf_res++;<br/>
+	<div class="comment">//Assign the constant 3U to all UInt32 matrices inside the output table of model 2</div>
+	p[2].tab() = 3U;<br/>
+	<div class="comment">//The action above also changes conf_res because that is a reference</div>
+	conf_res++;<br/>
+	<div class="comment">//The slice operator for models will force a deep copy (this will copy all models)</div>
+	Model<> & p2 = p();<br/>
+	(tab >> p2)++;<br/>
+	<div class="comment">//Copy the first 2 models and execute our own confusion inline</div>
+	Model<> & p3 = p(2);<br/>
+	((tab >> p3) > -Confusion&ltString&gt(classes))++;<br/>
+	</div>
+	
+	<h3>Printing and counting</h3>
+	Counting models is done with the counting operator '~'. Printing with the '++' operator will print the entire pipeline including all its hyper parameters. The '--' operator will only print structure.
+	<div class="code">
+	<div class="comment">Print complete pipeline including hyper parameters</div>
+	p++;
+	<div class="comment">Print pipeline structure</div>
+	p--;
+	<div class="comment">Return the amount of models in the pipeline</div>
+	~p;
+	</div>
+	
+	<h3>Reading and writing</h3>
+	Reading and writing of pipelines is supported through reading and writing models. See the Models chapter for more info.
+	<div class="code">
+	const UInt32 cnt = 1000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U))));<br/>
+	<div class="comment">//Construct and train pipeline</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);<br/>
+	(tab > p)++;<br/>
+	<div class="comment">//Save individual models</div>
+	p[0] >> "zs.ddsl";<br/>
+	p[1] >> "nb.ddsl";<br/>
+	p[2] >> "conf.ddsl";<br/>
+	<div class="comment">//Reconstruct pipeline and load models</div>
+	ZScore<> p2 = ZScore<>("zs.ddsl") | NaiveBayes&ltString&gt("nb.ddsl") | Confusion&ltString&gt("conf.ddsl");<br/>
+	<div class="comment">//Apply pipeline</div>
+	(tab >> p2)++;<br/>
+	</div>
+	
+	<h3>Executing pipelines</h3>
+	Some additional options are available for executing pipelines. Pipelines can be executed from a specific model until the last model. DDSL Pipelines can also be executed from the start up until a specified model (excluding the given model).
+	<div class="code">
+	<div class="comment">//Create a table and split in 4 parts</div>
+	const UInt32 cnt = 1000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U|2U|3U))));<br/>
+	
+	<div class="comment">//Construct pipeline</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes) | +Export<>("c:\\temp\\conf.txt");<br/>
+	<div class="comment">//Train pipeline</div>
+	(tab > p)++;<br/>
+	<div class="comment">//Apply pipeline on one subset but skip Export (place breakpoint and check file)</div>
+	(tab(tab[ctSplit] == 0U) << p[3])++;<br/>
+	<div class="comment">//Only apply ZScore (execute from 0 until 1, not including 1). Use print less operator (--) because of big table</div>
+	auto out = (tab << p[1])--;<br/>
+	<div class="comment">//Apply only the NaiveBayes, Confusion and Export but skip ZScore. ZScore has already been calculated in the Table out</div>
+	(out >> p[1])++;<br/>
+	<div class="comment">//Skip ZScore in training and applying (Effectively removes ZScore calculation)</div>
+	(tab > p[1])++;<br/>
+	<div class="comment">//The apply operator (>>) will append to the file.</div>
+	(tab >> p[1])++;<br/>
+	</div>
+	
+	Typically execution (train or apply) consists of two stages: prepare and execute. Prepare allocates all memory required for the pipeline. Also prepare makes all the needed slices. Each model is asked which types of inputs it needs and which ouputs types it gives. Also a model can specify the amount of output rows (The default is equal to the number of input rows, but Confusion overides this). Some times a model need all rows as an input (Like the Export model)<br/>
+	<br/>
+
+	Prepare is only called when a new table (slice) is streamed through the pipeline.
+	<div class="code">
+	const UInt32 cnt = 1000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+	Table<> tab =	((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+					(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+					(ctSplit|(random(2*cnt, 1U, (dtUInt32|0U|1U|2U|3U))));<br/>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);<br/>
+	<div class="comment">//Applying the train and apply operator to a pipeline will prepare it only once because the table tab does not change.</div>
+	tab > p; <br/>
+	tab >> p; <br/>
+	<div class="comment">//However, training with one slice and applying with a second will prepare twice because the memory location of the data is different</div>
+	(tab(tab[ctSplit] == 0U || tab[ctSplit] == 1U) > p)++;<br/>
+	(tab(tab[ctSplit] == 1U || tab[ctSplit] == 2U) >> p)++;<br/>
+	</div>	
+	For small data sets, preparing each time before classifying is not a big time penalty. But preparation can take quite a long time if the dataset is huge (e.g. 1M samples). Therefor direct slice assignment can be used to keep the pipeline from preparing. The idea is to copy new data to the existing table in batches.
+	
+	<div class="code">
+	<div class="comment">//Generate a dataset with 4 batches</div>
+	<div class="comment">//Each batch (ctSplit) should be equal, so first create equal batches, and then randomize content</div>
+	const UInt32 cnt = 1000;<br/>
+	Matrix&ltString&gt classes = (dtString|"a"|"b"); <br/>
+	Table<> tab = ((Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0)) ^ (Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) | <br/>
+		(ctTarget|(Matrix&ltString&gt(cnt,1,classes[0]) ^ Matrix&ltString&gt(cnt,1,classes[1]))) |<br/>
+		(ctSplit|shuffle(Matrix<UInt32>(cnt/2,1,0U,oColMajor)^Matrix<UInt32>(cnt/2,1,1U,oColMajor)^Matrix<UInt32>(cnt/2,1,2U,oColMajor)^Matrix<UInt32>(cnt/2,1,3U,oColMajor)));	<br/>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);<br/>
+	
+	<div class="comment">//batch zero is the batch included in the pipeline, and thus should be explicitly copied.</div>
+	Table<> batch0 = *tab(tab[ctSplit] == 0U);<br/>
+	Table<> batch1 = tab(tab[ctSplit] == 1U);<br/>
+	Table<> batch2 = tab(tab[ctSplit] == 2U);<br/>
+	Table<> batch3 = tab(tab[ctSplit] == 3U);<br/>
+	
+	<div class="comment">//Show distribution of classes in the batches</div>
+	cout << "batch 0: #a=" << ~(batch0[ctTarget] == "a") << ", #b=" << ~(batch0[ctTarget] == "b") << endl;<br/>
+	cout << "batch 1: #a=" << ~(batch1[ctTarget] == "a") << ", #b=" << ~(batch1[ctTarget] == "b") << endl;<br/>
+	cout << "batch 2: #a=" << ~(batch2[ctTarget] == "a") << ", #b=" << ~(batch2[ctTarget] == "b") << endl;<br/>
+	cout << "batch 3: #a=" << ~(batch3[ctTarget] == "a") << ", #b=" << ~(batch3[ctTarget] == "b") << endl;<br/>
+
+	<div class="comment">//train and prepare with batch0</div>
+	(batch0 > p)++;<br/>
+	<div class="comment">//Because batches have equal sizes the data will be copied (direct slice assignment)</div>
+	batch0 = batch1;<br/>
+	<div class="comment">//The memory location is the same so not preparing again</div>
+	(batch0 >> p)++;<br/>
+	<div class="comment">//Same for batch 2</div>
+	batch0 = batch2;<br/>
+	(batch0 >> p)++;<br/>
+	<div class="comment">//Same for batch 3</div>
+	batch0 = batch3;<br/>
+	(batch0 >> p)++;<br/>
+	</div>
+	
+	To above example can be extended to load the batches asynchronously from file, and copy them to the prepared pipeline. That is nice way to get started with DDSL!
+	<h2>Pipeline functions of the Model type in DS_Model.h</h2>
+	Additional convenience functions are defined in the Model class.
+	<div class="code">
+	<div class="comment">//Create a pipeline</div>
+	ZScore<> p = ZScore<>() | +NaiveBayes&ltString&gt(classes) | -Confusion&ltString&gt(classes);<br/>
+	<div class="comment">//Returns the next model in the pipeline</div>
+	p.next();<br/>
+	<div class="comment">//Returns the same (previous of the next) model in the pipeline</div>
+	p.next().prev();<br/>
+	<div class="comment">//Return the last model in the pipeline</div>
+	p.last();<br/>
+	<div class="comment">//Returns the first model in the pipeline</div>
+	p.first();<br/>
+	<div class="comment">//Wait for 100ms and check if the pipeline is done</div>
+	bool done = p.wait(100);<br/>
+	<div class="comment">//Display progress and return if the pipeline finishes</div>
+	p.progressLoop();<br/>
+	<div class="comment">//Reset the trained model</div>
+	p.reset();<br/>
+	<div class="comment">//Clear the internal data</div>
+	p.clear();<br/>
+	</div>	
+</div>
+
+<div class="text">
+<h1>Advanced topics</h1>
+	This chapters covers some advanced DDSL features. Although this is intended behavour, these features might not be thoroughly tested.
+	<h2>Other indexing types</h2>
+	By default DDSL uses the DSType::MatrixIndex type as the deafult for the "Index" type of the templates. The indexing type is the type used for counting (rows, columns, models, etc). The default can be overridden using the second template parameter. For example to use an UInt64 as indexing type construct a matrix as <div class="inlinecode">Matrix<&ltDouble, UInt64&gt</div>
+
+	<h2>Adding your own type</h2>
+	The easiest method to use you own type is to use the VoidPointer type and cast the value. However it is possible to define your own type from scratch (not tested):
+	<div class="code">
+		struct myType {Double x, Double y}<br/>
+		myType mt;<br/>
+		mt.x = 1.1;<br/>
+		mt.y = 2.3;<br/>
+		Matrix<myType> m2(10,10,mt);<br/>
+		for (auto it=m2.rows->begin(); it != m2.rows->end(); it++)<br/>
+		&nbsp&nbspcout << it->x << " " << it->y << endl;<br/>
+	</div>
+	Additional functionality should be added by to the DDSL framework. Mainly for printing, reading and writing. 
+
+<h2>Implementing your own model</h2>
+DDSL can be extended with your own models models. Several macros are available to generate default function prototypes and function bodies. ZScore, NaiveBayes, Random and Confusion provide easy examples to get started. Basicaly you create a class which inherits from <div class="inlinecode">Model<></div>. The following virtual abstract function should be overriden:
+
+<div class="inlinecode">void Model<TIdx, TId>::updateParameters()</div> is called when hyper parameters are changed.<br/><br/>
+<div class="inlinecode">void Model<TIdx, TId>::registerInputs(const Table<TIdx, TId> &table)</div> is called when input types have to be registered.<br/><br/>
+<div class="inlinecode">void Model<TIdx, TId>::registerOutputs(const Table<TIdx, TId> &input)</div> is called when output data types have to be registered.<br/><br/>
+<div class="inlinecode">void Model<TIdx, TId>::train(const Table<TIdx, TId> &table, Table<TIdx, TId> &input, Table<TIdx, TId> &output)</div> is called when the ">" operator or "<" is called on the model. The source table is passed. Also the prepared slice with the input types is provides. Also a pre-allocated output slice is provided. It is important not to change the input or output slice structure because they are part of the pipeline.<br/><br/>
+<div class="inlinecode">void Model<TIdx, TId>::apply(const Table<TIdx, TId> &table, Table<TIdx, TId> &input, Table<TIdx, TId> &output)</div> is called when the ">>" operator or "<<" is called on the model. The source table is passed. Also the prepared slice with the input types is provides. Also a pre-allocated output slice is provided. It is important not to change the input or output slice structure because they are part of the pipeline.<br/><br/>
+</div>
+
+<div class="text">
+<h1>Current Issues</h1>
+The DDSL language in C++ respects const correctness. With a small exception: Editing the <i>content</i> of a Matrix is allowed under const (because of slice references). Const matrices are guaranteed not to change the <i>structure</i> when passed as const. For this reason const_cast is needed at some places in the code. This issue could potentially be solved by making the internal data mutable. Also sometimes a const_cast is needed because const_iterators are not yet supported.<br/><br/>
+A Table can be implicitly converted to a Matrix. And a Matrix can be implicitly converted to a constant. While this is very powerfull in syntax, sometimes the messages of template deduction of the C++ compiler are a bit difficult to debug.
+</div>
+
+<div class="text">
+<h1>Model reference</h1>
+	<h2>ZScore</h2>
+	<table>
+	<tr><td>Description</td><td>Scales input features using the Z-Score</td></tr>
+	<tr><td>Source file</td><td>DS_Transform.*</td></tr>
+	<tr><td>Effect of ></td><td>Calculate mean and sd of each column</td></tr>
+	<tr><td>Effect of >></td><td>Subtract mean and divide by sd for each value per column</td></tr>
+	<tr><td>Template Parameters</td><td>None</td></tr>
+	<tr><td>Parameters</td><td>None</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>ctFeature/dtDouble</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>ctFeature/dtDouble</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td>None</td></tr>
+	<tr><td>Examples</td><td><div class="inlinecode">((ctFeature|((dtDouble|1.0|2.0)^(dtDouble|3.0|4.0))) > ZScore<>())++;</div></td></tr>
+	</table>
+	
+	<h2>MMScale</h2>
+	<table>
+	<tr><td>Description</td><td>Scales input features between the minimum and maximum value</td></tr>
+	<tr><td>Source file</td><td>DS_Transform.*</td></tr>
+	<tr><td>Effect of ></td><td>Calculate minimum and maximum value of each column</td></tr>
+	<tr><td>Effect of >></td><td>Subtract minimum and divide by maximum - minimum for each value per column</td></tr>
+	<tr><td>Template Parameters</td><td>None</td></tr>
+	<tr><td>Parameters</td><td>None</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>ctFeature/dtDouble</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>ctFeature/dtDouble</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td>None</td></tr>
+	<tr><td>Examples</td><td><div class="inlinecode">((ctFeature|((dtDouble|1.0|2.0)^(dtDouble|3.0|4.0))) > MMScale<>())++;</div></td></tr>
+	</table>
+	
+	<h2>Import</h2>
+	<table>
+	<tr><td>Description</td><td>Import a text or csv file. Files can for example be exported in R, Matlab or Excel</td></tr>
+	<tr><td>Source file</td><td>DS_Read.*</td></tr>
+	<tr><td>Effect of ></td><td>Read file</td></tr>
+	<tr><td>Effect of >></td><td>Read file</td></tr>
+	<tr><td>Template Parameters</td><td>None</td></tr>
+	<tr><td>Parameters</td><td>
+		String filename<br/>
+		String delimeter = " "<br/>
+		String newline character = "\n"<br/>
+		String quote = "\""
+	</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>None</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>All</td></tr>
+	<tr><td>Output row count</td><td>Determined by file</td></tr>
+	<tr><td>External dependancies</td><td>None</td></tr>
+	<tr><td>Examples</td><td>
+		<div class="inlinecode">
+		((ctFeature|((dtDouble|1.0|2.0)^(dtDouble|3.0|4.0))) > Import<>("file.txt"))++;<br/>
+		((ctFeature|((dtDouble|1.0|2.0)^(dtDouble|3.0|4.0))) > Import<>("file.csv", ","))++;
+		</div>
+	</td></tr>
+	</table>
+	
+	<h2>Export</h2>
+	<table>
+	<tr><td>Description</td><td>Export a text or csv file. Files can for example be imported in R, Matlab or Excel</td></tr>
+	<tr><td>Source file</td><td>DS_Write.*</td></tr>
+	<tr><td>Effect of ></td><td>Write file</td></tr>
+	<tr><td>Effect of >></td><td>Append to file</td></tr>
+	<tr><td>Template Parameters</td><td>None</td></tr>
+	<tr><td>Parameters</td><td>
+		String filename<br/>
+		bool includeTypes = true -> should types be contained in the header?<br/>
+		String delim=" "<br/>
+		String newline = "\n"<br/>
+		DSTypes::String quote="\""<br/>
+	</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>All</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>None</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td>None</td></tr>
+	<tr><td>Examples</td><td>
+		<div class="inlinecode">
+		((ctFeature|((dtDouble|1.0|2.0)^(dtDouble|3.0|4.0))) > Export<>("file.txt"))++;<br/>
+		((ctFeature|((dtDouble|1.0|2.0)^(dtDouble|3.0|4.0))) >> Export<>("file.csv", false, ","))++;
+		</div>
+	</td></tr>
+	</table>
+	
+	<h2>GenGauss</h2>
+	<table>
+	<tr><td>Description</td><td>Generate a multi-dimensional random point cloud, drawn from a (rotated) Gaussian distribution.</td></tr>
+	<tr><td>Source file</td><td>DS_Generate.*</td></tr>
+	<tr><td>Effect of ></td><td>Generate samples</td></tr>
+	<tr><td>Effect of >></td><td>Generate samples</td></tr>
+	<tr><td>Template Parameters</td><td>None</td></tr>
+	<tr><td>Parameters</td><td>		
+		Matrix<T> deviation -> Vector containing standard deviations of the Gaussian distribution (one element per dimension)<br/>
+		Matrix<T> mean -> Vector containing means of the Gaussian distribution (one element per dimension)<br/>
+	</td></tr>
+	<tr><td>Parameters</td><td>		
+		Matrix<T> eigenVectors -> Vector containing eigenvectors of the Gaussian distribution for rotated point clouds (one element per dimension)<br/>
+		Matrix<T> eigenValues -> Vector containing eigenValues of the Gaussian distribution for rotated point clouds (one element per dimension)<br/>
+		Matrix<T> mean -> Vector containing means of the Gaussian distribution (one element per dimension)<br/>
+	</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>None</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>ctFeature and DataType T</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td>None</td></tr>
+	<tr><td>Examples</td><td>
+		<div class="inlinecode">
+		Table<>(10) > GenGauss<>(dtDouble|5.0|10.0, dtDouble|3.0|6.0)++; //Generate 10 samples from a 2d Gaussian with mean 5, 10 and sd 3, 6<br/>
+		Table<>(10) > GenGauss<>(dtDouble|0.7|0.7, dtDouble|5.0|10.0, dtDouble|3.0|6.0)++; //Generate 10 samples from a 2d gaussian with mean 5, 10, eigenValues 3, 6 and eigenVector 0.7, 0.7 = (-45 degrees)<br/>
+		</div>
+	</td></tr>
+	</table>	
+
+	<h2>NaiveBayes</h2>
+	<table>
+	<tr><td>Description</td><td>Produces a Naive Bayes classifier.</td></tr>
+	<tr><td>Source file</td><td>DS_Classify.*</td></tr>
+	<tr><td>Effect of ></td><td>Train the Naive Bayes classifier</td></tr>
+	<tr><td>Effect of >></td><td>Apply the Naive Bayes classifier</td></tr>
+	<tr><td>Template Parameters</td><td>TClassType -> Type used for class IDs.</td></tr>
+	<tr><td>Parameters</td><td>		
+		Matrix<TClassType> classes -> Vector containing the class IDs (one element per class id).
+	</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>ctFeature and ctTarget</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>ctResult and ctConfidence</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td>None</td></tr>
+	<tr><td>Examples</td><td>
+		<div class="inlinecode">
+		const UInt32 cnt = 10;<br/>
+		Table<> tab = <br/>
+		((Table>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) |<br/>
+		(ctTarget|(Matrix&ltString&gt(cnt,1,"a") ^ Matrix&ltString&gt(cnt,1,"b"))); <br/>
+		Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+		NaiveBayes&ltString&gt nb = NaiveBayes&ltString&gt(classes);<br/>
+		(tab > nb)++;<br/>
+		</div>
+	</td></tr>
+	</table>
+	
+	<h2>Random</h2>
+	<table>
+	<tr><td>Description</td><td>Produces random classes. Only used for testing.</td></tr>
+	<tr><td>Source file</td><td>DS_Classify.*</td></tr>
+	<tr><td>Effect of ></td><td>Nothing</td></tr>
+	<tr><td>Effect of >></td><td>Produce random class IDs</td></tr>
+	<tr><td>Template Parameters</td><td>TClassType -> Type used for class IDs.</td></tr>
+	<tr><td>Parameters</td><td>		
+		Matrix<TClassType> classes -> Vector containing the class IDs (one element per class id).
+	</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>ctFeature and ctTarget</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>ctResult</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td>None</td></tr>
+	<tr><td>Examples</td><td>
+		<div class="inlinecode">
+		const UInt32 cnt = 10;<br/>
+		Table<> tab = <br/>
+		((Table>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) |<br/>
+		(ctTarget|(Matrix&ltString&gt(cnt,1,"a") ^ Matrix&ltString&gt(cnt,1,"b"))); <br/>
+		Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+		Random&ltString&gt rnd = Random&ltString&gt(classes);<br/>
+		(tab > rnd)++;<br/>
+		</div>
+	</td></tr>
+	</table>
+
+	<h2>Support Vector Machine</h2>
+	<table>
+	<tr><td>Description</td><td>Support Vector Machine classifier</td></tr>
+	<tr><td>Source file</td><td>DS_ClassifySVM.*</td></tr>
+	<tr><td>Effect of ></td><td>Train SVM</td></tr>
+	<tr><td>Effect of >></td><td>Apply SVM</td></tr>
+	<tr><td>Template Parameters</td><td>TClassType -> Type used for class IDs.</td></tr>
+	<tr><td>Parameters</td><td>
+	DSLib::Matrix<TClassType> &classes<br/>	
+	DSLib::Matrix<DSTypes::Double> &weights = DSLib::Matrix<DSTypes::Double, TIdx>()<br/>
+	<br/>
+	KernelType kt = ktLinear -> Kernel type (ktLinear: u'*v\n", ktPolynomial: (gamma*u'*v + coef0)^degree, ktRadialBasis: radial basis function: exp(-gamma*|u-v|^2), ktSigmoid, sigmoid: tanh(gamma*u'*v + coef0), ktPreComputed: precomputed kernel (kernel values in training_set_file))<br/>
+	<br/>
+	SVMType svmt = svmtCSVC -> svmtCSVC: multi-class classification, svmtNuSVC: multi-class classification, svmtOneClass: one-class SVM, svmtEpsilonSVR: epsilon-SVR: regression, smvtNuSVR: regression<br/>
+	<br/>
+	UInt32 shrinking = 0 -> whether to use the shrinking heuristics, 0 or 1 (default 1)<br/>
+	UInt32 probabilityEstimates = 1 -> whether to train a SVC or SVR model for probability estimates, 0 or 1 (default 0)<br/>
+	Double cachesize = 100 -> cache memory size in MB (default 100)<br/>
+	Double gamma = 0 -> gamma in kernel function (default 1/num_features)<br/>
+	UInt32 degree = 3 -> degree in kernel function (default 3)<br/>
+	Double coef0 = 0 -> coef0 in kernel function (default 0)<br/>
+	Double cost = 1 -> the parameter C of C-SVC, epsilon-SVR, and nu-SVR (default 1)<br/>
+	Double nu = 0.5 -> the parameter nu of nu-SVC, one-class SVM, and nu-SVR (default 0.5)<br/>
+	Double epsilon = 0.1 -> the epsilon in loss function of epsilon-SVR (default 0.1)<br/>
+	Double eTolerance = 0.001 -> tolerance of termination criterion (default 0.001)<br/>
+	</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>ctFeature and ctTarget</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>ctResult and ctConfidence</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td><a href="https://www.csie.ntu.edu.tw/~cjlin/libsvm/">libSVM</a></td></tr>
+	<tr><td>Examples</td><td>
+		<div class="inlinecode">
+		const UInt32 cnt = 10;<br/>
+		Table<> tab = <br/>
+		((Table>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) |<br/>
+		(ctTarget|(Matrix&ltString&gt(cnt,1,"a") ^ Matrix&ltString&gt(cnt,1,"b"))); <br/>
+		Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+		SVM&ltString&gt svm = SVM&ltString&gt(classes);<br/>
+		(tab > svm)++;<br/>
+		</div>
+	</td></tr>
+	</table>
+
+	<h2>CaffeMLP</h2>
+	<table>
+	<tr><td>Description</td><td>Multilayer Perceptron using Caffe Deep Learning framework. Exported model should also be compatible with <a href="https://developer.nvidia.com/digits">NVIDIA/DIGITS</a></td></tr>
+	<tr><td>Source file</td><td>DS_ClassifyCaffe.*</td></tr>
+	<tr><td>Effect of ></td><td>Train MLP</td></tr>
+	<tr><td>Effect of >></td><td>apply MLP</td></tr>
+	<tr><td>Template Parameters</td><td>TClassType -> Type used for class IDs.</td></tr>
+	<tr><td>Parameters</td><td>		
+	DSLib::Matrix<TClassType> classes<br/>
+	caffe::Caffe::Brew mode = caffe::Caffe::GPU -> or CPU <br/>
+	Double learnRate = 0.001<br/>
+	Double momentum = 0.01<br/>
+	TIdx units = 100<br/>
+	TIdx iter = 1000<br/>
+	TIdx batchSize = 10<br/>
+	</td></tr>
+	<tr><td>Input ContentType and DataType</td><td>ctFeature and ctTarget</td></tr>
+	<tr><td>Output ContentType and DataType</td><td>ctResult and ctConfidence</td></tr>
+	<tr><td>Output row count</td><td>Same as input</td></tr>
+	<tr><td>External dependancies</td><td><a href="http://caffe.berkeleyvision.org/">BVLC\Caffe</a> from the <a href="https://github.com/BVLC/caffe/tree/windows">Windows branch</a></td></tr>
+	<tr><td>Examples</td><td>
+		<div class="inlinecode">
+		const UInt32 cnt = 10;<br/>
+		Table<> tab = <br/>
+		((Table>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|0.0|0.0))^(Table<>(cnt) > GenGauss<>(dtDouble|10.0|10.0,dtDouble|20.0|20.0))) |<br/>
+		(ctTarget|(Matrix&ltString&gt(cnt,1,"a") ^ Matrix&ltString&gt(cnt,1,"b"))); <br/>
+		Matrix&ltString&gt classes = (dtString|"a"|"b");<br/>
+		Random&ltString&gt mlp = CaffeMLP&ltString&gt(classes, caffe::Caffe::GPU, 0.001, 0.01, 500, 4000, 1000);<br/>
+		(tab > mlp)++;<br/>
+		</div>
+	</td></tr>
+	</table>
+	
+	<h2>Principal Component Analysis</h2>
+	<h2>Linear Discriminant Analysis</h2>
+	<h2>Caffe</h2>
+</div>
+</body>

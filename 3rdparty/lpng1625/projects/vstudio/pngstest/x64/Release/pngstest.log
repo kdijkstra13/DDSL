@@ -1,0 +1,4 @@
+﻿  pngstest.c
+..\..\..\contrib\libtests\pngstest.c(35): error C2220: warning treated as error - no 'object' file generated
+..\..\..\contrib\libtests\pngstest.c(35): warning C4464: relative include path contains '..'
+..\..\..\contrib\libtests\pngstest.c(48): warning C4464: relative include path contains '..'

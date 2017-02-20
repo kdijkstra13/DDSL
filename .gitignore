@@ -1,0 +1,18 @@
+#ignore R stuff
+#**/*.Rdata
+#**/*.Rhistory
+
+#ignore visual studio Stuff
+#**/*.suo
+#**/*.sdf
+#**/*.db
+#**/*.user
+#**/.vs/
+
+#ignore vs builds
+#**/x64/
+#**/Debug/
+#**/Release/
+
+#ignore cmake builds
+#build/
