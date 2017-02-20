@@ -3,7 +3,7 @@
 
 #include "hpp/model/DS_Model.hpp"
 #include "hpp/lib/DS_MatrixFunc_AF.hpp"
-#include "ArrayFireDDSL.h"
+#include "ArrayFire_ddsl.h"
 
 using namespace std;
 using namespace DSTypes;

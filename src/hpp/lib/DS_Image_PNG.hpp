@@ -4,7 +4,7 @@
 
 #include "hpp/lib/DS_Image.hpp"
 extern "C" {
-	#include "pngDDSL.h"
+	#include "png_ddsl.h"
 }
 using namespace std;
 using namespace DSTypes;

@@ -1,4 +1,0 @@
-﻿  pngvalid.c
-..\..\..\contrib\libtests\pngvalid.c(53): error C2220: warning treated as error - no 'object' file generated
-..\..\..\contrib\libtests\pngvalid.c(53): warning C4464: relative include path contains '..'
-..\..\..\contrib\libtests\pngvalid.c(160): warning C4464: relative include path contains '..'

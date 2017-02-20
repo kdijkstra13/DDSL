@@ -15,40 +15,40 @@ using namespace DSUtil;
 namespace DSLib {
 
 	//Specializations
-	template <> inline bool Matrix<MatrixDouble, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &last) const { return false; }
-	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
+	template <> inline bool Matrix<MatrixDouble, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &) const { return false; }
+	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <> inline void Matrix<MatrixDouble, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
 
-	template <> inline bool Matrix<MatrixInt32, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &last) const { return false; }
-	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
+	template <> inline bool Matrix<MatrixInt32, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &) const { return false; }
+	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixInt32, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
 
-	template <> inline bool Matrix<MatrixUInt32, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &last) const { return false; }
-	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
+	template <> inline bool Matrix<MatrixUInt32, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &) const { return false; }
+	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixUInt32, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
 
-	template <>	inline bool Matrix<MatrixString, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &last) const { return false; }
-	template <>	inline void Matrix<MatrixString, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixString, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixString, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixString, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixString, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
-	template <>	inline void Matrix<MatrixString, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &other) const { dst.clear(); };
+	template <>	inline bool Matrix<MatrixString, MatrixIdx>::isSlicable(MatrixIdx &first, MatrixIdx &) const { return false; }
+	template <>	inline void Matrix<MatrixString, MatrixIdx>::isSmallerEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixString, MatrixIdx>::isSmaller(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixString, MatrixIdx>::isGreaterEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixString, MatrixIdx>::isGreater(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixString, MatrixIdx>::isEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
+	template <>	inline void Matrix<MatrixString, MatrixIdx>::isNotEqual(MatrixBase &dst, const MatrixBase &) const { dst.clear(); };
 
-	template <> inline bool Matrix<String, UInt32>::isSlicable(UInt32 &first, UInt32 &last) const { return false; }
-	template <> inline bool Matrix<VoidPointer, UInt32>::isSlicable(UInt32 &first, UInt32 &last) const { return false; }
+	template <> inline bool Matrix<String, UInt32>::isSlicable(UInt32 &first, UInt32 &) const { return false; }
+	template <> inline bool Matrix<VoidPointer, UInt32>::isSlicable(UInt32 &first, UInt32 &) const { return false; }
 
 	//CellsBase::IteratorBase
 	template <typename T, typename TInt>

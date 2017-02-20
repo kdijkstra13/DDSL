@@ -1,0 +1,70 @@
+DDSL on Windows:
+	Build zlib in .\3rdparty\zlib\zlib-1.2.8
+		mkdir build
+		cd build
+		cmake -G "Visual Studio 14 Win64" ..
+		Open Visual Studio Solution and compile as Release (Without Debug info)
+		Copy zlib.lib, zlib.dll and zconf.h from build folder to the root 3rdparty\zlib\zlib-1.2.8
+	Build lpng in .\3rdparty\lpng1628
+		mkdir build
+		cd build
+		cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\3rdparty\zlib-1.2.8" ..
+		Open Visual Studio Solution and compile as Release (Without Debug info)
+		Copy libpng16.lib, libpng16.dll and pnglibconf.h from build folder to the root 3rdparty\zlib\zlib-1.2.8
+		** note: libpng16.dll should also be copied to you exe folder
+		** libpng wil crash if there is a mismatch between (\MD and \MdD, etc.). So change VS Debug Profile to \MD
+	Download an install ArrayFire in its default location
+	Build Caffe
+		Checkout Caffe Windows branch in /3rdparty/caffe (git clone -b windows <repo>)
+		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
+			In /3rdparty/caffe/src/caffe/layer_factory.cpp
+			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
+			In /3rdparty/caffe/src/caffe/solver_factory.cpp
+			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
+		Build Caffe with instructions: https://github.com/BVLC/caffe/tree/windows
+			Change all occurences to "if NOT DEFINED WITH_NINJA set WITH_NINJA=0"
+	Build DDSL in .\
+		mkdir build
+		cd build
+		cmake -G "Visual Studio 14 Win64" ..
+		Open Visual Studio Solution and go add some stuff to ddsl_tester.exe and your good to go.
+
+DDSL on Ubuntu
+	Install lpng
+		sudo apt-get libpng-dev
+	Download and install ArrayFirefrom their website
+		sudo apt-get install libglfw3-dev libnnvm-dev
+	Build Caffe
+		sudo apt-get install --no-install-recommends libboost-all-dev
+		sudo apt-get install libopencv-dev libatlas-dev libatlas-base-dev libsnappy-dev
+		sudo apt-get install libhdf5-dev libhdf5-serial-dev libleveldb-dev liblmdb-dev
+		sudo apt-get install libgflags-dev libgoogle-glog-dev protobuf-compiler libprotobuf-dev
+		sudo apt-get install libpython-dev
+		Install Cuda from http://docs.nvidia.com/cuda/index.html#axzz4YZYC9wB0 and https://developer.nvidia.com/cuda-downloads
+		Install NCCL
+			git clone https://github.com/NVIDIA/nccl.git
+			cd nccl
+			make CUDA_HOME=/usr/local/cuda test
+			sudo make PREFIX=/usr/local install
+		Install Caffe and DIGITS from GIT repo
+			After pip install -r requirements.txt do pip install -U scikit-image and then pip install -r requirements.txt again
+			Use multi-gpu with cmake -DUSE_NCCL=1 ..
+		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
+			In /3rdparty/caffe/include/caffe/layer_factory.hpp
+			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
+			In /3rdparty/caffe/include/caffe/solver_factory.hpp
+			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
+	Build DDSL in .\
+		mkdir build
+		cd build
+		cmake ..
+		make
+		Go add some stuff to ddsl_tester and your good to go.
+
+DIGITS in Windows (quite the hassle)
+	Follow: https://github.com/NVIDIA/DIGITS/blob/digits-4.0/docs/BuildDigitsWindows.md
+	Enable the Python stuff in the DDSL\3rdparty\Caffe folder
+	Before doing: "python -m pip install -r requirements.txt" change the "requirements.txt" file and increment the maximum version to the one downloaded from http://www.lfd.uci.edu/~gohlke/pythonlibs/
+	Somehow one of the steps breaks packages installed by http://www.lfd.uci.edu/~gohlke/pythonlibs/
+	Fix this by just re-executing the python -m pip install lines before starting DIGITS
+	Manually download and install Pillow from http://www.lfd.uci.edu/~gohlke/pythonlibs/

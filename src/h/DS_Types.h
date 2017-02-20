@@ -78,11 +78,11 @@ namespace DSTypes {
 	private:
 		void *p = nullptr;
 	public:
-		virtual void read(std::istream &is) {};
-		virtual void write(std::ostream &os) const {};
+		virtual void read(std::istream &) {};
+		virtual void write(std::ostream &) const {};
 
 		void * get() const { return p; }
-		void set(void * const p) { this->p = p; }
+		void set(void * const pp) { this->p = pp; }
 		
 		template<typename T>
 		T & get() const {return *(dynamic_cast<T*>(p));}
@@ -91,15 +91,15 @@ namespace DSTypes {
 
 		virtual bool operator==(const VoidPointer &other) const { return p == other.p; };
 		virtual bool operator!=(const VoidPointer &other) const { return p != other.p; };
-		virtual bool operator>(const VoidPointer &other) const {return false; };
-		virtual bool operator<(const VoidPointer &other) const { return false; };
-		virtual bool operator>=(const VoidPointer &other) const { return false; };
-		virtual bool operator<=(const VoidPointer &other) const { return false; };
+		virtual bool operator>(const VoidPointer &) const {return false; };
+		virtual bool operator<(const VoidPointer &) const { return false; };
+		virtual bool operator>=(const VoidPointer &) const { return false; };
+		virtual bool operator<=(const VoidPointer &) const { return false; };
 		virtual void print(std::ostream &output) const { output << (unsigned int *)p; };
 
 
 		VoidPointer() {};
-		~VoidPointer() {};
+		virtual ~VoidPointer() {};
 		VoidPointer(void * p) { this->p = p; };
 
 		VoidPointer(const VoidPointer &other) { clone(other); };

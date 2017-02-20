@@ -223,7 +223,7 @@ namespace DSEvolution {
 
 		void clone(const Evolution &a);
 		void clone(Evolution &&a);
-		~Evolution(){};
+		virtual ~Evolution(){};
 		Evolution();
 		Evolution(const Evolution &a) {clone(a);};
 		Evolution(Evolution &&a) {clone(std::move(a));};

@@ -985,11 +985,13 @@ namespace DSModel {
 			init_(0, 1, genIds((String)"Stage ", 0U, 1U));
 		}
 
-		ProgressBar::ProgressBar(DSTypes::Double min, DSTypes::Double max, DSTypes::UInt32 stages) {
+		ProgressBar::ProgressBar(DSTypes::Double min, DSTypes::Double max, DSTypes::UInt32 stages) {			
 			if (stages > 0)
 				init_(0, 1, genIds((String)"Stage ", 0U, stages));
 			else
 				init_(0, 1, genIds((String)"Stage ", 0U, 1U));
+			min_ = min;
+			max_ = max;
 		}
 
 		ProgressBar::ProgressBar(DSTypes::Double min, DSTypes::Double max, const Matrix<String> &stages) {

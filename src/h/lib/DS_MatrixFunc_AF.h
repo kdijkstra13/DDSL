@@ -2,7 +2,7 @@
 #include "h/DS_Types.h"
 #include "h/lib/DS_Matrix.h"
 
-#include "ArrayFireDDSL.h"
+#include "ArrayFire_ddsl.h"
 
 namespace DSLib {
 	namespace ArrayFire {

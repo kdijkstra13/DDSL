@@ -1,7 +1,7 @@
 #pragma once
 #include "DS_Model.h"
 
-#include "ArrayFireDDSL.h"
+#include "ArrayFire_ddsl.h"
 
 namespace DSModel {
 	namespace ArrayFire {

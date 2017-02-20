@@ -13,7 +13,7 @@ using namespace DSLang;
 using namespace DSModel;
 using namespace DSImage;
 using namespace DSModel;
-
+/*
 void initGlog() {
 	//Start logging for caffe
 	cout << "Init google log" << endl;
@@ -26,9 +26,10 @@ void initCaffe(UInt32 ngpus) {
 	caffe::Caffe::set_mode(caffe::Caffe::GPU);
 	caffe::Caffe::set_solver_count(ngpus);
 }
-
+*/
 int main(void) {
 	try {
+		/*
 		initGlog();
 		UInt32 ngpus = 4;
 		initCaffe(ngpus);
@@ -78,10 +79,6 @@ int main(void) {
 		Table<> tab = trainTab ^ evalTab;
 
 		Matrix<ImagePNG<Float>> feat = tab[ctFeature];
-		//Scale
-		/*for (auto img=feat.rows->begin(); img!=feat.rows->end(); img++) {
-			(*img - 30.0f) * 0.01f;
-		}*/
 
 		//Save patches to DDSL file
 		cout << "Output DDSL file" << endl;
@@ -154,9 +151,12 @@ int main(void) {
 		production.clearAll();
 		images.clearAll();
 		features.clearAll();
+*/
+		ImagePNG<Float> png("C:\\Projects\\DSL\\Experiments\\Test.png", true);
+		png(0,10,0,10)++;
 
-	}
-	catch (const char * e) {
+		DSModel::ArrayFire::PCA<>("test");
+	} catch (const char * e) {
 		cout << e;
 	} catch (const Error &e) {
 		cout << e.what();

@@ -146,8 +146,8 @@ namespace DSEvolution {
 	//****************//
 	//** Individual **//
 	//****************//
-	void Individual::clone(const Individual &a) {}
-	void Individual::clone(Individual &&a) {}
+	void Individual::clone(const Individual &) {}
+	void Individual::clone(Individual &&) {}
 	
 	//********************//
 	//** RealIndividual **//
