@@ -1,28 +1,33 @@
 DDSL on Windows:
-	Build zlib in .\3rdparty\zlib\zlib-1.2.8
+	Build zlib in .\contrib\zlib\zlib-1.2.8
 		mkdir build
 		cd build
 		cmake -G "Visual Studio 14 Win64" ..
 		Open Visual Studio Solution and compile as Release (Without Debug info)
-		Copy zlib.lib, zlib.dll and zconf.h from build folder to the root 3rdparty\zlib\zlib-1.2.8
-	Build lpng in .\3rdparty\lpng1628
+		Copy zlib.lib, zlib.dll and zconf.h from build folder to the root contrib\zlib\zlib-1.2.8
+	Build lpng in .\contrib\lpng1628
 		mkdir build
 		cd build
-		cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\3rdparty\zlib-1.2.8" ..
+		cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..
 		Open Visual Studio Solution and compile as Release (Without Debug info)
-		Copy libpng16.lib, libpng16.dll and pnglibconf.h from build folder to the root 3rdparty\zlib\zlib-1.2.8
-		** note: libpng16.dll should also be copied to you exe folder
-		** libpng wil crash if there is a mismatch between (\MD and \MdD, etc.). So change VS Debug Profile to \MD
+		Copy libpng16.lib, libpng16.dll and pnglibconf.h from build folder to the root contrib\zlib\zlib-1.2.8
+		** note: libpng16.dll should also be copied to you exe folder (do not mix DLLs and programs of different builds)
+		** libpng wil crash if there is a mismatch between (\MD and \MdD, etc.). So change VS Debug Profile to \MD (Already done in DDSL's CMakeLists.txt)
 	Download an install ArrayFire in its default location
 	Build Caffe
-		Checkout Caffe Windows branch in /3rdparty/caffe (git clone -b windows <repo>)
+		Checkout Caffe Windows branch in /contrib/caffe (git clone -b windows <repo>)
 		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
-			In /3rdparty/caffe/src/caffe/layer_factory.cpp
+			In /contrib/caffe/src/caffe/layer_factory.cpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
-			In /3rdparty/caffe/src/caffe/solver_factory.cpp
+			In /contrib/caffe/src/caffe/solver_factory.cpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
 		Build Caffe with instructions: https://github.com/BVLC/caffe/tree/windows
-			Change all occurences to "if NOT DEFINED WITH_NINJA set WITH_NINJA=0"
+			Install Miniconda and create an python 3.5 environment.
+			This will use Visual Studio instead of Ninja to build Caffe.
+			Change all occurences to "if NOT DEFINED WITH_NINJA set WITH_NINJA=0" in .\scripts\build_win.cmd.
+		Patch cmake errors
+			In /contrib/caffe/build/CaffeTargets.cmake rename gflags_shared, hdf5_shared, hdf5_hl_shared to gflags, caffehdf5, caffehdf5_hl
+			In /contrib/caffe/build/libraries/lib rename libopenblas-dll.a, libopenblas.a to libopenblas-dll.a.lib, libopenblas.a.lib
 	Build DDSL in .\
 		mkdir build
 		cd build
@@ -50,9 +55,9 @@ DDSL on Ubuntu
 			After pip install -r requirements.txt do pip install -U scikit-image and then pip install -r requirements.txt again
 			Use multi-gpu with cmake -DUSE_NCCL=1 ..
 		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
-			In /3rdparty/caffe/include/caffe/layer_factory.hpp
+			In /contrib/caffe/include/caffe/layer_factory.hpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
-			In /3rdparty/caffe/include/caffe/solver_factory.hpp
+			In /contrib/caffe/include/caffe/solver_factory.hpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
 	Build DDSL in .\
 		mkdir build

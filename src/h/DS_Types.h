@@ -36,8 +36,8 @@ namespace DSTypes {
 	//Implicit conversion can clog template deduction error message because almost anything can be converted to anything.
 	//#define DS_DISABLE_IMPLICIT_CONVERSIONS	
 
-	#define PI 3.14159265358979323846
-	#define E 2.7182818284590452353
+	#define C_PI 3.14159265358979323846
+	#define C_E 2.7182818284590452353
 
 #ifdef _MSC_VER
 	#define OS_PATH_SEP "\\"
