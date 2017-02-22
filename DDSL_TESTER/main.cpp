@@ -31,7 +31,7 @@ int main(void) {
 		UInt32 ngpus = 4;
 		initCaffe(ngpus);
 		cout << "Start" << endl;
-
+		Table<>() > DSModel::Caffe<String>(dtString|"a"|"b");
 	} catch (const char * e) {
 		cout << e;
 	} catch (const Error &e) {

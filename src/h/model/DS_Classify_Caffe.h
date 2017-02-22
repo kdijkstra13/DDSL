@@ -84,17 +84,27 @@ namespace DSModel {
 	template<typename TClassType = DSTypes::UInt32, typename TIdx = DSTypes::TableIdx, typename TId = DSTypes::TableId>
 	class Caffe : public Model<TIdx, TId> {
 	private:
-		TIdx blobWidth_;
-		TIdx blobHeight_;
-		TIdx blobChannels_;
-		Matrix<Float, TIdx> blobData_;
+		
+		Matrix<TIdx, TIdx> blobWidth_;
+		Matrix<TIdx, TIdx> blobHeight_;
+		Matrix<TIdx, TIdx> blobChannels_;
+		Matrix<String, TIdx> blobName_;
+		Matrix<Matrix<Float, TIdx>, TIdx> blobData_;
+		Matrix<Matrix<Float, TIdx>, TIdx> labelData_;
+		TIdx batchSize_;
+
+		map<TClassType, DSTypes::Float> classToNum_;
+		Matrix<TClassType> classes_;		
+		
+		//TIdx blobWidth_;
+		//TIdx blobHeight_;
+		//TIdx blobChannels_;
+		//Matrix<Float, TIdx> blobData_;
 
 		caffe::Solver<DSTypes::Float> * solver_;
 		caffe::Net<DSTypes::Float> * net_;		
 		TIdx gpuDevices_;
 		TIdx iterDone_;
-		DSLib::Matrix<TClassType> classes_;
-		std::map<TClassType, DSTypes::Float> classToNum_;
 
 		DSTypes::String solverProtoFile_;
 		DSTypes::String netProtoFile_;
@@ -109,10 +119,26 @@ namespace DSModel {
 		void copyWeights_(const caffe::Net<Float> &netFrom, caffe::Net<Float> &netTo);
 
 		void loadCaffeModel_(caffe::Net<Float> **net, caffe::Solver<Float> **solver);
-		void calcHSBlobSize_(Table<TIdx, TId> &input);
-		void createHSBlob_(Table<TIdx, TId> &input);
-		void clearBlob_();
 		void init_();
+
+		void parseInputName_(const std::string &name, ContentType &ct, DataType &dt);
+		
+		boost::shared_ptr<caffe::Net<Float>> activeNet_;
+		void setActiveNet(boost::shared_ptr<caffe::Net<Float>> &n);
+		boost::shared_ptr<caffe::Net<Float>> getActiveNet();
+
+		template<typename T> void addBlobData_(const String &blobName, Matrix<T, TIdx> &in);
+		template<typename T> void addBlobData_(const String &blobName, Matrix<ImagePNG<T>, TIdx> &in);
+		template<typename T> void addBlobData_(const String &blobName, Matrix<Matrix<T>, TIdx> &in);
+		void addLabelBlobData_(const String &blobName, Matrix<TClassType, TIdx> &in);
+
+
+		void setMemoryDataInput_(Table<TIdx, TId> &input, const String &layerName, const String &dataName, const String &labelName, const ContentType dataCT, const DataType dataDT, const ContentType labelCT, const DataType labelDT);
+		
+		void clearInputData_();
+		void setInputData_(Table<TIdx, TId> &input);		
+		void getOutputData_(Table<TIdx, TId> &output);
+
 	protected:
 		void updateParameters() override;
 		void registerInputs(const DSLib::Table<TIdx, TId> &table) override;
