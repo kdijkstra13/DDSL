@@ -90,7 +90,11 @@ namespace DSModel {
 		Matrix<TIdx, TIdx> blobChannels_;
 		Matrix<String, TIdx> blobName_;
 		Matrix<Matrix<Float, TIdx>, TIdx> blobData_;
-		Matrix<Matrix<Float, TIdx>, TIdx> labelData_;
+
+		Matrix<String, TIdx> memoryDataLayerName_;
+		Matrix<String, TIdx> dataBlobName_;
+		Matrix<String, TIdx> labelBlobName_;
+
 		TIdx batchSize_;
 
 		map<TClassType, DSTypes::Float> classToNum_;
@@ -122,23 +126,33 @@ namespace DSModel {
 		void init_();
 
 		void parseInputName_(const std::string &name, ContentType &ct, DataType &dt);
+		void parseOutputName_(const std::string &name, ContentType &ct, DataType &dt);
+		void parseSecondaryOutputName_(const std::string &name, ContentType &ct, DataType &dt);
 		
 		boost::shared_ptr<caffe::Net<Float>> activeNet_;
-		void setActiveNet(boost::shared_ptr<caffe::Net<Float>> &n);
-		boost::shared_ptr<caffe::Net<Float>> getActiveNet();
+		void setActiveNet_(boost::shared_ptr<caffe::Net<Float>> &n);
+		boost::shared_ptr<caffe::Net<Float>> getActiveNet_();
 
 		template<typename T> void addBlobData_(const String &blobName, Matrix<T, TIdx> &in);
 		template<typename T> void addBlobData_(const String &blobName, Matrix<ImagePNG<T>, TIdx> &in);
 		template<typename T> void addBlobData_(const String &blobName, Matrix<Matrix<T>, TIdx> &in);
 		void addLabelBlobData_(const String &blobName, Matrix<TClassType, TIdx> &in);
 
+		template<typename T> void getBlobData_(const String &blobName, Matrix<T, TIdx> &out);
+		template<typename T> void getBlobData_(const String &blobName, Matrix<ImagePNG<T, TIdx>, TIdx> &out);
+		template<typename T> void getBlobData_(const String &blobName, Matrix<Matrix<T, TIdx>, TIdx> &out);
+		template<typename T> void getResultBlobData_(const String &blobName, Matrix<TClassType, TIdx> &result);
+		template<typename T> void getResultBlobData_(const String &blobName, Matrix<TClassType, TIdx> &result, Matrix<T, TIdx> &conf);		
 
 		void setMemoryDataInput_(Table<TIdx, TId> &input, const String &layerName, const String &dataName, const String &labelName, const ContentType dataCT, const DataType dataDT, const ContentType labelCT, const DataType labelDT);
-		
+		void getLayerOutput_(Table<TIdx, TId> &output, const String &blobName, const ContentType ct, const DataType dt);
+
 		void clearInputData_();
 		void setInputData_(Table<TIdx, TId> &input);		
 		void getOutputData_(Table<TIdx, TId> &output);
 
+		Float * getBlobDataByName_(const String &name);
+		void fillMemoryDataLayer_();
 	protected:
 		void updateParameters() override;
 		void registerInputs(const DSLib::Table<TIdx, TId> &table) override;
