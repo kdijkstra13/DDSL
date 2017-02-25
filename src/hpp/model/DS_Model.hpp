@@ -176,6 +176,18 @@ namespace DSModel {
 	}
 
 	template<typename TIdx, typename TId>
+	void Model<TIdx, TId>::registerInput(const DSLib::Matrix<DSTypes::ContentType> cts) { //any of the cts
+		inputDataTypes_.clear();
+		inputContentTypes_ = cts;
+	}
+
+	template<typename TIdx, typename TId>
+	void Model<TIdx, TId>::registerInput(const DSLib::Matrix<DSTypes::DataType> dts) { //any of the dts
+		inputContentTypes_.clear();
+		inputDataTypes_ = dts;
+	}
+
+	template<typename TIdx, typename TId>
 	void Model<TIdx, TId>::registerInput(const DSTypes::ContentType ct) {
 		inputDataTypes_.clear();
 		inputContentTypes_ = (dtContentType | ct);
@@ -668,13 +680,12 @@ namespace DSModel {
 
 	template<typename TIdx, typename TId>
 	void Model<TIdx, TId>::prepareInput(Table<TIdx, TId> &srcTable) {		
-		if (inputDataTypes_.isInitialized() || inputDataTypes_.isInitialized())
+		if (inputDataTypes_.isInitialized() || inputContentTypes_.isInitialized())
 			inputIndices_ = srcTable.slice(inputSlice_, inputDataTypes_, inputContentTypes_);
 		else if (inputAll_)
 			inputIndices_ = srcTable.slice(inputSlice_);
 		else
 			inputIndices_.clear();
-			
 	}
 
 	template<typename TIdx, typename TId>

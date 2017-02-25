@@ -132,6 +132,9 @@ namespace DSModel {
 		void registerInput(const DSTypes::DataType dt, const DSTypes::ContentType ct); //Only strict dt/ct pair, can be called multiple times
 		void registerInput(const DSTypes::DataType dt, const DSLib::Matrix<DSTypes::ContentType> cts); //Strict dt, but any of the cts
 		void registerInput(const DSLib::Matrix<DSTypes::DataType> dts, const DSTypes::ContentType ct); //strict ct, but any of the dts
+		void registerInput(const DSLib::Matrix<DSTypes::ContentType> cts); //Any of cts, any dt
+		void registerInput(const DSLib::Matrix<DSTypes::DataType> dts); //Any of dts, any ct
+
 		void registerInput(const DSTypes::ContentType ct); //strict ct, but any dt
 		void registerInput(const DSTypes::DataType ct); //strict dt, but any ct
 		void registerInputAll(); //Take any column as input

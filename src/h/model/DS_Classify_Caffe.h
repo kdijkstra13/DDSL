@@ -100,11 +100,6 @@ namespace DSModel {
 		map<TClassType, DSTypes::Float> classToNum_;
 		Matrix<TClassType> classes_;		
 		
-		//TIdx blobWidth_;
-		//TIdx blobHeight_;
-		//TIdx blobChannels_;
-		//Matrix<Float, TIdx> blobData_;
-
 		caffe::Solver<DSTypes::Float> * solver_;
 		caffe::Net<DSTypes::Float> * net_;		
 		TIdx gpuDevices_;
@@ -125,9 +120,9 @@ namespace DSModel {
 		void loadCaffeModel_(caffe::Net<Float> **net, caffe::Solver<Float> **solver);
 		void init_();
 
-		void parseInputName_(const std::string &name, ContentType &ct, DataType &dt);
-		void parseOutputName_(const std::string &name, ContentType &ct, DataType &dt);
-		void parseSecondaryOutputName_(const std::string &name, ContentType &ct, DataType &dt);
+		void parseName_(const std::string &name, ContentType &ct, DataType &dt);
+		void parseSecondaryName_(const std::string &name, ContentType &ct, DataType &dt);
+		void parseSecondaryName_(const std::string &name, ContentType &ct, DataType &dt, TIdx &width, TIdx &height, TIdx &channels);		
 		
 		boost::shared_ptr<caffe::Net<Float>> activeNet_;
 		void setActiveNet_(boost::shared_ptr<caffe::Net<Float>> &n);
@@ -141,7 +136,7 @@ namespace DSModel {
 		template<typename T> void getBlobData_(const String &blobName, Matrix<T, TIdx> &out);
 		template<typename T> void getBlobData_(const String &blobName, Matrix<ImagePNG<T, TIdx>, TIdx> &out);
 		template<typename T> void getBlobData_(const String &blobName, Matrix<Matrix<T, TIdx>, TIdx> &out);
-		template<typename T> void getResultBlobData_(const String &blobName, Matrix<TClassType, TIdx> &result);
+		void getResultBlobData_(const String &blobName, Matrix<TClassType, TIdx> &result);
 		template<typename T> void getResultBlobData_(const String &blobName, Matrix<TClassType, TIdx> &result, Matrix<T, TIdx> &conf);		
 
 		void setMemoryDataInput_(Table<TIdx, TId> &input, const String &layerName, const String &dataName, const String &labelName, const ContentType dataCT, const DataType dataDT, const ContentType labelCT, const DataType labelDT);
@@ -152,7 +147,9 @@ namespace DSModel {
 		void getOutputData_(Table<TIdx, TId> &output);
 
 		Float * getBlobDataByName_(const String &name);
-		void fillMemoryDataLayer_();
+		void fillMemoryDataLayer_(const TIdx n);
+			
+		void registerOutputBlob_(Table<TIdx, TId> &output, const ContentType ct, DataType dt, TIdx blobWidth, TIdx blobHeight, TIdx blobChannels);
 	protected:
 		void updateParameters() override;
 		void registerInputs(const DSLib::Table<TIdx, TId> &table) override;

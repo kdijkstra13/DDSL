@@ -814,7 +814,7 @@ namespace DSModel {
 		} else if (netProtoFile_ != "") {
 			*net = readNet_(netProtoFile_, snapshotModelFile_);
 		} else 
-			throw Error(ecIncompatible, "Caffe::registerInputs()", "Not solver and net filenames known");
+			throw Error(ecIncompatible, "loadCaffeModel", "Not solver and net filenames known");
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -854,21 +854,62 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::registerInputs(const Table<TIdx, TId> &table) {		
-		TClassType t;
-		this->registerInput(dtImagePNGFloat, ctFeature);
-		this->registerInput(dataType(t), ctTarget);
+		this->registerInput(dtContentType | ctFeature | ctTarget);
 		this->addStages(dtString | "Copy" | "Train" | "Apply");
-
 		if (net_ == nullptr)
 			throw Error(ecIncompatible, "Caffe::registerInputs()", "Not solver or net loaded");
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::registerOutputBlob_(Table<TIdx, TId> &output, const ContentType ct, DataType dt, TIdx blobWidth, TIdx blobHeight, TIdx blobChannels) {
+		if (ct == ctTarget && dt == dataType<TClassType>()) {
+			output | (ct | Matrix<TClassType, TIdx>(1, 1));
+		} else {
+			switch (dt) {
+				case dtFloat: output |			(ct | Matrix<Float, TIdx>(1, blobWidth * blobHeight * blobChannels));break;
+				case dtDouble: output |			(ct | Matrix<Double, TIdx>(1, blobWidth * blobHeight * blobChannels));break;
+   				case dtUInt32: output |			(ct | Matrix<UInt32, TIdx>(1, blobWidth * blobHeight * blobChannels));break;
+   				case dtImagePNGFloat: output |	(ct | Matrix<ImagePNG<Float, TIdx>, TIdx>(1, blobChannels));break;
+   				case dtImagePNGDouble: output | (ct | Matrix<ImagePNG<Double, TIdx>, TIdx>(1, blobChannels));break;
+   				case dtMatrixFloat: output |	(ct | Matrix<Matrix<Float, TIdx>, TIdx>(1, blobChannels));break;
+				case dtMatrixDouble: output |	(ct | Matrix<Matrix<Double, TIdx>, TIdx>(1, blobChannels));break;
+				default: throw Error(ecIncompatible, "registerOutputBlob", SS("Unsupported DataType: " << etos(dt)));
+			}
+		}
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::registerOutputs(const Table<TIdx, TId> &input) {
-		Matrix<TClassType> classes = this->template parameterValueById<Matrix<TClassType>>("Classes");
-		Table<TIdx, TId> output = (ctResult | (Matrix<TClassType>(oColMajor) | classes.val(0, 0))) | (ctConfidence | (Matrix<Double>(oColMajor) | 0.0));
-		output.resizeRows(0);
-		this->registerOutput(output);
+		try {
+			Table<> output;
+			const String outputName = "ddslOutput";
+			vector<String> names = net_->blob_names();
+			for (auto blobName=names.begin();blobName!=names.end();blobName++) {
+				if (blobName->substr(0, outputName.size()) == outputName) {
+					boost::shared_ptr<Blob<Float>> outputBlob = net_->blob_by_name(*blobName);
+					TIdx bw = outputBlob->width();
+					TIdx bh = outputBlob->height();
+					TIdx bc = outputBlob->channels();
+					TIdx bw2, bh2, bc2;
+					ContentType ct, ct2;
+					DataType dt, dt2;
+					parseName_(*blobName, ct, dt);
+					if (ct == ctResult && dt == dataType<TClassType>()) {
+						registerOutputBlob_(output, ct, dt, bw, bh, 1);
+						parseSecondaryName_(*blobName, ct2, dt2, bw2, bh2, bc2);
+						if (ct2 != ctUnknown) registerOutputBlob_(output, ct2, dt2, bw2, bh2, 1);
+					} else {
+						registerOutputBlob_(output, ct, dt, bw, bh, bc);
+						parseSecondaryName_(*blobName, ct2, dt2, bw2, bh2, bc2);
+						if (ct2 != ctUnknown) registerOutputBlob_(output, ct2, dt2, bw2, bh2, bc2);
+					}
+				}
+			}
+			output.resizeRows(0);
+			registerOutput(output);
+		} catch (Error &e) {
+			throw Error(ecExternalLibrary, "registerOutputs",  e.what());
+		}
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -993,25 +1034,31 @@ namespace DSModel {
 	}
 	
 	template<typename TClassType, typename TIdx, typename TId>
-	void Caffe<TClassType, TIdx, TId>::parseInputName_(const std::string &name, ContentType &ct, DataType &dt) {
-		Matrix<String> s = split(name, '.', ' ');
-		if (~s < 2)
-			throw Error(ecIncompatible, "parseInputName", "Cannot parse name: " + name);
-		ct = stringToContentType(s.vec(0));
-		dt = stringToDataType(s.vec(1));
-	}
-
-	template<typename TClassType, typename TIdx, typename TId>
-	void Caffe<TClassType, TIdx, TId>::parseOutputName_(const std::string &name, ContentType &ct, DataType &dt) {
+	void Caffe<TClassType, TIdx, TId>::parseName_(const std::string &name, ContentType &ct, DataType &dt) {
 		Matrix<String> s = split(name, '.', ' ');
 		if (~s < 3)
-			throw Error(ecIncompatible, "parseOutputName", "Cannot parse name: " + name);
+			throw Error(ecIncompatible, "parseName", "Cannot parse name: " + name);
 		ct = stringToContentType(s.vec(1));
 		dt = stringToDataType(s.vec(2));
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
-	void Caffe<TClassType, TIdx, TId>::parseSecondaryOutputName_(const std::string &name, ContentType &ct, DataType &dt) {
+	void Caffe<TClassType, TIdx, TId>::parseSecondaryName_(const std::string &name, ContentType &ct, DataType &dt, TIdx &width, TIdx &height, TIdx &channels) {
+		Matrix<String> s = split(name, '.', ' ');
+		if (~s < 8) {
+			ct = ctUnknown;
+			dt = dtUnknown;
+			return;
+		}			
+		ct = stringToContentType(s.vec(3));
+		dt = stringToDataType(s.vec(4));
+		width = stringToDataType(s.vec(5));
+		height = stringToDataType(s.vec(6));
+		channels = stringToDataType(s.vec(7));
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::parseSecondaryName_(const std::string &name, ContentType &ct, DataType &dt) {
 		Matrix<String> s = split(name, '.', ' ');
 		if (~s < 5) {
 			ct = ctUnknown;
@@ -1025,9 +1072,9 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	template<typename T>
 	void Caffe<TClassType, TIdx, TId>::addBlobData_(const String &blobName, Matrix<T, TIdx> &in) {
-		TIdx bw = (solver_->net()->blob_by_name(blobName)->width());
-		TIdx bh = (solver_->net()->blob_by_name(blobName)->height());
-		TIdx bc = (solver_->net()->blob_by_name(blobName)->channels());
+		TIdx bw = (getActiveNet_()->blob_by_name(blobName)->width());
+		TIdx bh = (getActiveNet_()->blob_by_name(blobName)->height());
+		TIdx bc = (getActiveNet_()->blob_by_name(blobName)->channels());
 		blobWidth_ | bw;
 		blobHeight_ | bh;
 		blobChannels_ | bc;
@@ -1046,7 +1093,8 @@ namespace DSModel {
 		TIdx bc = 0;
 		TIdx bw = 0;
 		TIdx bh = 0;
-		for (auto it = in.vec().begin(); it != in.vec().end(); it++) {
+
+		for (auto it=in.rows[0]->begin(); it!=in.rows[0]->end(); it++) {
 			bc += it->getChannelCount();
 			Matrix<T, TIdx> img = it->getImage();
 			TIdx imageWidth = img.cols.count() / it->getChannelCount();
@@ -1088,6 +1136,9 @@ namespace DSModel {
 			}
 			this->incProgress();
 		}
+		//ImagePNG<Float, TIdx> png(rowData);
+		//png.saveImage("c:/temp/blob.png", itM8);
+
 		blobData_ | rowData;
 	}
 
@@ -1098,8 +1149,8 @@ namespace DSModel {
 		TIdx bc = 0;
 		TIdx bw = 0;
 		TIdx bh = 0;
-		for (auto it = in.vec().begin(); it != in.vec().end(); it++) {
-			bc++;						
+		for (auto it=in.rows[0]->begin(); it!=in.rows[0]->end(); it++) {
+			bc++;
 			if (bh == 0) bh = it->rows.count();
 			if (bw == 0) bw = it->cols.count();
 			if (it->cols.count() != bw || it->rows.count() != bh)
@@ -1140,9 +1191,9 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::addLabelBlobData_(const String &blobName, Matrix<TClassType, TIdx> &in) {
-		TIdx bw = (solver_->net()->blob_by_name(blobName)->width());
-		TIdx bh = (solver_->net()->blob_by_name(blobName)->height());
-		TIdx bc = (solver_->net()->blob_by_name(blobName)->channels());
+		TIdx bw = (getActiveNet_()->blob_by_name(blobName)->width());
+		TIdx bh = (getActiveNet_()->blob_by_name(blobName)->height());
+		TIdx bc = (getActiveNet_()->blob_by_name(blobName)->channels());
 		blobWidth_ | bw;
 		blobHeight_ | bh;
 		blobChannels_ | bc;
@@ -1159,30 +1210,69 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	template<typename T>
 	void Caffe<TClassType, TIdx, TId>::getBlobData_(const String &blobName, Matrix<T, TIdx> &out) {
-
+		boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(blobName);
+		if (outputBlob->width() * outputBlob->height() * outputBlob->channels() != out.cols.count())
+			throw Error(ecIncompatible, "getBlobData", SS("Blob data does not fit the output of: " << blobName << " (" << outputBlob->width() << "x" << outputBlob->height() << "x" << outputBlob->channels() << " != " << out.cols.count() << ")"));
+		if (batchSize_ != out.rows.count())
+			throw Error(ecIncompatible, "getBlobData", SS("Blob data batch size does not fit the output of: " << blobName << " (" << batchSize_ << " != " << out.rows.count() << ")"));
+		const Float * begin = outputBlob->cpu_data();
+		const Float * end = begin + (batchSize_ * outputBlob->width() * outputBlob->height() * outputBlob->channels());
+		std::copy(begin, end, out.rows->begin());
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	template<typename T>
 	void Caffe<TClassType, TIdx, TId>::getBlobData_(const String &blobName, Matrix<ImagePNG<T, TIdx>, TIdx> &out) {
-
+		boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(blobName);
+		if (outputBlob->channels() != out.cols.count())
+			throw Error(ecIncompatible, "getBlobData<ImagePNG>", SS("Blob data does not fit the output of: " << blobName << "(" << outputBlob->channels() << " != " << out.cols.count() << ")"));
+		if (batchSize_  != out.rows.count())
+			throw Error(ecIncompatible, "getBlobData", SS("Blob data batch size does not fit the output of: " << blobName << " (" << batchSize_ << " != " << out.rows.count() << ")"));
+		const Float * begin = outputBlob->cpu_data();
+		const Float * end = begin + (batchSize_ * outputBlob->width() * outputBlob->height() * outputBlob->channels());
+		vector<Float> blob(begin, end);
+		auto p = blob.begin();
+		for (TIdx b=0;b<batchSize_;b++) {
+			for (TIdx c=0;c<out.cols.count();c++) {
+				ImagePNG<T, TIdx> png(outputBlob->height(), outputBlob->width());
+				std::copy(p, p + outputBlob->width() * outputBlob->height(), png.mat().rows->begin());
+				out.val(b, c);
+				p += outputBlob->width() * outputBlob->height();
+			}
+		}
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	template<typename T>
 	void Caffe<TClassType, TIdx, TId>::getBlobData_(const String &blobName, Matrix<Matrix<T, TIdx>, TIdx> &out) {
-
+		boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(blobName);
+		if (outputBlob->channels() != out.cols.count())
+			throw Error(ecIncompatible, "getBlobData<ImagePNG>", SS("Blob data does not fit the output of: " << blobName << "(" << outputBlob->channels() << " != " << out.cols.count() << ")"));
+		if (batchSize_  != out.rows.count())
+			throw Error(ecIncompatible, "getBlobData", SS("Blob data batch size does not fit the output of: " << blobName << " (" << batchSize_ << " != " << out.rows.count() << ")"));
+		const Float * begin = outputBlob->cpu_data();
+		const Float * end = begin + (batchSize_ * outputBlob->width() * outputBlob->height() * outputBlob->channels());
+		vector<Float> blob(begin, end);
+		auto p = blob.begin();
+		for (TIdx b=0;b<batchSize_;b++) {
+			for (TIdx c=0;c<out.cols.count();c++) {
+				Matrix<T, TIdx> mat(outputBlob->height(), outputBlob->width());
+				std::copy(p, p + outputBlob->width() * outputBlob->height(), mat.rows->begin());
+				out.val(b, c);
+				p += outputBlob->width() * outputBlob->height();
+			}
+		}
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
-	template<typename T>
 	void Caffe<TClassType, TIdx, TId>::getResultBlobData_(const String &blobName, Matrix<TClassType, TIdx> &result) {
+		TIdx classCount = ~classes_;
 		if (result.cols.count() != 1)
 			throw Error(ecIncompatible, "getResultBlobData", SS("Wrong size for result Matrix: " << blobName << " (" << result.printSize() << ")"));
-		TIdx classCount = classes.count();
+		
 		boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(blobName);
-		if (outputBlob->width() * outputBlob->height() != classCount)
-			throw Error(ecIncompatible, "getResultBlobData", SS("Caffe and DDSL class count mismatch for: " << blobName << " (" << outputBlob->width() * outputBlob->height() << != classCount << ")"));
+		if (outputBlob->width() * outputBlob->height() * outputBlob->channels()  != classCount)
+			throw Error(ecIncompatible, "getResultBlobData", SS("Caffe and DDSL class count mismatch for: " << blobName << " (" << outputBlob->width() * outputBlob->height() * outputBlob->channels() << " != " << classCount << ")"));
 
 		const Float * begin = outputBlob->cpu_data();
 		const Float * end = begin + (batchSize_ * classCount);
@@ -1214,17 +1304,17 @@ namespace DSModel {
 			throw Error(ecIncompatible, "getResultBlobData", SS("Wrong size for result Matrix: " << blobName << " (" << result.printSize() << ")"));
 		if (conf.cols.count() != 1)
 			throw Error(ecIncompatible, "getResultBlobData", SS("Wrong size for confidence Matrix: " << blobName << " (" << conf.printSize() << ")"));
-		TIdx classCount = classes.count();
+		TIdx classCount = ~classes_;
 		boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(blobName);
 		if (outputBlob->width() * outputBlob->height() != classCount)
-			throw Error(ecIncompatible, "getResultBlobData", SS("Caffe and DDSL class count mismatch for: " << blobName << " (" << outputBlob->width() * outputBlob->height() << != classCount << ")"));
+			throw Error(ecIncompatible, "getResultBlobData", SS("Caffe and DDSL class count mismatch for: " << blobName << " (" << outputBlob->width() * outputBlob->height() << " != " << classCount << ")"));
 
 		const Float * begin = outputBlob->cpu_data();
 		const Float * end = begin + (batchSize_ * classCount);
 		//Iterate over all outputs in the batch
 		const vector<Float> outputData(begin, end);
 		auto out_it = result.vec().begin();
-		auto conf_it = confi.vec().begin();
+		auto conf_it = conf.vec().begin();
 		for (TIdx s = 0; s < batchSize_; s++, out_it++, conf_it++) {
 			//Get softmax output and calculate probability
 			const vector<Float> sampleOutput(outputData.begin() + s * classCount, outputData.begin() + ((s + 1) * classCount));
@@ -1247,21 +1337,24 @@ namespace DSModel {
 	//Dispatch for output data
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::getLayerOutput_(Table<TIdx, TId> &output, const String &blobName, const ContentType ct, const DataType dt) {
-		if (ct == ctTarget && dt == dataType<TClassType>()) {
+		if (output.rows.count() != batchSize_)
+			throw Error(ecInternal, "getLayerOutput_", SS("Batch size does not match the number of rows: " << batchSize_ << " != " << output.rows.count()));
+
+		if (ct == ctResult && dt == dataType<TClassType>()) {
 			Matrix<TClassType, TIdx> result = (Matrix<TClassType, TIdx>) checkOutput(output(ct, dt));
 			ContentType confCT;
 			DataType confDT;
-			parseSecondaryOutputName_(blobName, confCT, confDT);
+			parseSecondaryName_(blobName, confCT, confDT);
 			if (confCT != ctUnknown && confDT != dtUnknown) {
 				if (confCT != ctConfidence)
 					throw Error(ecIncompatible, "getLayerOutput", SS("Currently only secondary ContentType 'Confidence' supported in blob: " << blobName));
 				switch (confDT) {
 					case dtFloat: {
-						Matrix<Float, TIdx> conf = (Matrix<Float, TIdx>) checkOutput(output(ctConfidence, dtFloat));
+						Matrix<Float, TIdx> conf = (Matrix<Float, TIdx>) checkOutput(output(confCT, confDT));
 						getResultBlobData_(blobName, result, conf);
 					break;}
   					case dtDouble: {
-						Matrix<Double, TIdx> conf = (Matrix<Double, TIdx>) checkOutput(output(ctConfidence, dtDouble));
+						Matrix<Double, TIdx> conf = (Matrix<Double, TIdx>) checkOutput(output(confCT, confDT));
 						getResultBlobData_(blobName, result, conf);
 					break;}
 				}
@@ -1270,6 +1363,32 @@ namespace DSModel {
 		} else {
 			switch (dt) {
 				case dtFloat: {
+					Matrix<Float, TIdx> out = (Matrix<Float, TIdx>) checkOutput(output(ct, dt));
+					getBlobData_(blobName, out);
+				break;}
+				case dtDouble: {
+					Matrix<Double, TIdx> out = (Matrix<Double, TIdx>) checkOutput(output(ct, dt));
+					getBlobData_(blobName, out);
+				break;}
+   				case dtUInt32: {
+					Matrix<UInt32, TIdx> out = (Matrix<UInt32, TIdx>) checkOutput(output(ct, dt));
+					getBlobData_(blobName, out);
+				break;}
+   				case dtImagePNGFloat: {
+					Matrix<ImagePNG<Float, TIdx>, TIdx> out = (Matrix<ImagePNG<Float>, TIdx>) checkOutput(output(ct, dt));
+					getBlobData_(blobName, out);
+				break;}
+   				case dtImagePNGDouble: {
+					Matrix<ImagePNG<Double, TIdx>, TIdx> out = (Matrix<ImagePNG<Double>, TIdx>) checkOutput(output(ct, dt));
+					getBlobData_(blobName, out);
+				break;}
+   				case dtMatrixFloat: {
+					Matrix<Matrix<Float, TIdx>, TIdx> out = (Matrix<Matrix<Float>, TIdx>) checkOutput(output(ct, dt));
+					getBlobData_(blobName, out);
+				break;}
+   				case dtMatrixDouble: {
+					Matrix<Matrix<Double, TIdx>, TIdx> out = (Matrix<Matrix<Double>, TIdx>) checkOutput(output(ct, dt));
+					getBlobData_(blobName, out);
 				break;}
 			}
 		}
@@ -1296,18 +1415,23 @@ namespace DSModel {
 				addBlobData_(dataName, in);
 				break;}
 			case dtMatrixFloat: {
-				Matrix<ImagePNG<Float>> in = (Matrix<ImagePNG<Float>>) checkInput(input(dataCT, dataDT));
+				Matrix<Matrix<Float>> in = (Matrix<Matrix<Float>>) checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			case dtMatrixDouble: {
-				Matrix<ImagePNG<Double>> in = (Matrix<ImagePNG<Double>>) checkInput(input(dataCT, dataDT));
+				Matrix<Matrix<Double>> in = (Matrix<Matrix<Double>>) checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			default: throw Error(ecIncompatible, "setMemoryDataInput_", SS(layerName << "." << dataName << " has an unsupported DataType: " <<  etos(dataCT)));
 		}
 
 		if (labelDT == dataType<TClassType>()) {
-			Matrix<TClassType, TIdx> in = (Matrix<TClassType, TIdx>) checkInput(input(labelCT, labelDT));
+			Matrix<TClassType, TIdx> in;
+			Table<TIdx, TId> ipt = input(labelCT, labelDT);
+			if (~ipt == 0) 
+				in.resize(input.rows.count(), 1); //dummy target if there is no target (production)
+			else
+				in = (Matrix<TClassType, TIdx>) ipt;
 			addLabelBlobData_(labelName, in);
 		} else {
 			switch (labelDT) {
@@ -1327,23 +1451,23 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	Float * Caffe<TClassType, TIdx, TId>::getBlobDataByName_(const String &name) {
 		TIdx idx=0;
-		for (auto n=blobName_.begin(); n != blobName_.end(); n++, idx++)
+		for (auto n=blobName_.vec().begin(); n != blobName_.vec().end(); n++, idx++)
 			if (*n == name)
 				return blobData_.vec(idx).getData();
 		throw Error(ecNotFound, "getBlobDataByName_", SS("Blob with name: " << name << " not found "));
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
-	void Caffe<TClassType, TIdx, TId>::fillMemoryDataLayer_() {
+	void Caffe<TClassType, TIdx, TId>::fillMemoryDataLayer_(const TIdx n) {
 		batchSize_ = 0;
 		TIdx idx=0;
-		for (layerName = memoryDataLayerName_.begin(); name != memoryDataLayerName_.end(); name++, idx++) {
+		for (auto layerName = memoryDataLayerName_.vec().begin(); layerName != memoryDataLayerName_.vec().end(); layerName++, idx++) {
 			boost::shared_ptr<MemoryDataLayer<Float>> dataLayer = dynamic_pointer_cast<MemoryDataLayer<Float>>(getActiveNet_()->layer_by_name(*layerName));
 			if (batchSize_ == 0)
 				batchSize_ = dataLayer->batch_size();
 			else if (batchSize_ != dataLayer->batch_size())
 				throw Error(ecIncompatible, "setMemoryDataInput_", "Batch sizes for MemoryData layers are different");
-			dataLayer->Reset(getBlobDataByName_(dataBlobName_).vec(idx), getBlobDataByName_(labeBlobName_).vec(idx));
+			dataLayer->Reset(getBlobDataByName_(dataBlobName_.vec(idx)), getBlobDataByName_(labelBlobName_.vec(idx)), n);
 		}
 	}
 
@@ -1354,7 +1478,6 @@ namespace DSModel {
 		blobChannels_.clear();
 		blobName_.clear();
 		blobData_.clear();
-		labelData_.clear();
 		memoryDataLayerName_.clear();
 		dataBlobName_.clear();
 		labelBlobName_.clear();
@@ -1375,7 +1498,7 @@ namespace DSModel {
 		try {
 			clearInputData_();
 			const String inputName = "ddslMemoryDataInput";
-			vector<String> names = solver_->net()->layer_names();
+			vector<String> names = getActiveNet_()->layer_names();
 			for (auto layerName=names.begin();layerName!=names.end();layerName++) {
 				if (layerName->substr(0, inputName.size()) == inputName) {				 
 					boost::shared_ptr<MemoryDataLayer<Float>> dataLayer = dynamic_pointer_cast<MemoryDataLayer<Float>>(getActiveNet_()->layer_by_name(*layerName));
@@ -1383,10 +1506,10 @@ namespace DSModel {
 					dataLayer->ToProto(&lp);
 					DataType dataDT, labelDT;
 					ContentType dataCT, labelCT;
-					String dataName = lp.bottom()[0];
-					String labelName = lp.bottom()[1];
-					parseInputName_(dataName, dataCT, dataDT);
-					parseInputName_(labelName, labelCT, labelDT);
+					String dataName = lp.top()[0];
+					String labelName = lp.top()[1];
+					parseName_(dataName, dataCT, dataDT);
+					parseName_(labelName, labelCT, labelDT);
 					if (labelCT != ctUnknown && labelDT != dataType<TClassType>())
 						throw Error(ecIncompatible, "setInputData", SS("Incompatible label input types: " << dataTypeToString(labelDT) << " != " << dataTypeToString(dataType<TClassType>())));
 					setMemoryDataInput_(input, *layerName, dataName, labelName, dataCT, dataDT, labelCT, labelDT);
@@ -1402,18 +1525,18 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::getOutputData_(Table<TIdx, TId> &output) {
-		//Get output of a single batch and copy to output
+		//Get result of a single batch and copy to output
 		try {
 			getActiveNet_()->Forward();
 			const String outputName = "ddslOutput";
-			vector<String> names = solver_->net()->blob_names();
+			vector<String> names = getActiveNet_()->blob_names();
 			for (auto blobName=names.begin();blobName!=names.end();blobName++) {
 				if (blobName->substr(0, outputName.size()) == outputName) {
 					boost::shared_ptr<Blob<Float>> outputBlob = net_->blob_by_name(*blobName);
 					ContentType ct;
 					DataType dt;
-					parseOutputName_(blobName, ct, dt);					
-					getLayerOutput_(output, blobName, ct, dt);
+					parseName_(*blobName, ct, dt);					
+					getLayerOutput_(output, *blobName, ct, dt);
 				}
 			}
 		} catch (Error &e) {
@@ -1435,7 +1558,7 @@ namespace DSModel {
 		//Set inputs of solver network
 		setActiveNet_(solver_->net());
 		setInputData_(input);
-		fillMemoryDataLayer_();
+		fillMemoryDataLayer_(input.rows.count());
 
 		//Train network
 		this->setStage("Train");
@@ -1453,21 +1576,18 @@ namespace DSModel {
 			solver_->Solve();
 
 		//Initialize		
-		Matrix<TClassType> out = output(dataType<TClassType>(), ctResult);
-		Matrix<Double> conf = output(dtDouble, ctConfidence);
-
 		this->setStage("Apply");
 		this->setMinProgress(0);
-		this->setMaxProgress(out.rows.count());
+		this->setMaxProgress(output.rows.count());
 
-		//Set inputs and weights of main network
+		//Set inputs and weights of main network (for apply only)
 		shareWeights_(*(solver_->net()), *net_);
-		boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
-		setActiveNet_(n);
-		fillMemoryDataLayer_();
+		//boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
+		//setActiveNet_(n);
+		fillMemoryDataLayer_(input.rows.count());
 
-		//Evaluate
-		for (TIdx i=0;i+=batchSize_;i<output.rows.count()) {
+		//Apply
+		for (TIdx i=0;i<output.rows.count();i+=batchSize_) {
 			Table<TIdx, TId> slice = output(i, batchSize_);
 			getOutputData_(slice);
 			this->incProgress(batchSize_);
@@ -1477,57 +1597,20 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::apply(const Table<TIdx, TId> &table, Table<TIdx, TId> &input, Table<TIdx, TId> &output) {
 		if (net_ == nullptr)
-			throw Error(ecIncompatible, "CaffeMLP::apply()", "Cannot apply without a network");
-		TClassType t;
+			throw Error(ecIncompatible, "apply", "Cannot apply without a network");
 
-		//Initialize hyperspectral blob
-		//this->setStage("Copy");
-		//calcHSBlobSize_(input);
-		//createHSBlob_(input);
+		boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
+		setActiveNet_(n);
+		setInputData_(input);
+		fillMemoryDataLayer_(input.rows.count());
 
-		//Initialize		
-		Matrix<TClassType> out = output(dataType(t), ctResult);
-		Matrix<Double> conf = output(dtDouble, ctConfidence);
-		Matrix<Float> targetFloat(out.rows.count(), 1); //dummy because MemoryDataLayer needs a target
-
-		this->setStage("Apply");
 		this->setMinProgress(0);
-		this->setMaxProgress(out.rows.count());
+		this->setMaxProgress(output.rows.count());
 
-		//Reset data layer pointer
-		//boost::shared_ptr<MemoryDataLayer<Float>> dataLayer = dynamic_pointer_cast<MemoryDataLayer<Float>>(net_->layer_by_name("data_layer"));
-		//TIdx batchSize = dataLayer->batch_size();
-		//dataLayer->Reset(blobData_.getData(), targetFloat.getData(), input.rows.count());
-
-		//Evaluate
-		const UInt32 classCount = classes_.vec().count();
-		auto conf_it = conf.vec().begin();
-		for (auto out_it = out.vec().begin(); out_it != out.vec().end();) {						
-			//Classify all samples in a batch
-			Blob<Float> * outputBlob = net_->Forward()[0];	
-			const Float * begin = outputBlob->cpu_data();
-			const Float * end = begin + (batchSize_ * classCount);
-			//Iterate over all outputs in the batch
-			const vector<Float> outputData(begin, end);
-			for (UInt32 s = 0; s < batchSize_; s++) {
-				//Get softmax output and calculate probability
-				const vector<Float> sampleOutput(outputData.begin() + s * classCount, outputData.begin() + ((s + 1) * classCount));
-				Float sum = 0;
-				Float max = 0;
-				TIdx maxIdx = 0;
-				TIdx idx = 0;
-				for (auto o = sampleOutput.begin(); o != sampleOutput.end(); o++, idx++) {
-					if (*o >= max) {
-						maxIdx = idx;
-						max = *o;
-					}
-					sum += *o;
-				}
-				*out_it = classes_.vec(maxIdx);
-				*conf_it = (max / sum); //Probability
-				out_it++;
-				conf_it++;
-			}
+		//Apply
+		for (TIdx i=0;i<output.rows.count();i+=batchSize_) {
+			Table<TIdx, TId> slice = output(i, batchSize_);
+			getOutputData_(slice);
 			this->incProgress(batchSize_);
 		}
 	}
@@ -1550,6 +1633,18 @@ namespace DSModel {
 		classToNum_ = other.classToNum_;
 		classes_ = other.classes_;
 
+		blobWidth_ = other.blobWidth_;
+		blobHeight_ = other.blobHeight_;
+		blobChannels_ = other.blobChannels_;
+		blobName_ = other.blobName_;
+		blobData_ = other.blobData_;
+
+		memoryDataLayerName_ = other.memoryDataLayerName_;
+		dataBlobName_ = other.dataBlobName_;
+		labelBlobName_ = other.labelBlobName_;
+
+		batchSize_ = other.batchSize_;
+
 		loadCaffeModel();
 		if (other.solver_ != nullptr) {
 			copyWeights_(*(other.solver_->net().get()), *(solver_->net().get()));
@@ -1565,11 +1660,23 @@ namespace DSModel {
 		init_();
 		gpuDevices_ = other.gpuDevices_;
 
-		solverProtoFile_ = other.solverProtoFile_;
-		netProtoFile_ = other.netProtoFile_;
-		snapshotModelFile_ = other.snapshotModelFile_;
-		classToNum_ = other.classToNum_;
-		classes_ = other.classes_;
+		solverProtoFile_ = std::move(other.solverProtoFile_);
+		netProtoFile_ = std::move( other.netProtoFile_);
+		snapshotModelFile_ = std::move(other.snapshotModelFile_);
+		classToNum_ = std::move(other.classToNum_);
+		classes_ = std::move(other.classes_);
+
+		blobWidth_ = std::move(other.blobWidth_);
+		blobHeight_ = std::move(other.blobHeight_);
+		blobChannels_  = std::move(other.blobChannels_);
+		blobName_ = std::move(other.blobName_);
+		blobData_ = std::move(other.blobData_);
+
+		memoryDataLayerName_ = std::move( other.memoryDataLayerName_);
+		dataBlobName_ = std::move( other.dataBlobName_);
+		labelBlobName_ = std::move(other.labelBlobName_);
+
+		batchSize_ = std::move(other.batchSize_);
 
 		net_ = other.net_;
 		solver_ = other.solver_;

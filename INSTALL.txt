@@ -3,16 +3,13 @@ DDSL on Windows:
 		mkdir build
 		cd build
 		cmake -G "Visual Studio 14 Win64" ..
-		Open Visual Studio Solution and compile as Release (Without Debug info)
-		Copy zlib.lib, zlib.dll and zconf.h from build folder to the root contrib\zlib\zlib-1.2.8
+		Open Visual Studio Solution and compile as Release and Debug
 	Build lpng in .\contrib\lpng1628
 		mkdir build
 		cd build
 		cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..
-		Open Visual Studio Solution and compile as Release (Without Debug info)
-		Copy libpng16.lib, libpng16.dll and pnglibconf.h from build folder to the root contrib\zlib\zlib-1.2.8
-		** note: libpng16.dll should also be copied to you exe folder (do not mix DLLs and programs of different builds)
-		** libpng wil crash if there is a mismatch between (\MD and \MdD, etc.). So change VS Debug Profile to \MD (Already done in DDSL's CMakeLists.txt)
+		Open Visual Studio Solution and compile as Release and Debug
+		** libpng wil crash if there is a mismatch between (\MD and \MdD, etc.)
 	Download an install ArrayFire in its default location
 	Build Caffe
 		Checkout Caffe Windows branch in /contrib/caffe (git clone -b windows <repo>)
@@ -22,9 +19,11 @@ DDSL on Windows:
 			In /contrib/caffe/src/caffe/solver_factory.cpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
 		Build Caffe with instructions: https://github.com/BVLC/caffe/tree/windows
-			Install Miniconda and create an python 3.5 environment.
-			This will use Visual Studio instead of Ninja to build Caffe.
-			Change all occurences to "if NOT DEFINED WITH_NINJA set WITH_NINJA=0" in .\scripts\build_win.cmd.
+			Install Miniconda and create an python 3.5 environment with all dependencies:
+				conda create -n py35 python=3.5 anaconda
+				activate py35
+			In scripts\build_win.cmd change all occurences to if NOT DEFINED WITH_NINJA set WITH_NINJA=0
+			You can also build debug Caffe by opening the solution and compiling with the Debug profile.
 		Patch cmake errors
 			In /contrib/caffe/build/CaffeTargets.cmake rename gflags_shared, hdf5_shared, hdf5_hl_shared to gflags, caffehdf5, caffehdf5_hl
 			In /contrib/caffe/build/libraries/lib rename libopenblas-dll.a, libopenblas.a to libopenblas-dll.a.lib, libopenblas.a.lib
@@ -32,8 +31,18 @@ DDSL on Windows:
 		mkdir build
 		cd build
 		cmake -G "Visual Studio 14 Win64" ..
+		For debugging leveldbd.lib needs to be linked (Somehow this is not autmatically handles by cmake)
 		Open Visual Studio Solution and go add some stuff to ddsl_tester.exe and your good to go.
-
+	Copy all .dll files from:
+		.\contrib\caffe\build\libraries\bin
+		.\contrib\caffe\build\libraries\lib
+		.\contrib\caffe\build\libraries\x64\vc14\bin
+		.\contrib\zlib-1.2.8\build\Release
+		.\contrib\zlib-1.2.8\build\Debug
+		.\contrib\lpng1628\build\Release
+		.\contrib\lpng1628\build\Debug
+		to .\DLL\ and put this folder in your system path.
+	
 DDSL on Ubuntu
 	Install lpng
 		sudo apt-get libpng-dev

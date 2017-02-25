@@ -149,10 +149,21 @@ namespace DSImage {
 	};
 
 	template <typename T, typename TIdx>
+	ImagePNG<T, TIdx>::ImagePNG(const TIdx rowCount, const TIdx colCount,  DSTypes::ImageType preferredImageType) : DSLib::Matrix<T, TIdx>(rowCount, colCount, DSTypes::oRowMajor) {
+		setImageType(preferredImageType);
+	};
+
+	template <typename T, typename TIdx>
 	ImagePNG<T, TIdx>::ImagePNG(const String &filename, DSLib::Matrix<T, TIdx> &img, ImageType preferredImageType) {
 		setFilename(filename);
 		setImage(img);
 		setImageType(preferredImageType);
+	}
+
+
+	template <typename T, typename TIdx>
+	ImagePNG<T, TIdx>::ImagePNG(Matrix<T, TIdx> &mat) {
+		setImage(mat);
 	}
 
 	template <typename T, typename TIdx>

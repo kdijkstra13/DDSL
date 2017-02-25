@@ -33,6 +33,7 @@
 #include "hpp/model/DS_Generate.hpp"
 #include "hpp/model/DS_Write.hpp"
 #include "hpp/model/DS_Read.hpp"
+#include "hpp/model/DS_Image.hpp"
 
 //Language
 #include "hpp/lang/DS_MatrixLang.hpp"

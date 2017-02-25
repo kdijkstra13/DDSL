@@ -23,9 +23,11 @@ namespace DSImage {
 		virtual void read(std::istream &is);
 		virtual void write(std::ostream &os) const;
 		
+		ImagePNG(DSLib::Matrix<T, TIdx> &img);
 		ImagePNG(const DSTypes::String &filename, bool prefetch);
 		ImagePNG(const DSTypes::String &filename, DSLib::Matrix<T, TIdx> &img = DSLib::Matrix<T, TIdx>(), DSTypes::ImageType preferredImageType = DSTypes::itM16);
 		ImagePNG(const TIdx rowCount, const TIdx colCount, const T &initVal, DSTypes::ImageType preferredImageType= DSTypes::itM16);
+		ImagePNG(const TIdx rowCount, const TIdx colCount, DSTypes::ImageType preferredImageType= DSTypes::itM16);
 
 		void loadImage();
 		void saveImage();
