@@ -2,7 +2,7 @@
 #include "DS_Model.h"
 
 namespace DSModel {
-	template<typename TImage = ImagePNG<Double>, typename TIdx = DSTypes::TableIdx, typename TId = DSTypes::TableId>
+	template<typename TImage, typename TIdx = DSTypes::TableIdx, typename TId = DSTypes::TableId>
 	class FileFetch : public Model<TIdx, TId> {
 	private:
 	protected:

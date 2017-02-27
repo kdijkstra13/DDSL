@@ -906,7 +906,7 @@ namespace DSModel {
 				}
 			}
 			output.resizeRows(0);
-			registerOutput(output);
+			this->registerOutput(output);
 		} catch (Error &e) {
 			throw Error(ecExternalLibrary, "registerOutputs",  e.what());
 		}
@@ -1506,8 +1506,13 @@ namespace DSModel {
 					dataLayer->ToProto(&lp);
 					DataType dataDT, labelDT;
 					ContentType dataCT, labelCT;
+					#ifdef _MSC_VER
 					String dataName = lp.top()[0];
 					String labelName = lp.top()[1];
+					#else
+					String dataName = *(lp.top().data()[0]);
+					String labelName = *(lp.top().data()[1]);
+					#endif
 					parseName_(dataName, dataCT, dataDT);
 					parseName_(labelName, labelCT, labelDT);
 					if (labelCT != ctUnknown && labelDT != dataType<TClassType>())

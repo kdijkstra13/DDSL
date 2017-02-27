@@ -166,7 +166,7 @@ namespace DSModel {
 			auto vv = v->second.vec().begin();
 			Double likely = 0;
 			for (auto cell = smp.begin(); cell!=smp.end(); cell++, mm++, vv++) {
-				Double scale = log(1.0 / sqrt(2.0 * PI * *vv));
+				Double scale = log(1.0 / sqrt(2.0 * C_PI * *vv));
 				Double dist = -(pow(*cell - *mm, 2.0) / (2.0 * *vv));
 				likely = likely + scale + dist;
 			}			
