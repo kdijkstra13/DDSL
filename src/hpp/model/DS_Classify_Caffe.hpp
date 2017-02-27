@@ -1052,9 +1052,9 @@ namespace DSModel {
 		}			
 		ct = stringToContentType(s.vec(3));
 		dt = stringToDataType(s.vec(4));
-		width = stringToDataType(s.vec(5));
-		height = stringToDataType(s.vec(6));
-		channels = stringToDataType(s.vec(7));
+		width = atoi(s.vec(5).c_str());
+		height = atoi(s.vec(6).c_str());
+		channels = atoi(s.vec(7).c_str());
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1306,7 +1306,7 @@ namespace DSModel {
 			throw Error(ecIncompatible, "getResultBlobData", SS("Wrong size for confidence Matrix: " << blobName << " (" << conf.printSize() << ")"));
 		TIdx classCount = ~classes_;
 		boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(blobName);
-		if (outputBlob->width() * outputBlob->height() != classCount)
+		if (outputBlob->width() * outputBlob->height() * outputBlob->channels() != classCount)
 			throw Error(ecIncompatible, "getResultBlobData", SS("Caffe and DDSL class count mismatch for: " << blobName << " (" << outputBlob->width() * outputBlob->height() << " != " << classCount << ")"));
 
 		const Float * begin = outputBlob->cpu_data();
