@@ -9,7 +9,7 @@ option(DDSL_EXT_LIB_PNG "PNG support" ON)
 option(DDSL_EXT_LIB_SVM "SVM support" ON)
 option(DDSL_EXT_LIB_AF "ArrayFire support" ON)
 option(DDSL_EXT_LIB_CAFFE "Caffe support" ON)
-option(DDSL_CUDA_GPU "Build with GPU support" OFF)
+option(DDSL_CUDA_GPU "Build with GPU support" ON)
 option(DDSL_CUDA_NCCL "Multi-GPU support" OFF)
 
 #Projects
@@ -261,7 +261,7 @@ if (BUILD_LIBAF_DDSL)
 endif()
 
 if (BUILD_DDSL_TESTER)
-	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/DDSL_TESTER/main.cpp")
+	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_tester/main.cpp")
 	if (DDSL_EXT_LIB_CAFFE)
 		list(APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/libcaffe_ddsl/force_link.cpp")
 	endif()
@@ -295,12 +295,14 @@ if (BUILD_DDSL_TESTER)
 	if (DDSL_EXT_LIB_CAFFE)
 		include_directories(${Caffe_INCLUDE_DIRS})
 		include_directories(${CMAKE_CURRENT_LIST_DIR}/contrib/caffe/build) #for export.hpp
-		
+		include_directories(${CMAKE_CURRENT_LIST_DIR}/contrib/caffe/build/install/include) #for caffe.pb.h
 		target_link_libraries(${EXE_NAME} ${Caffe_LIBRARIES})
-		set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS ${Caffe_DEFINITIONS})
 		
-		message(${Caffe_INCLUDE_DIRS})
-		message(${Caffe_LIBRARIES})
+		#set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS ${Caffe_DEFINITIONS})
+		set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "USE_OPENCV")
+		
+		#message(${Caffe_INCLUDE_DIRS})
+		#message(${Caffe_LIBRARIES})
 	endif()
 endif()
 

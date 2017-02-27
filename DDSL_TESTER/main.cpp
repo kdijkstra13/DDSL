@@ -32,7 +32,7 @@ int main(void) {
 		initCaffe(ngpus);
 		cout << "Start" << endl;
 //		Table<>() > DSModel::Caffe<String>(dtString|"a"|"b");
-		ImagePNG<Float> png("C:\\DATASETS\\PlastcisSWIR2\\0000_0.png" , true);
+		ImagePNG<Float> png("D:\\DATASETS\\PlastcisSWIR2\\0000_0.png" , true);
 		png(0U, 10U, 0U, 10U)++;
 
 	} catch (const char * e) {

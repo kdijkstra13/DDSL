@@ -2,15 +2,17 @@ DDSL on Windows:
 	Build zlib in .\contrib\zlib\zlib-1.2.8
 		mkdir build
 		cd build
-		cmake -G "Visual Studio 14 Win64" ..
-		Open Visual Studio Solution and compile as Release and Debug
+		'cmake -G "Visual Studio 14 Win64" .."' or 'cmake -G "Visual Studio 12 Win64" ..'
+		Open Visual Studio Solution and compile project "zlib" as Release and Debug
+		Copy Release\zlib.lib and Debug\zlibd.lib to root folder .\contrib\zlib\zlib-1.2.8 
+		Copy build\zonf.h to root folder .\contrib\zlib\zlib-1.2.8 
 	Build lpng in .\contrib\lpng1628
 		mkdir build
 		cd build
-		cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..
-		Open Visual Studio Solution and compile as Release and Debug
-		** libpng wil crash if there is a mismatch between (\MD and \MdD, etc.)
-	Download an install ArrayFire in its default location
+		'cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..' or 'cmake -G "Visual Studio 12 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..'
+		Open Visual Studio Solution and compile project "png" as Release and Debug
+		** libpng wil crash if there is a mismatch between (\MD and \MdD, and Visual Studio Versions)
+	Download an install ArrayFire (ArrayFire.com) in its default location
 	Build Caffe
 		Checkout Caffe Windows branch in /contrib/caffe (git clone -b windows <repo>)
 		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
@@ -18,25 +20,28 @@ DDSL on Windows:
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
 			In /contrib/caffe/src/caffe/solver_factory.cpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
-		Build Caffe with instructions: https://github.com/BVLC/caffe/tree/windows
-			Install Miniconda and create an python 3.5 environment with all dependencies:
-				conda create -n py35 python=3.5 anaconda
-				activate py35
-			In scripts\build_win.cmd change all occurences to if NOT DEFINED WITH_NINJA set WITH_NINJA=0
+		Install Miniconda and create an python 3.5 environment:
+			conda create -n py35 python=3.5 anaconda
+			activate py35
+		In scripts\build_win.cmd change all occurences to "if NOT DEFINED WITH_NINJA set WITH_NINJA=0" (If using DDSL with VS then Release and Debug folders are needed)
+		In scripts\build_win.cmd change all occurences to "if NOT DEFINED MSVC_VERSION set MSVC_VERSION=12" (NVCC does not work with VS2015)
+		In scripts\build_win.cmd change all occurences to "if NOT DEFINED USE_NCCL set USE_NCCL=0" (Because of an bug)
+			Build Caffe with instructions: https://github.com/BVLC/caffe/tree/windows
 			You can also build debug Caffe by opening the solution and compiling with the Debug profile.
 		Patch cmake errors
-			In /contrib/caffe/build/CaffeTargets.cmake rename gflags_shared, hdf5_shared, hdf5_hl_shared to gflags, caffehdf5, caffehdf5_hl
-			In /contrib/caffe/build/libraries/lib rename libopenblas-dll.a, libopenblas.a to libopenblas-dll.a.lib, libopenblas.a.lib
+			In /contrib/caffe/build/CaffeTargets.cmake rename gflags_shared, hdf5-shared, hdf5-hl_shared to gflags, caffehdf5, caffehdf5_hl
+			In /contrib/caffe/build/CaffeTargets.cmake debug rename leveldb to leveldbd
+			In /contrib/caffe/build/libraries/lib rename libopenblas.dll.a, libopenblas.a to libopenblas.dll.a.lib, libopenblas.a.lib
 	Build DDSL in .\
 		mkdir build
 		cd build
-		cmake -G "Visual Studio 14 Win64" ..
-		For debugging leveldbd.lib needs to be linked (Somehow this is not autmatically handles by cmake)
+		'cmake -G "Visual Studio 14 Win64 .."' or when using NVCC 'cmake -G "Visual Studio 12 Win64 .."'
+		For debugging leveldbd.lib needs to be linked (Somehow this is not autmatically handled by cmake)
 		Open Visual Studio Solution and go add some stuff to ddsl_tester.exe and your good to go.
 	Copy all .dll files from:
 		.\contrib\caffe\build\libraries\bin
 		.\contrib\caffe\build\libraries\lib
-		.\contrib\caffe\build\libraries\x64\vc14\bin
+		.\contrib\caffe\build\libraries\x64\vc14\bin or .\contrib\caffe\build\libraries\x64\vc12\bin
 		.\contrib\zlib-1.2.8\build\Release
 		.\contrib\zlib-1.2.8\build\Debug
 		.\contrib\lpng1628\build\Release
@@ -60,14 +65,19 @@ DDSL on Ubuntu
 			cd nccl
 			make CUDA_HOME=/usr/local/cuda test
 			sudo make PREFIX=/usr/local install
-		Install Caffe and DIGITS from GIT repo
+		Install Caffe from GIT repo in contrib\caffe: git clone https://github.com/BVLC/caffe.git
+			Edit Makefile.config for enabling cuDNN
 			After pip install -r requirements.txt do pip install -U scikit-image and then pip install -r requirements.txt again
-			Use multi-gpu with cmake -DUSE_NCCL=1 ..
 		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
 			In /contrib/caffe/include/caffe/layer_factory.hpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
 			In /contrib/caffe/include/caffe/solver_factory.hpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
+		Build Caffe
+			mkdir build && de build 
+			cmake -DUSE_NCCL=1 ..
+			make
+			make install
 	Build DDSL in .\
 		mkdir build
 		cd build
