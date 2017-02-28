@@ -84,7 +84,7 @@ namespace DSLib {
 			Matrix<T, TIdx> patchTargetsTemp;
 			Matrix<TIdx, TIdx> coordsTemp;
 			genUniform2DCoords(*tar, n, patchHeight/2, patchWidth/2, coordsTemp);
-			int c=0;
+			//int c=0;
 			for (auto cell = row->begin(); cell != row->end(); cell++) {
 				Matrix<TMat<T, TIdx>, TIdx> patchesChannelTemp;
 				if (cell->rows.count() != tar->rows.count() || cell->cols.count() != tar->cols.count())
@@ -588,7 +588,7 @@ namespace DSLib {
 		coords.clear();
 		featuresOut.clear();
 		targetsOut.clear();
-		UInt32 dbg=3;
+		//UInt32 dbg=3;
 		auto row = featuresIn2.rows.begin();
 		for (auto tar = targetsIn2.rows->begin();tar != targetsIn2.rows->end(); tar++, row++) {
 			Matrix<T, TIdx> featuresTemp(n, featuresIn.cols.count() * windowWidth * windowHeight);

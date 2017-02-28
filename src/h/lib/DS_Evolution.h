@@ -13,11 +13,11 @@ namespace DSEvolution {
 	public:
 		void clone(const Individual &a);
 		void clone(Individual &&a);
-		~Individual(){};
+		virtual ~Individual(){};
 		Individual(){};
 		Individual(const Individual &a) {clone(a);};
 		Individual(Individual &&a) {clone(std::move(a));};
-		Individual & operator=(const Individual &a) {clone(a);}
+		Individual & operator=(const Individual &a) {clone(a);return *this;}
 
 		virtual void randomize() = 0;
 	};
@@ -79,7 +79,7 @@ namespace DSEvolution {
 		Objective(){};
 		Objective(const Objective &a) {clone(a);};
 		Objective(Objective &&a) {clone(std::move(a));};
-		Objective & operator=(const Objective &a) {clone(a);}
+		Objective & operator=(const Objective &a) {clone(a);return *this;}
 	};
 
 	template <typename T>
@@ -93,8 +93,8 @@ namespace DSEvolution {
 		MultiObjective(){};
 		MultiObjective(const MultiObjective<T> &a) {clone(a);};
 		MultiObjective(MultiObjective<T> &&a) {clone(std::move(a));};
-		MultiObjective<T> & operator=(const MultiObjective<T> &a) {clone(a);}
-		MultiObjective<T> operator=(MultiObjective<T> &&a) {clone(std::move(a));}
+		MultiObjective<T> & operator=(const MultiObjective<T> &a) {clone(a);return *this;}
+		MultiObjective<T> operator=(MultiObjective<T> &&a) {clone(std::move(a));return *this;}
 
 		void setScores(const std::vector<T> &os);
 		std::vector<T> getScores() const;
@@ -142,7 +142,7 @@ namespace DSEvolution {
 		Population(){};
 		Population(const Population &a) {clone(a);};
 		Population(Population &&a) {clone(std::move(a));};
-		Population & operator=(const Population &a) {clone(a);}
+		Population & operator=(const Population &a) {clone(a);return *this;}
 	};
 
 	template <class TIndividual, class TObjective>
@@ -227,7 +227,7 @@ namespace DSEvolution {
 		Evolution();
 		Evolution(const Evolution &a) {clone(a);};
 		Evolution(Evolution &&a) {clone(std::move(a));};
-		Evolution & operator=(const Evolution &a) {clone(a);}
+		Evolution & operator=(const Evolution &a) {clone(a);return *this;}
 
 		void run(DSTypes::UInt32 generations);
 		void stop();
@@ -248,7 +248,7 @@ namespace DSEvolution {
 		DSTypes::UInt32 childCount_; //The number individuals before selection (if 0 then parentCount ^ 2)
 
 		//childCount should be bigger than parentCount, otherwise the population will die out.
-		//eliteProb and eliteCount can be used simultanuously to add additional parents to the child population.		
+		//eliteProb and eliteCount can be used simultaneously to add additional parents to the child population.
 		//if childCount is zero, it will be set to parentCount^2 and parent selection will be disabled.
 		std::mutex lockPop_;
 	protected:
@@ -267,8 +267,8 @@ namespace DSEvolution {
 					const DSTypes::UInt32 childCount = 50);
 		GAEvolution(const GAEvolution<TPopulation> &a) {clone(a);};
 		GAEvolution(GAEvolution<TPopulation> &&a) {clone(std::move(a));};
-		GAEvolution<TPopulation> & operator=(const GAEvolution<TPopulation> &a) {clone(a);}
-		GAEvolution<TPopulation> operator=(GAEvolution<TPopulation> &&a) {clone(std::move(a));}
+		GAEvolution<TPopulation> & operator=(const GAEvolution<TPopulation> &a) {clone(a);return *this;}
+		GAEvolution<TPopulation> operator=(GAEvolution<TPopulation> &&a) {clone(std::move(a));return *this;}
 
 		TPopulation getPopulation();
 		void setPopulation(const TPopulation &p);

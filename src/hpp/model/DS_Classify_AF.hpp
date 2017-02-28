@@ -113,8 +113,8 @@ namespace DSModel {
 				Array<Float, TIdx> afsd(oColMajor);
 
 				//Define some dimensions
-				unsigned int nsamples = (unsigned int)afin.arr().dims(0);
-				unsigned int nclasses = ~classes;
+				//unsigned int nsamples = (unsigned int)afin.arr().dims(0);
+				//unsigned int nclasses = ~classes;
 				unsigned int ndim = in.cols.count();
 
 				//Calculate covariance on centered data				
@@ -199,8 +199,8 @@ namespace DSModel {
 				Array<Float, TIdx> afsd(oColMajor);
 
 				//Define some dimensions
-				unsigned int nsamples = (unsigned int)afin.arr().dims(0);
-				unsigned int nclasses = ~classes;
+				//unsigned int nsamples = (unsigned int)afin.arr().dims(0);
+				//unsigned int nclasses = ~classes;
 				unsigned int ndim = in.cols.count();
 
 				//Calculate covariance on centered data				

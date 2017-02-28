@@ -135,7 +135,7 @@ namespace DSFunc {
 			freeAndNull(&dat);
 			freeAndNull(&trans);
 			progressCallback(min, max, max);
-		} catch (const exception e) {
+		} catch (const exception &e) {
 			freeAndNull(&dat);
 			freeAndNull(&trans);
 			throw Error(ecGeneral, f, e.what());
@@ -175,7 +175,7 @@ namespace DSFunc {
 			}
 			freeAndNull(&cur);
 			freeAndNull(&dat);
-		} catch (const exception e) {
+		} catch (const exception &e) {
 			freeAndNull(&cur);
 			freeAndNull(&dat);			
 			throw Error(ecGeneral, "WriteDB", e.what());
@@ -265,7 +265,7 @@ namespace DSFunc {
 			freeAndNull(&cur);
 			freeAndNull(&dat);
 			progressCallback(0, rowCount, rowCount);
-		} catch (const exception e) {
+		} catch (const exception &e) {
 			freeAndNull(&cur);
 			freeAndNull(&dat);			
 			throw Error(ecGeneral, f, e.what());
@@ -338,7 +338,7 @@ namespace DSFunc {
 			freeAndNull(&trans);
 			progressCallback(min, max, max);
 		}
-		catch (const exception e) {
+		catch (const exception &e) {
 			freeAndNull(&dat);
 			freeAndNull(&trans);
 			throw Error(ecGeneral, f, e.what());
@@ -415,7 +415,7 @@ namespace DSFunc {
 			freeAndNull(&dat);
 			progressCallback(0, rowCount, rowCount);
 		}
-		catch (const exception e) {
+		catch (const exception &e) {
 			freeAndNull(&cur);
 			freeAndNull(&dat);
 			throw Error(ecGeneral, f, e.what());
@@ -473,7 +473,7 @@ namespace DSFunc {
 			freeAndNull(&trans);
 			progressCallback(min, max, max);
 		}
-		catch (const exception e) {
+		catch (const exception &e) {
 			freeAndNull(&dat);
 			freeAndNull(&trans);
 			throw Error(ecGeneral, f, e.what());
@@ -542,7 +542,7 @@ namespace DSFunc {
 			freeAndNull(&cur);
 			freeAndNull(&dat);
 			progressCallback(0, rowCount, rowCount);
-		} catch (const exception e) {
+		} catch (const exception &e) {
 			freeAndNull(&cur);
 			freeAndNull(&dat);
 			throw Error(ecGeneral, f, e.what());
@@ -1026,9 +1026,9 @@ namespace DSModel {
 		Table<TIdx, TId> tab =
 			(Matrix<Literal, TIdx>() | "Val") |
 			(
-			(Matrix<Literal, TIdx>() | "Classes")			^ (ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes))) |
-			(Matrix<Literal, TIdx>() | "NetProtoFile")		^ (ctParameter | (Matrix<String>() | netProtoFile)) |
-			(Matrix<Literal, TIdx>() | "SolverProtoFile")	^ (ctParameter | (Matrix<String>() | solverProtoFile))
+			(((Matrix<Literal, TIdx>() | "Classes")			^ (ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes))))) |
+			(((Matrix<Literal, TIdx>() | "NetProtoFile")		^ (ctParameter | (Matrix<String>() | netProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "SolverProtoFile")	^ (ctParameter | (Matrix<String>() | solverProtoFile))))
 			);
 		this->registerParameters(tab);
 	}
@@ -1105,7 +1105,7 @@ namespace DSModel {
 		}
 		
 		//Check with Caffe blob
-		if (bw != net_->blob_by_name(blobName)->width() || bh != net_->blob_by_name(blobName)->height() || bc != net_->blob_by_name(blobName)->channels()) 
+		if (bw != (TIdx)net_->blob_by_name(blobName)->width() || bh != (TIdx)net_->blob_by_name(blobName)->height() || bc != (TIdx)net_->blob_by_name(blobName)->channels())
 			throw Error(ecIncompatible, "addBlobData_", SS("Blob size mismatch between Caffe and DDSL:  " << net_->blob_by_name(blobName)->width() << "x" << net_->blob_by_name(blobName)->height() << "x" << net_->blob_by_name(blobName)->channels() << " != "  << bw << "x" << bh << "x" << bc));
 
 		blobWidth_ | bw;
@@ -1271,7 +1271,7 @@ namespace DSModel {
 			throw Error(ecIncompatible, "getResultBlobData", SS("Wrong size for result Matrix: " << blobName << " (" << result.printSize() << ")"));
 		
 		boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(blobName);
-		if (outputBlob->width() * outputBlob->height() * outputBlob->channels()  != classCount)
+		if ((TIdx)outputBlob->width() * (TIdx)outputBlob->height() * (TIdx)outputBlob->channels() != classCount)
 			throw Error(ecIncompatible, "getResultBlobData", SS("Caffe and DDSL class count mismatch for: " << blobName << " (" << outputBlob->width() * outputBlob->height() * outputBlob->channels() << " != " << classCount << ")"));
 
 		const Float * begin = outputBlob->cpu_data();
@@ -1341,7 +1341,7 @@ namespace DSModel {
 			throw Error(ecInternal, "getLayerOutput_", SS("Batch size does not match the number of rows: " << batchSize_ << " != " << output.rows.count()));
 
 		if (ct == ctResult && dt == dataType<TClassType>()) {
-			Matrix<TClassType, TIdx> result = (Matrix<TClassType, TIdx>) checkOutput(output(ct, dt));
+			Matrix<TClassType, TIdx> result = (Matrix<TClassType, TIdx>) this->checkOutput(output(ct, dt));
 			ContentType confCT;
 			DataType confDT;
 			parseSecondaryName_(blobName, confCT, confDT);
@@ -1350,11 +1350,11 @@ namespace DSModel {
 					throw Error(ecIncompatible, "getLayerOutput", SS("Currently only secondary ContentType 'Confidence' supported in blob: " << blobName));
 				switch (confDT) {
 					case dtFloat: {
-						Matrix<Float, TIdx> conf = (Matrix<Float, TIdx>) checkOutput(output(confCT, confDT));
+						Matrix<Float, TIdx> conf = (Matrix<Float, TIdx>) this->checkOutput(output(confCT, confDT));
 						getResultBlobData_(blobName, result, conf);
 					break;}
   					case dtDouble: {
-						Matrix<Double, TIdx> conf = (Matrix<Double, TIdx>) checkOutput(output(confCT, confDT));
+						Matrix<Double, TIdx> conf = (Matrix<Double, TIdx>) this->checkOutput(output(confCT, confDT));
 						getResultBlobData_(blobName, result, conf);
 					break;}
 				}
@@ -1363,31 +1363,31 @@ namespace DSModel {
 		} else {
 			switch (dt) {
 				case dtFloat: {
-					Matrix<Float, TIdx> out = (Matrix<Float, TIdx>) checkOutput(output(ct, dt));
+					Matrix<Float, TIdx> out = (Matrix<Float, TIdx>) this->checkOutput(output(ct, dt));
 					getBlobData_(blobName, out);
 				break;}
 				case dtDouble: {
-					Matrix<Double, TIdx> out = (Matrix<Double, TIdx>) checkOutput(output(ct, dt));
+					Matrix<Double, TIdx> out = (Matrix<Double, TIdx>) this->checkOutput(output(ct, dt));
 					getBlobData_(blobName, out);
 				break;}
    				case dtUInt32: {
-					Matrix<UInt32, TIdx> out = (Matrix<UInt32, TIdx>) checkOutput(output(ct, dt));
+					Matrix<UInt32, TIdx> out = (Matrix<UInt32, TIdx>) this->checkOutput(output(ct, dt));
 					getBlobData_(blobName, out);
 				break;}
    				case dtImagePNGFloat: {
-					Matrix<ImagePNG<Float, TIdx>, TIdx> out = (Matrix<ImagePNG<Float>, TIdx>) checkOutput(output(ct, dt));
+					Matrix<ImagePNG<Float, TIdx>, TIdx> out = (Matrix<ImagePNG<Float>, TIdx>) this->checkOutput(output(ct, dt));
 					getBlobData_(blobName, out);
 				break;}
    				case dtImagePNGDouble: {
-					Matrix<ImagePNG<Double, TIdx>, TIdx> out = (Matrix<ImagePNG<Double>, TIdx>) checkOutput(output(ct, dt));
+					Matrix<ImagePNG<Double, TIdx>, TIdx> out = (Matrix<ImagePNG<Double>, TIdx>) this->checkOutput(output(ct, dt));
 					getBlobData_(blobName, out);
 				break;}
    				case dtMatrixFloat: {
-					Matrix<Matrix<Float, TIdx>, TIdx> out = (Matrix<Matrix<Float>, TIdx>) checkOutput(output(ct, dt));
+					Matrix<Matrix<Float, TIdx>, TIdx> out = (Matrix<Matrix<Float>, TIdx>) this->checkOutput(output(ct, dt));
 					getBlobData_(blobName, out);
 				break;}
    				case dtMatrixDouble: {
-					Matrix<Matrix<Double, TIdx>, TIdx> out = (Matrix<Matrix<Double>, TIdx>) checkOutput(output(ct, dt));
+					Matrix<Matrix<Double, TIdx>, TIdx> out = (Matrix<Matrix<Double>, TIdx>) this->checkOutput(output(ct, dt));
 					getBlobData_(blobName, out);
 				break;}
 			}
@@ -1399,27 +1399,27 @@ namespace DSModel {
 	void Caffe<TClassType, TIdx, TId>::setMemoryDataInput_(Table<TIdx, TId> &input, const String &layerName, const String &dataName, const String &labelName, const ContentType dataCT, const DataType dataDT, const ContentType labelCT, const DataType labelDT) {
 		switch (dataDT) {
 			case dtFloat: {
-				Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) checkInput(input(dataCT, dataDT));
+				Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) this->checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			case dtDouble: {
-				Matrix<Double, TIdx> in = (Matrix<Double, TIdx>) checkInput(input(dataCT, dataDT));
+				Matrix<Double, TIdx> in = (Matrix<Double, TIdx>) this->checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			case dtImagePNGFloat: {
-				Matrix<ImagePNG<Float>> in = (Matrix<ImagePNG<Float>>) checkInput(input(dataCT, dataDT));
+				Matrix<ImagePNG<Float>> in = (Matrix<ImagePNG<Float>>) this->checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			case dtImagePNGDouble: {
-				Matrix<ImagePNG<Double>> in = (Matrix<ImagePNG<Double>>) checkInput(input(dataCT, dataDT));
+				Matrix<ImagePNG<Double>> in = (Matrix<ImagePNG<Double>>) this->checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			case dtMatrixFloat: {
-				Matrix<Matrix<Float>> in = (Matrix<Matrix<Float>>) checkInput(input(dataCT, dataDT));
+				Matrix<Matrix<Float>> in = (Matrix<Matrix<Float>>) this->checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			case dtMatrixDouble: {
-				Matrix<Matrix<Double>> in = (Matrix<Matrix<Double>>) checkInput(input(dataCT, dataDT));
+				Matrix<Matrix<Double>> in = (Matrix<Matrix<Double>>) this->checkInput(input(dataCT, dataDT));
 				addBlobData_(dataName, in);
 				break;}
 			default: throw Error(ecIncompatible, "setMemoryDataInput_", SS(layerName << "." << dataName << " has an unsupported DataType: " <<  etos(dataCT)));
@@ -1436,7 +1436,7 @@ namespace DSModel {
 		} else {
 			switch (labelDT) {
 				case dtFloat: {
-					Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) checkInput(input(labelCT, labelDT));
+					Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) this->checkInput(input(labelCT, labelDT));
 					addBlobData_(labelName, in);
 					break;}
 				case dtUnknown: {
@@ -1484,7 +1484,7 @@ namespace DSModel {
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
-	void Caffe<TClassType, TIdx, TId>::setActiveNet_(boost::shared_ptr<caffe::Net<Float>> &n) {
+	void Caffe<TClassType, TIdx, TId>::setActiveNet_(boost::shared_ptr<caffe::Net<Float>> n) {
 		activeNet_ = n;
 	}
 
@@ -2130,21 +2130,21 @@ namespace DSModel {
 		Table<TIdx, TId> tab =
 			(Matrix<Literal, TIdx>() | "Val") |
 			(
-			(Matrix<Literal, TIdx>() | "Classes") ^		(ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes))) |
-			(Matrix<Literal, TIdx>() | "StepValue") ^	(ctParameter | (Matrix<Matrix<UInt32>>() | (Matrix<UInt32>() | stepValue))) |
-			(Matrix<Literal, TIdx>() | "Units") ^		(ctParameter | (Matrix<Matrix<UInt32>>() | (Matrix<UInt32>() | units))) |
-			(Matrix<Literal, TIdx>() | "LearnRate") ^	(ctParameter | (Matrix<Double>() | learnRate)) |
-			(Matrix<Literal, TIdx>() | "Momentum") ^	(ctParameter | (Matrix<Double>() | momentum)) |
-			(Matrix<Literal, TIdx>() | "Gamma") ^		(ctParameter | (Matrix<Double>() | gamma)) |
-			(Matrix<Literal, TIdx>() | "WeightDecay") ^ (ctParameter | (Matrix<Double>() | weightDecay)) |
-			(Matrix<Literal, TIdx>() | "Power") ^		(ctParameter | (Matrix<Double>() | power)) |			
-			(Matrix<Literal, TIdx>() | "BatchSize") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)batchSize)) |
-			(Matrix<Literal, TIdx>() | "Iterations") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)iter)) |
-			(Matrix<Literal, TIdx>() | "IterationsDone") ^	(ctParameter | (Matrix<UInt32>() | (UInt32)0)) |
-			(Matrix<Literal, TIdx>() | "LearnRatePolicy") ^ (ctParameter | (Matrix<UInt32>() | (UInt32)lrp)) |
-			(Matrix<Literal, TIdx>() | "UnitType") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)unitType)) |
-			(Matrix<Literal, TIdx>() | "SolverType") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)solverType)) |
-			(Matrix<Literal, TIdx>() | "StepSize") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)stepSize))
+			((Matrix<Literal, TIdx>() | "Classes") ^		(ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes)))) |
+			((Matrix<Literal, TIdx>() | "StepValue") ^	(ctParameter | (Matrix<Matrix<UInt32>>() | (Matrix<UInt32>() | stepValue)))) |
+			((Matrix<Literal, TIdx>() | "Units") ^		(ctParameter | (Matrix<Matrix<UInt32>>() | (Matrix<UInt32>() | units)))) |
+			((Matrix<Literal, TIdx>() | "LearnRate") ^	(ctParameter | (Matrix<Double>() | learnRate))) |
+			((Matrix<Literal, TIdx>() | "Momentum") ^	(ctParameter | (Matrix<Double>() | momentum))) |
+			((Matrix<Literal, TIdx>() | "Gamma") ^		(ctParameter | (Matrix<Double>() | gamma))) |
+			((Matrix<Literal, TIdx>() | "WeightDecay") ^ (ctParameter | (Matrix<Double>() | weightDecay))) |
+			((Matrix<Literal, TIdx>() | "Power") ^		(ctParameter | (Matrix<Double>() | power))) |
+			((Matrix<Literal, TIdx>() | "BatchSize") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)batchSize))) |
+			((Matrix<Literal, TIdx>() | "Iterations") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)iter))) |
+			((Matrix<Literal, TIdx>() | "IterationsDone") ^	(ctParameter | (Matrix<UInt32>() | (UInt32)0))) |
+			((Matrix<Literal, TIdx>() | "LearnRatePolicy") ^ (ctParameter | (Matrix<UInt32>() | (UInt32)lrp))) |
+			((Matrix<Literal, TIdx>() | "UnitType") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)unitType))) |
+			((Matrix<Literal, TIdx>() | "SolverType") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)solverType))) |
+			((Matrix<Literal, TIdx>() | "StepSize") ^		(ctParameter | (Matrix<UInt32>() | (UInt32)stepSize)))
 			);
 		this->registerParameters(tab);
 	}

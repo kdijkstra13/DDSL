@@ -51,8 +51,9 @@ DDSL on Windows:
 DDSL on Ubuntu
 	Install lpng
 		sudo apt-get libpng-dev
-	Download and install ArrayFirefrom their website
-		sudo apt-get install libglfw3-dev libnnvm-dev
+	Download and install ArrayFire from their website
+		sudo apt-get install libglfw3-dev libnnvm3 
+		libnvvm3 will not work on 14.04, therefor disable GPU support for ArrayFire in de CMakeLists of DDSL_APPS
 	Build Caffe
 		sudo apt-get install --no-install-recommends libboost-all-dev
 		sudo apt-get install libopencv-dev libatlas-dev libatlas-base-dev libsnappy-dev
@@ -60,13 +61,14 @@ DDSL on Ubuntu
 		sudo apt-get install libgflags-dev libgoogle-glog-dev protobuf-compiler libprotobuf-dev
 		sudo apt-get install libpython-dev
 		Install Cuda from http://docs.nvidia.com/cuda/index.html#axzz4YZYC9wB0 and https://developer.nvidia.com/cuda-downloads
+		Install cuDNN from NVIDIA website
 		Install NCCL
 			git clone https://github.com/NVIDIA/nccl.git
 			cd nccl
 			make CUDA_HOME=/usr/local/cuda test
 			sudo make PREFIX=/usr/local install
 		Install Caffe from GIT repo in contrib\caffe: git clone https://github.com/BVLC/caffe.git
-			Edit Makefile.config for enabling cuDNN
+			Edit Makefile.config for enabling cuDNN (copy from Makefile.config.example)
 			After pip install -r requirements.txt do pip install -U scikit-image and then pip install -r requirements.txt again
 		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
 			In /contrib/caffe/include/caffe/layer_factory.hpp
@@ -92,3 +94,21 @@ DIGITS in Windows (quite the hassle)
 	Somehow one of the steps breaks packages installed by http://www.lfd.uci.edu/~gohlke/pythonlibs/
 	Fix this by just re-executing the python -m pip install lines before starting DIGITS
 	Manually download and install Pillow from http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+FAQ:
+Q: c++: error: unrecognized command line option ‘-std=c++14’
+A: You have an old g++ compiler
+sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
+sudo apt-get update
+
+Q: png reading crashes
+A: Make sure you compile all zlib/png libs with the same compiler and compiler options
+
+Q: Cannot compile Caffe with Visual Studio 2015
+A: The NVIDIA NVCC compiler does not support VS2015. Only use VS2015 if you're compiling CPU_ONLY
+
+Q: Multi-GPU does not work
+A: Be sure to build Caffe with NCCL
+
+Q: How can I use eclipse?
+A: cmake -Wno-dev -G "Eclipse CDT4 - Unix Makefiles" -D_ECLIPSE_VERSION=4.6 ..

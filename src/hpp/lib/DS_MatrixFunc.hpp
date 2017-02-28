@@ -289,7 +289,7 @@ namespace DSFunc {
 		if (!rhs.isInitialized() || !lhs.isInitialized()) {
 			dst.clear();
 			return;
-		} else if (lhs.isColVector() && rhs.isColVector() || lhs.isRowVector() && rhs.isRowVector()) {
+		} else if ((lhs.isColVector() && rhs.isColVector()) || (lhs.isRowVector() && rhs.isRowVector())) {
 			dst.clear();
 			vector<T> lhsVec, rhsVec, dstVec;
 			lhsVec.resize(lhs.vec().count());

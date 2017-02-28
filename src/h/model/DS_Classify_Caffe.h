@@ -125,7 +125,7 @@ namespace DSModel {
 		void parseSecondaryName_(const std::string &name, ContentType &ct, DataType &dt, TIdx &width, TIdx &height, TIdx &channels);		
 		
 		boost::shared_ptr<caffe::Net<Float>> activeNet_;
-		void setActiveNet_(boost::shared_ptr<caffe::Net<Float>> &n);
+		void setActiveNet_(boost::shared_ptr<caffe::Net<Float>> n);
 		boost::shared_ptr<caffe::Net<Float>> getActiveNet_();
 
 		template<typename T> void addBlobData_(const String &blobName, Matrix<T, TIdx> &in);
