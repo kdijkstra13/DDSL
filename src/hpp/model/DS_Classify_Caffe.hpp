@@ -5,6 +5,9 @@
 #include "hpp/lib/DS_Image_PNG.hpp"
 
 #include "caffe/layers/memory_data_layer.hpp"
+#include "caffe/layers/inner_product_layer.hpp"
+#include "caffe/layers/conv_layer.hpp"
+
 #include "caffe/sgd_solvers.hpp"
 #include "caffe/solver_factory.hpp"
 #include "caffe/util/db.hpp"
@@ -1034,6 +1037,105 @@ namespace DSModel {
 	}
 	
 	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::getBlobSize_(const DSTypes::String &name, TIdx &bw, TIdx &bh, TIdx &bc) {
+		bw = (getActiveNet_()->blob_by_name(name)->width());
+		bh = (getActiveNet_()->blob_by_name(name)->height());
+		bc = (getActiveNet_()->blob_by_name(name)->channels());
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::fitToBlob_(const DSTypes::String &blobName, Matrix<T, TIdx> &mat) {
+		TIdx bw, bh, bc;
+		getBlobSize_(blobName, bw, bh, bc);
+		mat.resize(batchSize_, bw * bh * bc);
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::fitToBlob_(const DSTypes::String &blobName, Matrix<Matrix<T>, TIdx> &mat) {
+		TIdx bw, bh, bc;
+		getBlobSize_(blobName, bw, bh, bc);
+		mat.resize(batchSize_, bc);
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::fitToBlob_(const DSTypes::String &blobName, Matrix<ImagePNG<T>, TIdx> &mat) {
+		TIdx bw, bh, bc;
+		getBlobSize_(blobName, bw, bh, bc);
+		mat.resize(batchSize_, bc);
+	}
+
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::getBlobData(const String &blobName, Matrix<T, TIdx> &out) {
+		if (getActiveNet_()->blob_by_name(blobName)->count() == 1) {
+			out.resize(1,1);
+			out.val(0,0) = *(getActiveNet_()->blob_by_name(blobName)->cpu_data());
+			return;
+		}
+		fitToBlob_(blobName, out);
+		getBlobData_(blobName, out);
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::getBlobData(const String &blobName, Matrix<ImagePNG<T, TIdx>, TIdx> &out) {
+		fitToBlob_(blobName, out);
+		getBlobData_(blobName, out);
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::getBlobData(const String &blobName, Matrix<Matrix<T, TIdx>, TIdx> &out) {
+		fitToBlob_(blobName, out);
+		getBlobData_(blobName, out);
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::getLayerBlob(const String &layerName, const TIdx blobIdx, Matrix<T, TIdx> &mat) {
+		if (blobIdx >= getLayerBlobCount(layerName))
+			throw Error(ecRangeError, "getLayerBlob", SS("Blob index " << blobIdx << " out of range."));
+		boost::shared_ptr<Blob<Float>> blob = getActiveNet_()->layer_by_name(layerName)->blobs()[blobIdx];
+		TIdx rowcnt=1;
+		if (blob->shape().size() == 0) {
+			mat.resize(0,0);
+			return;
+		} else if (blob->shape().size() > 1){
+			for (auto i = blob->shape().begin()+1; i!=blob->shape().end();i++)
+				rowcnt *= *i;
+		} 
+		Matrix<Float, TIdx> matFloat(rowcnt, blob->shape()[0]);
+		auto elm = matFloat.rows->begin();
+		Float * f = blob->mutable_cpu_data();
+		for (auto elm=matFloat.rows->begin(); elm!=matFloat.rows->end();elm++,f++)
+			*elm = *f;
+		mat.resize(matFloat.rows.count(), matFloat.cols.count());
+		convert(mat, matFloat);
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	TIdx Caffe<TClassType, TIdx, TId>::getLayerBlobCount(const String &layerName) {
+		return getActiveNet_()->layer_by_name(layerName)->blobs().size();
+	}
+
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> 
+	void Caffe<TClassType, TIdx, TId>::getInnerProductData(const String &layerName, Matrix<T, TIdx> &weights, Matrix<T, TIdx> &bias) {
+		getLayerBlob(layerName, 0, weights);
+		getLayerBlob(layerName, 1, bias);
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T> void Caffe<TClassType, TIdx, TId>::getConvolutionData(const String &layerName, Matrix<T, TIdx> &out) {
+		//TODO
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::parseName_(const std::string &name, ContentType &ct, DataType &dt) {
 		Matrix<String> s = split(name, '.', ' ');
 		if (~s < 3)
@@ -1537,7 +1639,7 @@ namespace DSModel {
 			vector<String> names = getActiveNet_()->blob_names();
 			for (auto blobName=names.begin();blobName!=names.end();blobName++) {
 				if (blobName->substr(0, outputName.size()) == outputName) {
-					boost::shared_ptr<Blob<Float>> outputBlob = net_->blob_by_name(*blobName);
+					boost::shared_ptr<Blob<Float>> outputBlob = getActiveNet_()->blob_by_name(*blobName);
 					ContentType ct;
 					DataType dt;
 					parseName_(*blobName, ct, dt);					

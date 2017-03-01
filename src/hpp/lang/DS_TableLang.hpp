@@ -174,7 +174,7 @@ namespace DSLang {
 
 	template <typename T, typename TIdx, typename TId>
 	DSLib::Matrix<TIdx, TIdx> operator<(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
-		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) == rhs);
+		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) < rhs);
 	}
 
 	template <typename TIdx, typename TId>

@@ -120,10 +120,15 @@ namespace DSModel {
 		void loadCaffeModel_(caffe::Net<Float> **net, caffe::Solver<Float> **solver);
 		void init_();
 
-		void parseName_(const std::string &name, ContentType &ct, DataType &dt);
-		void parseSecondaryName_(const std::string &name, ContentType &ct, DataType &dt);
-		void parseSecondaryName_(const std::string &name, ContentType &ct, DataType &dt, TIdx &width, TIdx &height, TIdx &channels);		
+		void parseName_(const DSTypes::String &name, ContentType &ct, DataType &dt);
+		void parseSecondaryName_(const DSTypes::String &name, ContentType &ct, DataType &dt);
+		void parseSecondaryName_(const DSTypes::String &name, ContentType &ct, DataType &dt, TIdx &width, TIdx &height, TIdx &channels);		
+		void getBlobSize_(const DSTypes::String &blobName, TIdx &bw, TIdx &bh, TIdx &bc);
 		
+		template<typename T> void fitToBlob_(const DSTypes::String &blobName, Matrix<T, TIdx> &mat);
+		template<typename T> void fitToBlob_(const DSTypes::String &blobName, Matrix<Matrix<T>, TIdx> &mat);
+		template<typename T> void fitToBlob_(const DSTypes::String &blobName, Matrix<ImagePNG<T>, TIdx> &mat);
+
 		boost::shared_ptr<caffe::Net<Float>> activeNet_;
 		void setActiveNet_(boost::shared_ptr<caffe::Net<Float>> n);
 		boost::shared_ptr<caffe::Net<Float>> getActiveNet_();
@@ -168,6 +173,15 @@ namespace DSModel {
 		void clearCaffeModel();
 		void updateCaffeModel(bool copyWeights=true);
 
+		template<typename T> void getBlobData(const String &blobName, Matrix<T, TIdx> &out);
+		template<typename T> void getBlobData(const String &blobName, Matrix<ImagePNG<T, TIdx>, TIdx> &out);
+		template<typename T> void getBlobData(const String &blobName, Matrix<Matrix<T, TIdx>, TIdx> &out);
+
+		template<typename T> void getLayerBlob(const String &layerName, const TIdx blobIdx, Matrix<T, TIdx> &mat);
+		TIdx getLayerBlobCount(const String &layerName);
+		template<typename T> void getInnerProductData(const String &layerName, Matrix<T, TIdx> &weights, Matrix<T, TIdx> &bias);
+		template<typename T> void getConvolutionData(const String &layerName, Matrix<T, TIdx> &out);
+		
 		//caffe::Caffe::Brew & mode() const { return mode_; }
 		
 		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, TIdx gpuDevices = 0);
