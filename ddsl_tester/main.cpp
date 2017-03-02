@@ -35,9 +35,17 @@ int main(void) {
 		ImagePNG<Float> png("C:\\DATASETS\\PlastcisSWIR2\\0000_0.png" , true);
 		png(0U, 10U, 0U, 10U)++;
 
-	} catch (const char * e) {
-		cout << e;
-	} catch (const Error &e) {
+	} catch (const double &e) {
+		cout << "double: " << e << endl;
+	} catch (int &e) {
+		cout << "int: " << e << endl;
+	} catch (float &e) {
+		cout << "float: " << e << endl;
+	} catch (const std::string &e) {
+		cout << "string: " << e << endl;
+	} catch (const std::exception &e) {
+		cout << e.what();
+  	} catch (const Error &e) {
 		cout << e.what();
 	}
 	cout << endl << "Say something: ";

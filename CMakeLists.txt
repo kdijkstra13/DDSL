@@ -9,12 +9,14 @@ option(DDSL_EXT_LIB_PNG "PNG support" ON)
 option(DDSL_EXT_LIB_SVM "SVM support" ON)
 option(DDSL_EXT_LIB_AF "ArrayFire support" ON)
 option(DDSL_EXT_LIB_CAFFE "Caffe support" ON)
+option(DDSL_EXT_LIB_CHAISCRIPT "Build with ChaiScript support" ON)
 option(DDSL_CUDA_GPU "Build with GPU support" ON)
 option(DDSL_CUDA_NCCL "Multi-GPU support" OFF)
 
 #Projects
 option(BUILD_DDSL_NO_EXT_LIB "Build vanilla DDSL" ON) 						#Depend on: None
 option(BUILD_DDSL_TESTER "Build testing project for debugging DDSL" ON) 	#Depend on: Any (See ddsl.hpp and ddsl.h)
+option(BUILD_DDSL_CHAISCRIPT "Build a chai script interpreter" ON) 				#Depend on: DDSL_EXT_LIB_CHAISCRIPT
 option(BUILD_LIBPNG_DDSL "Build a library for PNG" ON) 						#Depend on: DDSL_EXT_LIB_PNG
 option(BUILD_LIBSVM_DDSL "Build a library for SVM" ON) 						#Depend on: DDSL_EXT_LIB_SVM
 option(BUILD_LIBAF_DDSL "Build a library for ArrayFire" ON) 				#Depend on: DDSL_EXT_LIB_AF
@@ -215,6 +217,22 @@ if (BUILD_DDSL_NO_EXT_LIB)
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "DDSL_NO_EXT_LIB")
 endif()
 
+if (BUILD_DDSL_CHAISCRIPT)
+	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/main.cpp")
+	set (EXE_NAME "ddsl_chaiscript")
+	message("Make exe ${EXE_NAME}")
+	include_directories (${CMAKE_CURRENT_LIST_DIR}/src)
+	include_directories (${CMAKE_CURRENT_LIST_DIR}/contrib/ChaiScript-6.0.0/include)
+
+	add_ddsl_h_files()
+	add_ddsl_hpp_files()
+	add_executable(${EXE_NAME} ${SRC_FILES})
+	add_ddsl_h_groups()
+	add_ddsl_hpp_groups()
+
+	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "DDSL_NO_EXT_LIB")
+endif()
+
 if (BUILD_LIBPNG_DDSL)
 	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/libpng_ddsl/png_ddsl.c")
 	list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/libpng_ddsl/png_ddsl.h")
@@ -259,6 +277,7 @@ if (BUILD_LIBAF_DDSL)
 		target_link_libraries(${LIB_NAME} afcpu)
 	endif()
 endif()
+
 
 if (BUILD_DDSL_TESTER)
 	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_tester/main.cpp")
