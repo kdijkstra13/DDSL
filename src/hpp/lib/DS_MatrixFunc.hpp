@@ -530,6 +530,14 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
+	inline Matrix<T, TInt> t(const Matrix<T, TInt> &src) {
+		Matrix<T, TInt> ret;
+		Matrix<T, TInt> src2 = const_cast<Matrix<T, TInt>&>(src);
+		transpose(ret, src2);
+		return ret;
+	}
+
+	template <typename T, typename TInt>
 	inline void multiplyBase(Matrix<T, TInt>& dst, Matrix<T, TInt>& src1, Matrix<T, TInt>& src2) {
 		if (!src1.isInitialized() || !src2.isInitialized())
 			return;

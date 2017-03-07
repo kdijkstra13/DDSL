@@ -55,6 +55,9 @@ namespace DSFunc {
 	void transpose(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &src);
 
 	template <typename T, typename TInt>
+	DSLib::Matrix<T, TInt> t(const DSLib::Matrix<T, TInt> &src); //inline transpose
+
+	template <typename T, typename TInt>
 	void multiply(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &src1, DSLib::Matrix<T, TInt> &src2);	
 
 	template <typename T, typename TInt>
