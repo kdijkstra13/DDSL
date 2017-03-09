@@ -1717,7 +1717,7 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	caffe::SolverAction::Enum Caffe<TClassType, TIdx, TId>::SolverCallback_() {
 		UInt32 iters = maxIter_>0?maxIter_:solverIter_;
-		if (solver_->iter() >= iters) {
+		if (solver_->iter() > iters) {
 			this->setStageDone();
 			return caffe::SolverAction::Enum::STOP;
 		} else {
@@ -1745,7 +1745,7 @@ namespace DSModel {
 
 		//Train network
 		this->setStage("Train");		
-		UInt32 solverIter_ = solver_->param().max_iter();
+		solverIter_ = solver_->param().max_iter();
 		this->template parameterValueById<UInt32>("SolverIter") = solverIter_;
 		UInt32 iters = maxIter_>0?maxIter_:solverIter_;
 
@@ -1790,6 +1790,7 @@ namespace DSModel {
 		setInputData_(input);
 		fillMemoryDataLayer_(input.rows.count());
 
+		this->setStage("Apply");
 		this->setMinProgress(0);
 		this->setMaxProgress(output.rows.count());
 
