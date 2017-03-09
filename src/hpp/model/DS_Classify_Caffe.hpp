@@ -12,6 +12,8 @@
 #include "caffe/solver_factory.hpp"
 #include "caffe/util/db.hpp"
 
+#include "boost/bind.hpp"
+
 //#include "caffe/util/io.hpp"
 #include "google/protobuf/text_format.h"
 #ifndef CPU_ONLY
@@ -39,6 +41,52 @@ namespace DSTypes {
 }
 
 namespace DSFunc {
+
+	inline DSLib::Matrix<Int32> getCaffeGPUs() {
+		int count;
+		Matrix<Int32> ret;
+		cudaGetDeviceCount(&count);
+		for (int i = 0; i < count; ++i) {
+		  ret | (Int32)i;
+		}
+		return ret;
+	}
+
+	inline DSLib::Matrix<Int32> setCaffeGPUs(const DSLib::Matrix<Int32> &gpus = DSLib::Matrix<Int32>()) {
+		Matrix<Int32> gpus2, gpus3;
+#ifndef CPU_ONLY
+		gpus2 = getCaffeGPUs();
+		if (~gpus == 0)
+			gpus3 = gpus2;
+		else {
+			DSFunc::setIntersection(gpus3, const_cast<Matrix<Int32>&>(gpus), gpus2);
+			if (~gpus3 != ~gpus)
+				cout << "Warning: Not all GPUs were available." << endl;
+		}
+#ifndef USE_NCCL
+		if (~gpus3 > 1) {
+			cout << "Warning: Cannot use multi-gpu when not built using USE_NCCL." << endl;
+			gpus3.resize(1U, 1U);
+		}
+#endif
+		cout << "Querying GPUs: " << gpus3.print();
+		for (auto gpu = gpus3.vec().begin(); gpu != gpus3.vec().end(); gpu++) {
+			caffe::Caffe::SetDevice(*gpu);
+			caffe::Caffe::DeviceQuery();
+		}
+		if (~gpus3 > 0) {
+			caffe::Caffe::set_mode(caffe::Caffe::GPU);
+			caffe::Caffe::SetDevice(gpus3.vec(0));
+			caffe::Caffe::set_solver_count(~gpus3);
+		} else
+			cout << "Warning: No GPUs detected" << endl;
+#else
+		cout << "Warning: Running CPU Only." << endl;
+		caffe::Caffe::set_mode(caffe::Caffe::CPU);
+#endif
+		return gpus3;
+	}
+
 	inline DB * openDB(const String filename, const DBMode mode, const Backend be) {
 		const String f = "openDB";
 		DB * dat;
@@ -749,6 +797,9 @@ namespace DSModel {
 		classes_ = this->template parameterValueById<Matrix<TClassType>>("Classes");
 		netProtoFile_ = this->template parameterValueById<String>("NetProtoFile");
 		solverProtoFile_ = this->template parameterValueById<String>("SolverProtoFile");
+		maxIter_ = this->template parameterValueById<UInt32>("MaxIter");
+		currIter_ = this->template parameterValueById<UInt32>("CurrIter");
+		gpuDevices_ = this->template parameterValueById<UInt32>("GPUDevices");
 
 		classToNum_.clear();
 		Float i = 0;
@@ -955,6 +1006,9 @@ namespace DSModel {
 		//Should only be called from the constructor, otherwise call clearCaffeModel_() first
 		solver_ = nullptr;
 		net_ = nullptr;
+		maxIter_ = 0;
+		currIter_ = 0;
+		solverIter_ = 0;
 		gpuDevices_ = 0;
 		solverProtoFile_ = "";
 		netProtoFile_ = "";
@@ -1023,15 +1077,20 @@ namespace DSModel {
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
-	Caffe<TClassType, TIdx, TId>::Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, TIdx gpuDevices) {
-		init_();		
+	Caffe<TClassType, TIdx, TId>::Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, TIdx gpuDevices, TIdx maxIter) {
+		init_();
 		gpuDevices_ = gpuDevices;
+		maxIter_ = maxIter;
 		Table<TIdx, TId> tab =
 			(Matrix<Literal, TIdx>() | "Val") |
 			(
-			(((Matrix<Literal, TIdx>() | "Classes")			^ (ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes))))) |
+			(((Matrix<Literal, TIdx>() | "Classes")				^ (ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes))))) |
 			(((Matrix<Literal, TIdx>() | "NetProtoFile")		^ (ctParameter | (Matrix<String>() | netProtoFile)))) |
-			(((Matrix<Literal, TIdx>() | "SolverProtoFile")	^ (ctParameter | (Matrix<String>() | solverProtoFile))))
+			(((Matrix<Literal, TIdx>() | "SolverProtoFile")		^ (ctParameter | (Matrix<String>() | solverProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "MaxIter")				^ (ctParameter | (Matrix<UInt32>() | (UInt32)maxIter)))) |
+			(((Matrix<Literal, TIdx>() | "CurrIter")			^ (ctParameter | (Matrix<UInt32>() | (UInt32)currIter_)))) |
+			(((Matrix<Literal, TIdx>() | "SolverIter")			^ (ctParameter | (Matrix<UInt32>() | (UInt32)solverIter_)))) |
+			(((Matrix<Literal, TIdx>() | "GPUDevices")			^ (ctParameter | (Matrix<UInt32>() | (UInt32)gpuDevices))))
 			);
 		this->registerParameters(tab);
 	}
@@ -1338,7 +1397,7 @@ namespace DSModel {
 			for (TIdx c=0;c<out.cols.count();c++) {
 				ImagePNG<T, TIdx> png(outputBlob->height(), outputBlob->width());
 				std::copy(p, p + outputBlob->width() * outputBlob->height(), png.mat().rows->begin());
-				out.val(b, c);
+				out.val(b, c) = png;
 				p += outputBlob->width() * outputBlob->height();
 			}
 		}
@@ -1360,7 +1419,7 @@ namespace DSModel {
 			for (TIdx c=0;c<out.cols.count();c++) {
 				Matrix<T, TIdx> mat(outputBlob->height(), outputBlob->width());
 				std::copy(p, p + outputBlob->width() * outputBlob->height(), mat.rows->begin());
-				out.val(b, c);
+				out.val(b, c) = mat;
 				p += outputBlob->width() * outputBlob->height();
 			}
 		}
@@ -1443,7 +1502,7 @@ namespace DSModel {
 			throw Error(ecInternal, "getLayerOutput_", SS("Batch size does not match the number of rows: " << batchSize_ << " != " << output.rows.count()));
 
 		if (ct == ctResult && dt == dataType<TClassType>()) {
-			Matrix<TClassType, TIdx> result = (Matrix<TClassType, TIdx>) this->checkOutput(output(ct, dt));
+			Matrix<TClassType, TIdx> result = (Matrix<TClassType, TIdx>) this->checkOutput(output(ct, dt), blobName);
 			ContentType confCT;
 			DataType confDT;
 			parseSecondaryName_(blobName, confCT, confDT);
@@ -1452,11 +1511,11 @@ namespace DSModel {
 					throw Error(ecIncompatible, "getLayerOutput", SS("Currently only secondary ContentType 'Confidence' supported in blob: " << blobName));
 				switch (confDT) {
 					case dtFloat: {
-						Matrix<Float, TIdx> conf = (Matrix<Float, TIdx>) this->checkOutput(output(confCT, confDT));
+						Matrix<Float, TIdx> conf = (Matrix<Float, TIdx>) this->checkOutput(output(confCT, confDT), blobName);
 						getResultBlobData_(blobName, result, conf);
 					break;}
   					case dtDouble: {
-						Matrix<Double, TIdx> conf = (Matrix<Double, TIdx>) this->checkOutput(output(confCT, confDT));
+						Matrix<Double, TIdx> conf = (Matrix<Double, TIdx>) this->checkOutput(output(confCT, confDT), blobName);
 						getResultBlobData_(blobName, result, conf);
 					break;}
 				}
@@ -1465,31 +1524,31 @@ namespace DSModel {
 		} else {
 			switch (dt) {
 				case dtFloat: {
-					Matrix<Float, TIdx> out = (Matrix<Float, TIdx>) this->checkOutput(output(ct, dt));
+					Matrix<Float, TIdx> out = (Matrix<Float, TIdx>) this->checkOutput(output(ct, dt), blobName);
 					getBlobData_(blobName, out);
 				break;}
 				case dtDouble: {
-					Matrix<Double, TIdx> out = (Matrix<Double, TIdx>) this->checkOutput(output(ct, dt));
+					Matrix<Double, TIdx> out = (Matrix<Double, TIdx>) this->checkOutput(output(ct, dt), blobName);
 					getBlobData_(blobName, out);
 				break;}
    				case dtUInt32: {
-					Matrix<UInt32, TIdx> out = (Matrix<UInt32, TIdx>) this->checkOutput(output(ct, dt));
+					Matrix<UInt32, TIdx> out = (Matrix<UInt32, TIdx>) this->checkOutput(output(ct, dt), blobName);
 					getBlobData_(blobName, out);
 				break;}
    				case dtImagePNGFloat: {
-					Matrix<ImagePNG<Float, TIdx>, TIdx> out = (Matrix<ImagePNG<Float>, TIdx>) this->checkOutput(output(ct, dt));
+					Matrix<ImagePNG<Float, TIdx>, TIdx> out = (Matrix<ImagePNG<Float>, TIdx>) this->checkOutput(output(ct, dt), blobName);
 					getBlobData_(blobName, out);
 				break;}
    				case dtImagePNGDouble: {
-					Matrix<ImagePNG<Double, TIdx>, TIdx> out = (Matrix<ImagePNG<Double>, TIdx>) this->checkOutput(output(ct, dt));
+					Matrix<ImagePNG<Double, TIdx>, TIdx> out = (Matrix<ImagePNG<Double>, TIdx>) this->checkOutput(output(ct, dt), blobName);
 					getBlobData_(blobName, out);
 				break;}
    				case dtMatrixFloat: {
-					Matrix<Matrix<Float, TIdx>, TIdx> out = (Matrix<Matrix<Float>, TIdx>) this->checkOutput(output(ct, dt));
+					Matrix<Matrix<Float, TIdx>, TIdx> out = (Matrix<Matrix<Float>, TIdx>) this->checkOutput(output(ct, dt), blobName);
 					getBlobData_(blobName, out);
 				break;}
    				case dtMatrixDouble: {
-					Matrix<Matrix<Double, TIdx>, TIdx> out = (Matrix<Matrix<Double>, TIdx>) this->checkOutput(output(ct, dt));
+					Matrix<Matrix<Double, TIdx>, TIdx> out = (Matrix<Matrix<Double>, TIdx>) this->checkOutput(output(ct, dt), blobName);
 					getBlobData_(blobName, out);
 				break;}
 			}
@@ -1501,27 +1560,27 @@ namespace DSModel {
 	void Caffe<TClassType, TIdx, TId>::setMemoryDataInput_(Table<TIdx, TId> &input, const String &layerName, const String &dataName, const String &labelName, const ContentType dataCT, const DataType dataDT, const ContentType labelCT, const DataType labelDT) {
 		switch (dataDT) {
 			case dtFloat: {
-				Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) this->checkInput(input(dataCT, dataDT));
+				Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) this->checkInput(input(dataCT, dataDT), dataName);
 				addBlobData_(dataName, in);
 				break;}
 			case dtDouble: {
-				Matrix<Double, TIdx> in = (Matrix<Double, TIdx>) this->checkInput(input(dataCT, dataDT));
+				Matrix<Double, TIdx> in = (Matrix<Double, TIdx>) this->checkInput(input(dataCT, dataDT), dataName);
 				addBlobData_(dataName, in);
 				break;}
 			case dtImagePNGFloat: {
-				Matrix<ImagePNG<Float>> in = (Matrix<ImagePNG<Float>>) this->checkInput(input(dataCT, dataDT));
+				Matrix<ImagePNG<Float>> in = (Matrix<ImagePNG<Float>>) this->checkInput(input(dataCT, dataDT), dataName);
 				addBlobData_(dataName, in);
 				break;}
 			case dtImagePNGDouble: {
-				Matrix<ImagePNG<Double>> in = (Matrix<ImagePNG<Double>>) this->checkInput(input(dataCT, dataDT));
+				Matrix<ImagePNG<Double>> in = (Matrix<ImagePNG<Double>>) this->checkInput(input(dataCT, dataDT), dataName);
 				addBlobData_(dataName, in);
 				break;}
 			case dtMatrixFloat: {
-				Matrix<Matrix<Float>> in = (Matrix<Matrix<Float>>) this->checkInput(input(dataCT, dataDT));
+				Matrix<Matrix<Float>> in = (Matrix<Matrix<Float>>) this->checkInput(input(dataCT, dataDT), dataName);
 				addBlobData_(dataName, in);
 				break;}
 			case dtMatrixDouble: {
-				Matrix<Matrix<Double>> in = (Matrix<Matrix<Double>>) this->checkInput(input(dataCT, dataDT));
+				Matrix<Matrix<Double>> in = (Matrix<Matrix<Double>>) this->checkInput(input(dataCT, dataDT), dataName);
 				addBlobData_(dataName, in);
 				break;}
 			default: throw Error(ecIncompatible, "setMemoryDataInput_", SS(layerName << "." << dataName << " has an unsupported DataType: " <<  etos(dataCT)));
@@ -1538,14 +1597,14 @@ namespace DSModel {
 		} else {
 			switch (labelDT) {
 				case dtFloat: {
-					Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) this->checkInput(input(labelCT, labelDT));
+					Matrix<Float, TIdx> in = (Matrix<Float, TIdx>) this->checkInput(input(labelCT, labelDT), labelName);
 					addBlobData_(labelName, in);
 					break;}
 				case dtUnknown: {
 					Matrix<Float, TIdx> in(input.rows.count(), 1); //dummy
 					addBlobData_(labelName, in);				
 					break;}
-				default: throw Error(ecIncompatible, "setMemoryDataInput_", SS(layerName << "." << dataName << " has an unsupported DataType: " << etos(labelDT)));
+				default: throw Error(ecIncompatible, "setMemoryDataInput_", SS(layerName << "." << labelName << " has an unsupported DataType: " << etos(labelDT)));
 			}
 		}
 	}
@@ -1626,7 +1685,7 @@ namespace DSModel {
 				}
 			}
 		} catch (Error &e) {
-			throw Error(ecExternalLibrary, "setInputData_",  SS(e.what() << ". Are all the ddslinput layers of the correct type?"));
+			throw Error(ecExternalLibrary, "setInputData()",  SS(e.what() << ". Are all the ddslInput blobs of the correct type?"));
 		}
 	}
 
@@ -1647,8 +1706,21 @@ namespace DSModel {
 				}
 			}
 		} catch (Error &e) {
-			throw Error(ecExternalLibrary, "setOutputData_",  e.what());
+			throw Error(ecExternalLibrary, "setOutputData()",  SS(e.what() << ". Are all the ddslOutput blobs of the correct type?"));
 		}	
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	caffe::SolverAction::Enum Caffe<TClassType, TIdx, TId>::SolverCallback_() {
+		UInt32 iters = maxIter_>0?maxIter_:solverIter_;
+		if (solver_->iter() >= iters) {
+			this->setStageDone();
+			return caffe::SolverAction::Enum::STOP;
+		} else {
+			if (solver_->iter() % 10 == 0)
+				this->setProgress(solver_->iter());
+		}
+		return caffe::SolverAction::Enum::NONE;
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1668,21 +1740,24 @@ namespace DSModel {
 		fillMemoryDataLayer_(input.rows.count());
 
 		//Train network
-		this->setStage("Train");
-		UInt32 iters = solver_->param().max_iter();
-		this->setMinProgress(1);
-		this->setMaxProgress(iters);
+		this->setStage("Train");		
+		UInt32 solverIter_ = solver_->param().max_iter();
+		this->template parameterValueById<UInt32>("SolverIter") = solverIter_;
+		UInt32 iters = maxIter_>0?maxIter_:solverIter_;
+
+		this->setMinProgress(0);
+		this->setMaxProgress(solverIter_);
+		this->setProgress(solver_->iter());
 
 		//Train the classifier
-		if (gpuDevices_ == 1) {
-			while (solver_->iter() < (int)iters) {
-				solver_->Step(1);
-				this->setProgress(solver_->iter());
-			}
-		} else
-			solver_->Solve();
+		ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
+		solver_->SetActionFunction(cb);
+		solver_->Solve();
 
-		//Initialize		
+		UInt32 currIter_ = solver_->iter();
+		this->template parameterValueById<UInt32>("CurrIter") = currIter_;
+
+		//Initialize
 		this->setStage("Apply");
 		this->setMinProgress(0);
 		this->setMaxProgress(output.rows.count());
@@ -1723,6 +1798,42 @@ namespace DSModel {
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::setMaxIter(const TIdx maxIter) {
+		this->template parameterValueById<UInt32>("MaxIter") = maxIter_;
+		updateParameters();
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	TIdx Caffe<TClassType, TIdx, TId>::getMaxIter() {
+		return this->template parameterValueById<UInt32>("MaxIter");
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	TIdx Caffe<TClassType, TIdx, TId>::getCurrIter() {
+		return this->template parameterValueById<UInt32>("CurrIter");
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	TIdx Caffe<TClassType, TIdx, TId>::getSolverIter() {
+		return this->template parameterValueById<UInt32>("SolverIter");
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	bool Caffe<TClassType, TIdx, TId>::incMaxIter(const TIdx amount) {
+		UInt32 maxIter_ = this->template parameterValueById<UInt32>("MaxIter");
+		UInt32 solverIter_ = this->template parameterValueById<UInt32>("SolverIter");
+		if (maxIter_ >= solverIter_)
+			return false;
+		maxIter_ += amount;
+		if (maxIter_ > solverIter_)
+			maxIter_ = solverIter_;
+		this->template parameterValueById<UInt32>("MaxIter") = maxIter_;
+		updateParameters();
+		return true;
+	}
+
+
+	template<typename TClassType, typename TIdx, typename TId>
 	Caffe<TClassType, TIdx, TId>::~Caffe() {
 		clearCaffeModel();
 		clearInputData_();
@@ -1733,6 +1844,9 @@ namespace DSModel {
 		clearCaffeModel();
 		init_();
 		gpuDevices_ = other.gpuDevices_;
+		maxIter_ = other.maxIter_;
+		currIter_ = other.currIter_;
+		solverIter_ = other.solverIter_;
 
 		solverProtoFile_ = other.solverProtoFile_;
 		netProtoFile_ = other.netProtoFile_;
@@ -1766,6 +1880,9 @@ namespace DSModel {
 		clearCaffeModel();
 		init_();
 		gpuDevices_ = other.gpuDevices_;
+		maxIter_ = other.maxIter_;
+		currIter_ = other.currIter_;
+		solverIter_ = other.solverIter_;
 
 		solverProtoFile_ = std::move(other.solverProtoFile_);
 		netProtoFile_ = std::move( other.netProtoFile_);

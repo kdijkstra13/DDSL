@@ -494,8 +494,8 @@ namespace DSLib {
 
 namespace DSTypes{
 	//Type definitions for Matrix put into the DSTypes namespace after definition of Matrix<>. Allows for Matrix<MatrixDouble>
-	typedef DSLib::Matrix<DSTypes::Float, DSTypes::MatrixIdx> MatrixDouble;
-	typedef DSLib::Matrix<DSTypes::Double, DSTypes::MatrixIdx> MatrixFloat;
+	typedef DSLib::Matrix<DSTypes::Float, DSTypes::MatrixIdx> MatrixFloat;
+	typedef DSLib::Matrix<DSTypes::Double, DSTypes::MatrixIdx> MatrixDouble;
 	typedef DSLib::Matrix<DSTypes::Int32, DSTypes::MatrixIdx> MatrixInt32;
 	typedef DSLib::Matrix<DSTypes::UInt32, DSTypes::MatrixIdx> MatrixUInt32;
 	typedef DSLib::Matrix<DSTypes::String, DSTypes::MatrixIdx> MatrixString;

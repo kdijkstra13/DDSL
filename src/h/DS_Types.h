@@ -131,11 +131,11 @@ namespace DSTypes {
 	};
 
 	enum ContentType {ctUnknown, ctFeature, ctTarget, ctResult, ctSplit, ctConfusion, ctIndex, ctParameter, ctConfidence, ctImage, ctError, ctCorrelation};
-	enum DataType { dtUnknown, dtDouble, dtFloat, dtUInt8, dtUInt16, dtUInt32, dtUInt64, dtInt8, dtInt16, dtInt32, dtInt64, dtString, dtCString, dtContentType, dtDataType, dtMatrixDouble, dtMatrixInt32, dtMatrixUInt32, dtMatrixString, dtVoidPointer, dtCaffeBlobDouble, 
+	enum DataType { dtUnknown, dtDouble, dtFloat, dtUInt8, dtUInt16, dtUInt32, dtUInt64, dtInt8, dtInt16, dtInt32, dtInt64, dtString, dtCString, dtContentType, dtDataType, dtMatrixFloat, dtMatrixDouble, dtMatrixInt32, dtMatrixUInt32, dtMatrixString, dtVoidPointer, dtCaffeBlobDouble,
 		#ifndef DDSL_NO_EXT_LIB_PNG
-			dtImagePNGDouble, dtImagePNGFloat, 
+			dtImagePNGDouble, dtImagePNGFloat
 		#endif		
-		dtMatrixFloat};
+		};
 	enum PassThroughType {pttAll, pttRelevant, pttNone};
 	enum ExecType { etSynchronous, etAsynchronous};
 	enum Order {oRowMajor, oColMajor};

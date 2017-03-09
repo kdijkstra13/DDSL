@@ -95,6 +95,9 @@ namespace DSModel {
 		Matrix<String, TIdx> dataBlobName_;
 		Matrix<String, TIdx> labelBlobName_;
 
+		TIdx maxIter_;
+		TIdx currIter_;
+		TIdx solverIter_;
 		TIdx batchSize_;
 
 		map<TClassType, DSTypes::Float> classToNum_;
@@ -108,6 +111,8 @@ namespace DSModel {
 		DSTypes::String solverProtoFile_;
 		DSTypes::String netProtoFile_;
 		DSTypes::String snapshotModelFile_;
+
+		caffe::SolverAction::Enum Caffe<TClassType, TIdx, TId>::SolverCallback_();
 
 		void freeNet_(caffe::Net<Float>** net);
 		void freeSolver_(caffe::Solver<Float>** net);
@@ -183,8 +188,14 @@ namespace DSModel {
 		template<typename T> void getConvolutionData(const String &layerName, Matrix<T, TIdx> &out);
 		
 		//caffe::Caffe::Brew & mode() const { return mode_; }
+
+		void setMaxIter(const TIdx maxIter); //when maxIter is zero, maxITer will be set to the solver's iter.
+		bool incMaxIter(const TIdx amount); //Increase maxIter not further than solver's iter. Return false if maxIter cannot be increased further.
+		TIdx getMaxIter();
+		TIdx getSolverIter();
+		TIdx getCurrIter();
 		
-		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, TIdx gpuDevices = 0);
+		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, TIdx gpuDevices = 0, TIdx maxIter = 0);
 		Caffe(const DSTypes::String &filename, TIdx gpuDevices = 0, const DSTypes::String snapshotModelFile = "");
 
 		M_HDR_MODEL_DESTRUCTOR(Caffe)
@@ -249,10 +260,7 @@ namespace DSModel {
 
 		void clearCaffeModel();
 		void updateCaffeModel(bool copyWeights=true);
-
-		//caffe::Caffe::Brew mode() const { return mode_; }
-		//void mode(caffe::Caffe::Brew mode) { mode_ = mode; }
-
+		
 		void readModel(const DSTypes::String &filename, bool loadSolver, bool loadNet);
 	
 		CaffeMLP(const DSLib::Matrix<TClassType, TIdx> &classes, TIdx gpuDevices = 0, DSTypes::Double learnRate = 0.001, DSTypes::Double momentum = 0.01, Matrix<UInt32> units = (dtUInt32|100), TIdx iter = 1000, TIdx batchSize = 10, DSTypes::LearnRatePolicy lrp = lrpFixed, TIdx stepSize = 100, Double gamma = 0.1, Double power = 1, Double weightDecay = 0, DSTypes::UnitType unitType = utTanH, DSTypes::SolverType solverType_ = stSGD, Matrix<UInt32> stepValue_ = (dtUInt32|0));

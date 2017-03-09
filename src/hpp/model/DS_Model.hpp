@@ -14,27 +14,27 @@ namespace DSModel {
 	//#define ASYNCPOLICY std::launch::deferred
 
 	template <typename TIdx, typename TId> 
-	Table<TIdx, TId> & Model<TIdx, TId>::checkInput(Table<TIdx, TId> &tab) {
+	Table<TIdx, TId> & Model<TIdx, TId>::checkInput(Table<TIdx, TId> &tab, const String &name) {
 		if (~tab == 0)
-			throw Error(ecIncompatible, "checkInput", "A model input is not present. Is the correct passThroughType specified?");
+			throw Error(ecIncompatible, "checkInput", SS("Model input \"" << name << "\" is not present. Is the correct passThroughType specified?"));
 		return tab;
 	}
 
 	template <typename TIdx, typename TId> 
-	Table<TIdx, TId> && Model<TIdx, TId>::checkInput(Table<TIdx, TId> &&tab) {
-		return std::move(checkInput(tab));
+	Table<TIdx, TId> && Model<TIdx, TId>::checkInput(Table<TIdx, TId> &&tab, const String &name) {
+		return std::move(checkInput(tab, name));
 	}
 
 	template <typename TIdx, typename TId> 
-	Table<TIdx, TId> & Model<TIdx, TId>::checkOutput(Table<TIdx, TId> &tab) {
+	Table<TIdx, TId> & Model<TIdx, TId>::checkOutput(Table<TIdx, TId> &tab, const String &name) {
 		if (~tab == 0)
-			throw Error(ecIncompatible, "checkOutput", "A model output is not present. Is the correct passThroughType specified?");
+			throw Error(ecIncompatible, "checkOutput", SS("Model ouput \"" << name << "\" is not present. Is the correct passThroughType specified?"));
 		return tab;
 	}
 
 	template <typename TIdx, typename TId> 
-	Table<TIdx, TId> && Model<TIdx, TId>::checkOutput(Table<TIdx, TId> &&tab) {
-		return std::move(checkInput(tab));
+	Table<TIdx, TId> && Model<TIdx, TId>::checkOutput(Table<TIdx, TId> &&tab, const String &name) {
+		return std::move(checkInput(tab, name));
 	}
 
 	template<typename TIdx, typename TId>

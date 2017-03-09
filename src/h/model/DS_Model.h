@@ -231,10 +231,10 @@ namespace DSModel {
 		virtual void clear() override;
 		virtual void clearAll() override;
 
-		Table<TIdx, TId> & checkInput(Table<TIdx, TId> &tab);
-		Table<TIdx, TId> && checkInput(Table<TIdx, TId> &&tab);
-		Table<TIdx, TId> & checkOutput(Table<TIdx, TId> &tab);
-		Table<TIdx, TId> && checkOutput(Table<TIdx, TId> &&tab);
+		Table<TIdx, TId> & checkInput(Table<TIdx, TId> &tab, const String &name);
+		Table<TIdx, TId> && checkInput(Table<TIdx, TId> &&tab, const String &name);
+		Table<TIdx, TId> & checkOutput(Table<TIdx, TId> &tab, const String &name);
+		Table<TIdx, TId> && checkOutput(Table<TIdx, TId> &&tab, const String &name);
 		
 		void prepareOutput(DSLib::Table<TIdx, TId> &srcTable);
 		void prepareInput(DSLib::Table<TIdx, TId> &srcTable);

@@ -11,19 +11,62 @@ using namespace std;
 
 namespace DSTypes {
 	namespace {
-		const char * dataTypeName_[] = { "Unknown", typeid(Double).name(), typeid(Float).name(), typeid(UInt8).name(), typeid(UInt16).name(), typeid(UInt32).name(), typeid(UInt64).name(), typeid(Int8).name(), typeid(Int16).name(), typeid(Int32).name(), typeid(Int64).name(), typeid(String).name(), typeid(CString).name(), typeid(ContentType).name(), typeid(DataType).name(), typeid(MatrixDouble).name(), typeid(MatrixInt32).name(), typeid(MatrixUInt32).name(), typeid(MatrixString).name(), typeid(VoidPointer).name(), typeid(CaffeBlobDouble).name(), 
-#ifndef DDSL_NO_EXT_LIB_PNG
-			typeid(ImagePNG<Double>).name(), 
-			typeid(ImagePNG<Float>).name(), 
-#endif
-			typeid(MatrixFloat).name()
+		const char * dataTypeName_[] = { 
+			"Unknown", 
+			typeid(Double).name(), 
+			typeid(Float).name(), 
+			typeid(UInt8).name(), 
+			typeid(UInt16).name(), 
+			typeid(UInt32).name(), 
+			typeid(UInt64).name(), 
+			typeid(Int8).name(), 
+			typeid(Int16).name(), 
+			typeid(Int32).name(), 
+			typeid(Int64).name(), 
+			typeid(String).name(), 
+			typeid(CString).name(), 
+			typeid(ContentType).name(), 
+			typeid(DataType).name(), 
+			typeid(MatrixFloat).name(),
+			typeid(MatrixDouble).name(), 
+			typeid(MatrixInt32).name(), 
+			typeid(MatrixUInt32).name(), 
+			typeid(MatrixString).name(), 
+			typeid(VoidPointer).name(), 
+			typeid(CaffeBlobDouble).name(), 
+			#ifndef DDSL_NO_EXT_LIB_PNG
+				typeid(ImagePNG<Double>).name(),
+				typeid(ImagePNG<Float>).name(),
+			#endif
 		};
-		size_t dataTypeHash_[] = { 0, typeid(Double).hash_code(), typeid(Float).hash_code(), typeid(UInt8).hash_code(), typeid(UInt16).hash_code(), typeid(UInt32).hash_code(), typeid(UInt64).hash_code(), typeid(Int8).hash_code(), typeid(Int16).hash_code(), typeid(Int32).hash_code(), typeid(Int64).hash_code(), typeid(String).hash_code(), typeid(CString).hash_code(), typeid(ContentType).hash_code(), typeid(DataType).hash_code(), typeid(MatrixDouble).hash_code(), typeid(MatrixInt32).hash_code(), typeid(MatrixUInt32).hash_code(), typeid(MatrixString).hash_code(), typeid(VoidPointer).hash_code(), typeid(CaffeBlobDouble).hash_code(), 
-#ifndef DDSL_NO_EXT_LIB_PNG
-			typeid(ImagePNG<Double>).hash_code(), 
-			typeid(ImagePNG<Float>).hash_code(), 
-#endif
-			typeid(Matrix<Float>).hash_code()};
+		size_t dataTypeHash_[] = { 
+			0, 
+			typeid(Double).hash_code(), 
+			typeid(Float).hash_code(), 
+			typeid(UInt8).hash_code(), 
+			typeid(UInt16).hash_code(), 
+			typeid(UInt32).hash_code(), 
+			typeid(UInt64).hash_code(), 
+			typeid(Int8).hash_code(), 
+			typeid(Int16).hash_code(), 
+			typeid(Int32).hash_code(), 
+			typeid(Int64).hash_code(), 
+			typeid(String).hash_code(), 
+			typeid(CString).hash_code(), 
+			typeid(ContentType).hash_code(), 
+			typeid(DataType).hash_code(), 
+			typeid(MatrixFloat).hash_code(),
+			typeid(MatrixDouble).hash_code(), 
+			typeid(MatrixInt32).hash_code(), 
+			typeid(MatrixUInt32).hash_code(), 
+			typeid(MatrixString).hash_code(), 
+			typeid(VoidPointer).hash_code(), 
+			typeid(CaffeBlobDouble).hash_code(), 
+			#ifndef DDSL_NO_EXT_LIB_PNG
+				typeid(ImagePNG<Double>).hash_code(), 
+				typeid(ImagePNG<Float>).hash_code()
+			#endif
+		};
 	}
 
 	inline Error::Error (const ErrorCode code, std::string location, std::string message, const bool fatal) : loc_(location), msg_(message), ftl_(fatal), code_(code) {}
@@ -56,7 +99,7 @@ namespace DSTypes {
 	template<typename T> struct enumStrings {static char const* data[];};
 
 	template<> char const* enumStrings<ContentType>::data[] = { "Unknown", "Feature", "Target", "Result", "Split", "Confusion", "Index", "Parameter", "Confidence", "Image", "Error", "Correlation"};
-	template<> char const* enumStrings<DataType>::data[] = { "Unknown", "Double", "Float", "UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64", "String", "CString", "ContentType", "DataType", "MatrixDouble", "MatrixInt32", "MatrixUInt32", "MatrixString", "VoidPointer", "CaffeBlobDouble", "ImagePNGDouble", "ImagePNGFloat", "MatrixFloat"};
+	template<> char const* enumStrings<DataType>::data[] = { "Unknown", "Double", "Float", "UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64", "String", "CString", "ContentType", "DataType", "MatrixFloat", "MatrixDouble", "MatrixInt32", "MatrixUInt32", "MatrixString", "VoidPointer", "CaffeBlobDouble", "ImagePNGDouble", "ImagePNGFloat"};
 	template<> char const* enumStrings<PassThroughType>::data[] = {"All", "Relevant", "None"};
 	template<> char const* enumStrings<ExecType>::data[] = { "Synchronous", "Asynchronous"};
 	template<> char const* enumStrings<Order>::data[] = {"RowMajor", "ColMajor"};
