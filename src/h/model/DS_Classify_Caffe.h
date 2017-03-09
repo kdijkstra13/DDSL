@@ -112,7 +112,7 @@ namespace DSModel {
 		DSTypes::String netProtoFile_;
 		DSTypes::String snapshotModelFile_;
 
-		caffe::SolverAction::Enum Caffe<TClassType, TIdx, TId>::SolverCallback_();
+		caffe::SolverAction::Enum SolverCallback_();
 
 		void freeNet_(caffe::Net<Float>** net);
 		void freeSolver_(caffe::Solver<Float>** net);
@@ -171,6 +171,8 @@ namespace DSModel {
 	public:
 		using Model<TIdx, TId>::train;
 		using Model<TIdx, TId>::apply;
+
+		virtual DSTypes::String modelName() const override;
 
 		void resetModel() override;
 

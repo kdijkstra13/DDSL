@@ -782,6 +782,10 @@ namespace DSModel {
 	//*****************//
 	//** Class Caffe **//
 	//*****************//
+	template<typename TClassType, typename TIdx, typename TId>
+	DSTypes::String Caffe<TClassType, TIdx, TId>::modelName() const {
+		return SS("Caffe");
+	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::updateParameters() {
