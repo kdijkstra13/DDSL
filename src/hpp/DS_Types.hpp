@@ -11,59 +11,59 @@ using namespace std;
 
 namespace DSTypes {
 	namespace {
-		const char * dataTypeName_[] = { 
-			"Unknown", 
-			typeid(Double).name(), 
-			typeid(Float).name(), 
-			typeid(UInt8).name(), 
-			typeid(UInt16).name(), 
-			typeid(UInt32).name(), 
-			typeid(UInt64).name(), 
-			typeid(Int8).name(), 
-			typeid(Int16).name(), 
-			typeid(Int32).name(), 
-			typeid(Int64).name(), 
-			typeid(String).name(), 
-			typeid(CString).name(), 
-			typeid(ContentType).name(), 
-			typeid(DataType).name(), 
+		const char * dataTypeName_[] = {
+			"Unknown",
+			typeid(Double).name(),
+			typeid(Float).name(),
+			typeid(UInt8).name(),
+			typeid(UInt16).name(),
+			typeid(UInt32).name(),
+			typeid(UInt64).name(),
+			typeid(Int8).name(),
+			typeid(Int16).name(),
+			typeid(Int32).name(),
+			typeid(Int64).name(),
+			typeid(String).name(),
+			typeid(CString).name(),
+			typeid(ContentType).name(),
+			typeid(DataType).name(),
 			typeid(MatrixFloat).name(),
-			typeid(MatrixDouble).name(), 
-			typeid(MatrixInt32).name(), 
-			typeid(MatrixUInt32).name(), 
-			typeid(MatrixString).name(), 
-			typeid(VoidPointer).name(), 
-			typeid(CaffeBlobDouble).name(), 
+			typeid(MatrixDouble).name(),
+			typeid(MatrixInt32).name(),
+			typeid(MatrixUInt32).name(),
+			typeid(MatrixString).name(),
+			typeid(VoidPointer).name(),
+			typeid(CaffeBlobDouble).name(),
 			#ifndef DDSL_NO_EXT_LIB_PNG
 				typeid(ImagePNG<Double>).name(),
 				typeid(ImagePNG<Float>).name(),
 			#endif
 		};
-		size_t dataTypeHash_[] = { 
-			0, 
-			typeid(Double).hash_code(), 
-			typeid(Float).hash_code(), 
-			typeid(UInt8).hash_code(), 
-			typeid(UInt16).hash_code(), 
-			typeid(UInt32).hash_code(), 
-			typeid(UInt64).hash_code(), 
-			typeid(Int8).hash_code(), 
-			typeid(Int16).hash_code(), 
-			typeid(Int32).hash_code(), 
-			typeid(Int64).hash_code(), 
-			typeid(String).hash_code(), 
-			typeid(CString).hash_code(), 
-			typeid(ContentType).hash_code(), 
-			typeid(DataType).hash_code(), 
+		size_t dataTypeHash_[] = {
+			0,
+			typeid(Double).hash_code(),
+			typeid(Float).hash_code(),
+			typeid(UInt8).hash_code(),
+			typeid(UInt16).hash_code(),
+			typeid(UInt32).hash_code(),
+			typeid(UInt64).hash_code(),
+			typeid(Int8).hash_code(),
+			typeid(Int16).hash_code(),
+			typeid(Int32).hash_code(),
+			typeid(Int64).hash_code(),
+			typeid(String).hash_code(),
+			typeid(CString).hash_code(),
+			typeid(ContentType).hash_code(),
+			typeid(DataType).hash_code(),
 			typeid(MatrixFloat).hash_code(),
-			typeid(MatrixDouble).hash_code(), 
-			typeid(MatrixInt32).hash_code(), 
-			typeid(MatrixUInt32).hash_code(), 
-			typeid(MatrixString).hash_code(), 
-			typeid(VoidPointer).hash_code(), 
-			typeid(CaffeBlobDouble).hash_code(), 
+			typeid(MatrixDouble).hash_code(),
+			typeid(MatrixInt32).hash_code(),
+			typeid(MatrixUInt32).hash_code(),
+			typeid(MatrixString).hash_code(),
+			typeid(VoidPointer).hash_code(),
+			typeid(CaffeBlobDouble).hash_code(),
 			#ifndef DDSL_NO_EXT_LIB_PNG
-				typeid(ImagePNG<Double>).hash_code(), 
+				typeid(ImagePNG<Double>).hash_code(),
 				typeid(ImagePNG<Float>).hash_code()
 			#endif
 		};
@@ -82,7 +82,7 @@ namespace DSTypes {
 	};
 
 	//Check if a variable is of the same DataType
-	template <typename T> inline bool dataTypeEqual(const DataType dt, const T &tp) {		
+	template <typename T> inline bool dataTypeEqual(const DataType dt, const T &tp) {
 		return (dataTypeHash_[dt] == typeid(T).hash_code());
 	}
 
@@ -111,7 +111,7 @@ namespace DSTypes {
 	inline std::ostream& operator<<(std::ostream &os, const VoidPointer &vp) { return os << "(void*)" << (UInt)vp.get(); };
 
 	//Find the DataType of a variable
-	template <typename T> inline DataType dataType(const T &type) {		
+	template <typename T> inline DataType dataType(const T &type) {
 		const int len = sizeof(enumStrings<DataType>::data) / sizeof(char*);
 		for (int i=0;i<len;i++)
 			if (dataTypeEqual(DataType(i), type))
@@ -132,6 +132,12 @@ namespace DSTypes {
 			return enumStrings<DataType>::data[distance(std::begin(dataTypeHash_), f)];
 		}
 		return typeid(T).name();
+	}
+
+	//Find the user friendly name of the DataType of a variable
+	template <typename T> inline String typeName() {
+	    T t;
+	    return typeName(t);
 	}
 
 	inline ContentType stringToContentType(const String &s) {
@@ -160,7 +166,7 @@ namespace DSTypes {
 	template<typename T>
 	inline std::istream& operator>>(std::istream& str, enumRef<T> & data) {
 		std::string value;
-		getline(str, value);		
+		getline(str, value);
 		auto begin = std::begin(enumStrings<T>::data);
 		auto end = std::end(enumStrings<T>::data);
 		auto find = std::find(begin, std::end(enumStrings<T>::data), value);
