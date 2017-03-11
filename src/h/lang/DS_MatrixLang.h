@@ -77,7 +77,7 @@ namespace DSLang {
 	template <typename T, typename TInt> DSLib::Matrix<T, TInt> operator^(DSLib::Matrix<T, TInt> &&lhs, const DSLib::Matrix<T, TInt> &rhs);
 	template <typename T, typename TInt> DSLib::Matrix<T, TInt> operator|(DSLib::Matrix<T, TInt> &&lhs, const T &rhs);
 	template <typename T, typename TInt> DSLib::Matrix<T, TInt> operator^(DSLib::Matrix<T, TInt> &&lhs, const T &rhs);
-	
+
 	//Special templates to handle "literal" (Header file code)
 	template <int T, typename TInt> DSLib::Matrix<DSTypes::Literal, TInt> & operator|(DSLib::Matrix<DSTypes::Literal, TInt> &lhs, const char(&rhs)[T]) { lhs.cols.add((const char *)rhs);return lhs; }
 	template <int T, typename TInt> DSLib::Matrix<DSTypes::Literal, TInt> operator|(DSLib::Matrix<DSTypes::Literal, TInt> &&lhs, const char(&rhs)[T]) { return std::move(lhs | rhs); };
@@ -136,10 +136,10 @@ namespace DSLang {
 	//** Set logic **//
 	//***************//
 
-	//Set intersection between indices 
+	//Set intersection between indices
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator&&(DSLib::Matrix<T, TInt> &lhs, const DSLib::Matrix<T, TInt> &rhs);
-	
+
 	//Set union between indices
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator||(DSLib::Matrix<T, TInt> &lhs, const DSLib::Matrix<T, TInt> &rhs);
@@ -182,7 +182,7 @@ namespace DSLang {
 
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator*(DSLib::Matrix<T, TInt> &lhs, const DSLib::Matrix<T, TInt> &rhs);
-	
+
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & pow(DSLib::Matrix<T, TInt> &lhs, const T &rhs);
 
@@ -251,6 +251,27 @@ namespace DSLang {
 
 	template <typename T, typename TInt>
 	const DSLib::Matrix<T, TInt> & operator--(const DSLib::Matrix<T, TInt> &lhs, int);
+
+	//Print full matrix
+    template <typename T, typename TInt>
+	DSLib::Matrix<T, TInt> & operator++(DSLib::Matrix<T, TInt> &lhs);
+
+	template <typename T, typename TInt>
+	DSLib::Matrix<T, TInt> && operator++(DSLib::Matrix<T, TInt> &&lhs);
+
+	template <typename T, typename TInt>
+	const DSLib::Matrix<T, TInt> & operator++(const DSLib::Matrix<T, TInt> &lhs);
+
+	//Print Matrix meta information
+	template <typename T, typename TInt>
+	DSLib::Matrix<T, TInt> && operator--(DSLib::Matrix<T, TInt> &&lhs);
+
+	template <typename T, typename TInt>
+	DSLib::Matrix<T, TInt> & operator--(DSLib::Matrix<T, TInt> &lhs);
+
+	template <typename T, typename TInt>
+	const DSLib::Matrix<T, TInt> & operator--(const DSLib::Matrix<T, TInt> &lhs);
+
 
 	//**********************//
 	//** Matrix streaming **//
