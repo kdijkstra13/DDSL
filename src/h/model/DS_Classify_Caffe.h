@@ -105,7 +105,7 @@ namespace DSModel {
 		
 		caffe::Solver<DSTypes::Float> * solver_;
 		caffe::Net<DSTypes::Float> * net_;		
-		TIdx gpuDevices_;
+		DSLib::Matrix<DSTypes::Int32, TIdx> gpuDevices_;
 		TIdx iterDone_;
 
 		DSTypes::String solverProtoFile_;
@@ -188,17 +188,15 @@ namespace DSModel {
 		TIdx getLayerBlobCount(const String &layerName);
 		template<typename T> void getInnerProductData(const String &layerName, Matrix<T, TIdx> &weights, Matrix<T, TIdx> &bias);
 		template<typename T> void getConvolutionData(const String &layerName, Matrix<T, TIdx> &out);
-		
-		//caffe::Caffe::Brew & mode() const { return mode_; }
 
 		void setMaxIter(const TIdx maxIter); //when maxIter is zero, maxITer will be set to the solver's iter.
 		bool incMaxIter(const TIdx amount); //Increase maxIter not further than solver's iter. Return false if maxIter cannot be increased further.
 		TIdx getMaxIter();
 		TIdx getSolverIter();
 		TIdx getCurrIter();
-		
-		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, TIdx gpuDevices = 0, TIdx maxIter = 0);
-		Caffe(const DSTypes::String &filename, TIdx gpuDevices = 0, const DSTypes::String snapshotModelFile = "");
+
+		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = 0);
+		Caffe(const DSTypes::String &filename, const DSTypes::String snapshotModelFile = "");
 
 		M_HDR_MODEL_DESTRUCTOR(Caffe)
 		M_HDR_MODEL_CONSTRUCTOR_NO_FILE(Caffe, TClassType, TIdx, TId)
