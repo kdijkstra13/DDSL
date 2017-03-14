@@ -81,11 +81,11 @@ namespace DSModel {
 				//Train
 				patterns_.clear();
 				Matrix<TClassType, TIdx> classes = this->template parameterValueById<Matrix<TClassType, TIdx>>("Classes");
-				Matrix<Float, TIdx> in = this->checkInput(input(dtFloat, ctFeature));
-				Matrix<TClassType, TIdx> tar = this->checkInput(input(dataType<TClassType>(), ctTarget));
-				Matrix<TClassType, TIdx> ret = this->checkOutput(output(dataType<TClassType>(), ctResult));
-				Matrix<Float, TIdx> conf = this->checkOutput(output(dtFloat, ctConfidence));
-				Matrix<Float, TIdx> cors = this->checkOutput(output(dtFloat, ctCorrelation));
+				Matrix<Float, TIdx> in = this->checkInput(input(dtFloat, ctFeature), "Float");
+				Matrix<TClassType, TIdx> tar = this->checkInput(input(dataType<TClassType>(), ctTarget), "Target");
+				Matrix<TClassType, TIdx> ret = this->checkOutput(output(dataType<TClassType>(), ctResult), "Result");
+				Matrix<Float, TIdx> conf = this->checkOutput(output(dtFloat, ctConfidence), "Confidence");
+				Matrix<Float, TIdx> cors = this->checkOutput(output(dtFloat, ctCorrelation), "Correlation");
 
 				this->setStage("Train");
 				this->setMinProgress(0);

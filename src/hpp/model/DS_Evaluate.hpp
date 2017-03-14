@@ -78,8 +78,8 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Confusion<TClassType, TIdx, TId>::train(const Table<TIdx, TId> &table, Table<TIdx, TId> &input, Table<TIdx, TId> &output) {
-		Matrix<TClassType, TIdx> eval = this->checkInput(input(ctTarget));
-		Matrix<TClassType, TIdx> result = this->checkInput(input(ctResult));
+		Matrix<TClassType, TIdx> eval = this->checkInput(input(ctTarget), "Target");
+		Matrix<TClassType, TIdx> result = this->checkInput(input(ctResult), "Result");
 		Matrix<UInt32, TIdx> out = output;
 		Matrix<TClassType> classes = this->template parameterValueById<Matrix<TClassType>>("Classes");
 

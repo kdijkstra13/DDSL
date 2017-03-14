@@ -222,15 +222,24 @@ if (BUILD_DDSL_CHAISCRIPT)
 	set (EXE_NAME "ddsl_chaiscript")
 	message("Make exe ${EXE_NAME}")
 	include_directories (${CMAKE_CURRENT_LIST_DIR}/src)
-	include_directories (/usr/local/include)
+
+	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+		include_directories (${CMAKE_CURRENT_LIST_DIR}/contrib/ChaiScript-6.0.0/include)
+	else()
+		include_directories (/usr/local/include)
+	endif()
 	
 	add_ddsl_h_files()
 	add_ddsl_hpp_files()
 	add_executable(${EXE_NAME} ${SRC_FILES})
 	add_ddsl_h_groups()
 	add_ddsl_hpp_groups()
-        
-        target_link_libraries(${EXE_NAME} /usr/local/lib/chaiscript/libchaiscript_stdlib-6.0.0.so -ldl)
+    
+	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+		target_link_libraries(${EXE_NAME} ${CMAKE_CURRENT_LIST_DIR}/contrib/ChaiScript-6.0.0/build/lib)
+	else ()
+		target_link_libraries(${EXE_NAME} /usr/local/lib/chaiscript/libchaiscript_stdlib-6.0.0.so -ldl)
+	endif ()
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "DDSL_NO_EXT_LIB")
 endif()
 
