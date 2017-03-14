@@ -1733,9 +1733,9 @@ namespace DSModel {
 		if (solver_ == nullptr)
 			throw Error(ecIncompatible, "CaffeMLP::train()", "Cannot train without a solver");
 
-		//setCaffeGPUs(gpuDevices_);
-		caffe::Caffe::set_mode(caffe::Caffe::GPU);
-		caffe::Caffe::SetDevice(0);
+		setCaffeGPUs(gpuDevices_, false);
+		//caffe::Caffe::set_mode(caffe::Caffe::GPU);
+		//caffe::Caffe::SetDevice(0);
 		//caffe::Caffe::set_solver_count(~gpus3);
 
 		//Keep batchsize for checking
@@ -1791,7 +1791,7 @@ namespace DSModel {
 		if (net_ == nullptr)
 			throw Error(ecIncompatible, "apply", "Cannot apply without a network");
 
-		//setCaffeGPUs(gpuDevices_);
+		setCaffeGPUs(gpuDevices_, false);
 
 		boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
 		setActiveNet_(n);
