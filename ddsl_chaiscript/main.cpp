@@ -50,9 +50,6 @@ void bindMatrixLib(chaiscript::ChaiScript &chai) {
     CHAI_CONSTRUCTOR(chai, TMat, type)
     CHAI_CONSTRUCTOR(chai, TMat, type, const TMat&);
 
-    //Add static init
-    CHAI_OPER(chai, |, TMat, DataType, const T&);
-
     //Add class members
     CHAI_MEMBER_CONST(chai, print, DSTypes::String, TMat);
     CHAI_MEMBER_CONST(chai, print, void, TMat, std::ostream &);
@@ -66,15 +63,45 @@ void bindMatrixFunc(chaiscript::ChaiScript &chai) {
 template <typename T, typename TIdx>
 void bindMatrixLang(chaiscript::ChaiScript &chai) {
     typedef DSLib::Matrix<T, TIdx> TMat;
+    typedef DSLib::Matrix<TIdx, TIdx> TMatIdx;
     //Printing
-    //CHAI_OPER(chai, ++, TMat&, TMat&, int);
-    CHAI_OPER(chai, ++, TMat&, TMat&);
-    //CHAI_OPER(chai, --, TMat&, TMat&, int);
-    CHAI_OPER(chai, --, TMat&, TMat&);
+    CHAI_OPER(chai, ++, TMat, TMat&&);
+    CHAI_OPER(chai, --, TMat, TMat&&);
+
+    //Static init
+    CHAI_OPER(chai, |, TMat, DataType, const T&);
+    CHAI_OPER(chai, ^, TMat, DataType, const T&);
+
+    //Assignment
+    CHAI_OPER(chai, |=, TMat&, TMat&, const TMat&);
+    CHAI_OPER(chai, ^=, TMat&, TMat&, const TMat&);
+    CHAI_OPER(chai, +=, TMat&, TMat&, const TMat&);
+  //  CHAI_OPER(chai, *=, TMat, TMat&&, const TMat&);
+
+    //Breakup
+    CHAI_OPER(chai, !, TMat&, TMat&);
+    CHAI_OPER(chai, *, TMat, const TMat&);
 
     //Concat
     CHAI_OPER(chai, |, TMat&, TMat&, const T&);
     CHAI_OPER(chai, |, TMat&, TMat&, const TMat&);
+    CHAI_OPER(chai, ^, TMat&, TMat&, const T&);
+    CHAI_OPER(chai, ^, TMat&, TMat&, const TMat&);
+
+    //Comparing
+    CHAI_OPER(chai, ==, TMatIdx, const TMat&, const TMat&);
+    CHAI_OPER(chai, ==, TMatIdx, const TMat&, const T&);
+    CHAI_OPER(chai, !=, TMatIdx, const TMat&, const TMat&);
+    CHAI_OPER(chai, !=, TMatIdx, const TMat&, const T&);
+    CHAI_OPER(chai, >, TMatIdx, const TMat&, const TMat&);
+    CHAI_OPER(chai, >, TMatIdx, const TMat&, const T&);
+    CHAI_OPER(chai, <, TMatIdx, const TMat&, const TMat&);
+    CHAI_OPER(chai, <, TMatIdx, const TMat&, const T&);
+    CHAI_OPER(chai, >=, TMatIdx, const TMat&, const TMat&);
+    CHAI_OPER(chai, >=, TMatIdx, const TMat&, const T&);
+    CHAI_OPER(chai, <=, TMatIdx, const TMat&, const TMat&);
+    CHAI_OPER(chai, <=, TMatIdx, const TMat&, const T&);
+
 }
 
 template <typename T, typename TIdx>

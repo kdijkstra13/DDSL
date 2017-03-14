@@ -237,14 +237,14 @@ namespace DSLang {
 	DSLib::Matrix<T, TInt> & operator++(DSLib::Matrix<T, TInt> &lhs, int);
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator++(DSLib::Matrix<T, TInt> &&lhs, int);
+	DSLib::Matrix<T, TInt> operator++(DSLib::Matrix<T, TInt> &&lhs, int);
 
 	template <typename T, typename TInt>
 	const DSLib::Matrix<T, TInt> & operator++(const DSLib::Matrix<T, TInt> &lhs, int);
 
 	//Print Matrix meta information
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator--(DSLib::Matrix<T, TInt> &&lhs, int);
+	DSLib::Matrix<T, TInt> operator--(DSLib::Matrix<T, TInt> &&lhs, int);
 
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator--(DSLib::Matrix<T, TInt> &lhs, int);
@@ -257,14 +257,14 @@ namespace DSLang {
 	DSLib::Matrix<T, TInt> & operator++(DSLib::Matrix<T, TInt> &lhs);
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator++(DSLib::Matrix<T, TInt> &&lhs);
+	DSLib::Matrix<T, TInt> operator++(DSLib::Matrix<T, TInt> &&lhs);
 
 	template <typename T, typename TInt>
 	const DSLib::Matrix<T, TInt> & operator++(const DSLib::Matrix<T, TInt> &lhs);
 
 	//Print Matrix meta information
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator--(DSLib::Matrix<T, TInt> &&lhs);
+	DSLib::Matrix<T, TInt> operator--(DSLib::Matrix<T, TInt> &&lhs);
 
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator--(DSLib::Matrix<T, TInt> &lhs);
@@ -280,25 +280,25 @@ namespace DSLang {
 	DSLib::Matrix<T, TInt> & operator>>(DSLib::Matrix<T, TInt> &lhs, std::ostream &rhs);
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator>>(DSLib::Matrix<T, TInt> &&lhs, std::ostream &rhs);
+	DSLib::Matrix<T, TInt> operator>>(DSLib::Matrix<T, TInt> &&lhs, std::ostream &rhs);
 
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator<<(DSLib::Matrix<T, TInt> &lhs, std::istream &rhs);
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator<<(DSLib::Matrix<T, TInt> &&lhs, std::istream &rhs);
+	DSLib::Matrix<T, TInt> operator<<(DSLib::Matrix<T, TInt> &&lhs, std::istream &rhs);
 
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator >> (DSLib::Matrix<T, TInt> &lhs, const DSTypes::String &rhs);
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator >> (DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs);
+	DSLib::Matrix<T, TInt> operator >> (DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs);
 
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & operator<<(DSLib::Matrix<T, TInt> &lhs, const DSTypes::String &rhs);
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator<<(DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs);
+	DSLib::Matrix<T, TInt> operator<<(DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs);
 
 	//********************//
 	//** Matrix Slicing **//

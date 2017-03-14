@@ -91,7 +91,7 @@ namespace DSLang {
 	template <typename T, typename TInt> DSLib::Matrix<T, TInt> operator^=(DSLib::Matrix<T, TInt> &&lhs, const DSLib::Matrix<T, TInt> &rhs) {return std::move(lhs^=rhs);};
 	template <typename T, typename TInt> DSLib::Matrix<T, TInt> operator+=(DSLib::Matrix<T, TInt> &&lhs, const DSLib::Matrix<T, TInt> &rhs) {return std::move(lhs+=rhs);};
 	template <typename T, typename TInt> DSLib::Matrix<T, TInt> operator*=(DSLib::Matrix<T, TInt> &&lhs, const DSLib::Matrix<T, TInt> &rhs) {return std::move(lhs*=rhs);};
-	template <typename T, typename TInt> DSLib::Matrix<T, TInt> && operator!(DSLib::Matrix<T, TInt> &&rhs) {return std::move(!rhs);};
+	template <typename T, typename TInt> DSLib::Matrix<T, TInt> operator!(DSLib::Matrix<T, TInt> &&rhs) {return std::move(!rhs);};
 
 	//***************************//
 	//** Matrix Initialization **//
@@ -500,7 +500,7 @@ namespace DSLang {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator++(DSLib::Matrix<T, TInt> &&lhs, int) {
+	DSLib::Matrix<T, TInt> operator++(DSLib::Matrix<T, TInt> &&lhs, int) {
 		lhs.print(std::cout);
 		std::cout << std::endl;
 		return std::move(lhs);
@@ -515,7 +515,7 @@ namespace DSLang {
 
 	//Print Matrix meta information
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator--(DSLib::Matrix<T, TInt> &&lhs, int) {
+	DSLib::Matrix<T, TInt> operator--(DSLib::Matrix<T, TInt> &&lhs, int) {
 		lhs.printLess(std::cout);
 		std::cout << std::endl;
 		return std::move(lhs);
@@ -543,7 +543,7 @@ namespace DSLang {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator++(DSLib::Matrix<T, TInt> &&lhs) {
+	DSLib::Matrix<T, TInt> operator++(DSLib::Matrix<T, TInt> &&lhs) {
 		lhs.print(std::cout);
 		std::cout << std::endl;
 		return std::move(lhs);
@@ -558,7 +558,7 @@ namespace DSLang {
 
 	//Print Matrix meta information
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator--(DSLib::Matrix<T, TInt> &&lhs) {
+	DSLib::Matrix<T, TInt> operator--(DSLib::Matrix<T, TInt> &&lhs) {
 		lhs.printLess(std::cout);
 		std::cout << std::endl;
 		return std::move(lhs);
@@ -588,7 +588,7 @@ namespace DSLang {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator>>(DSLib::Matrix<T, TInt> &&lhs, std::ostream &rhs) {
+	DSLib::Matrix<T, TInt> operator>>(DSLib::Matrix<T, TInt> &&lhs, std::ostream &rhs) {
 		lhs.write(rhs);
 		return std::move(lhs);
 	}
@@ -600,7 +600,7 @@ namespace DSLang {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator<<(DSLib::Matrix<T, TInt> &&lhs, std::istream &rhs) {
+	DSLib::Matrix<T, TInt> operator<<(DSLib::Matrix<T, TInt> &&lhs, std::istream &rhs) {
 		lhs.read(rhs);
 		return std::move(lhs);
 	}
@@ -612,7 +612,7 @@ namespace DSLang {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator >> (DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs) {
+	DSLib::Matrix<T, TInt> operator >> (DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs) {
 		lhs.write(rhs);
 		return std::move(lhs);
 	}
@@ -624,7 +624,7 @@ namespace DSLang {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> && operator<<(DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs) {
+	DSLib::Matrix<T, TInt> operator<<(DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs) {
 		lhs.read(rhs);
 		return std::move(lhs);
 	}
