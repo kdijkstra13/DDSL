@@ -236,7 +236,7 @@ if (BUILD_DDSL_CHAISCRIPT)
 	add_ddsl_hpp_groups()
     
 	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-		target_link_libraries(${EXE_NAME} ${CMAKE_CURRENT_LIST_DIR}/contrib/ChaiScript-6.0.0/build/lib)
+		target_link_libraries(${EXE_NAME} debug ${CMAKE_CURRENT_LIST_DIR}/contrib/ChaiScript-6.0.0/build/Debug/chaiscript_stdlib-6.0.0.lib optimized ${CMAKE_CURRENT_LIST_DIR}/contrib/ChaiScript-6.0.0/build/Release/chaiscript_stdlib-6.0.0.lib)
 	else ()
 		target_link_libraries(${EXE_NAME} /usr/local/lib/chaiscript/libchaiscript_stdlib-6.0.0.so -ldl)
 	endif ()
