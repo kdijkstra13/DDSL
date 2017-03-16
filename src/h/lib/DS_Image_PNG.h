@@ -23,9 +23,9 @@ namespace DSImage {
 		virtual void read(std::istream &is);
 		virtual void write(std::ostream &os) const;
 		
-		ImagePNG(DSLib::Matrix<T, TIdx> &img);
+		//ImagePNG(const DSLib::Matrix<T, TIdx> &img);
 		ImagePNG(const DSTypes::String &filename, bool prefetch);
-		ImagePNG(const DSTypes::String &filename, DSLib::Matrix<T, TIdx> &img = DSLib::Matrix<T, TIdx>(), DSTypes::ImageType preferredImageType = DSTypes::itM16);
+		ImagePNG(const DSTypes::String &filename, const DSLib::Matrix<T, TIdx> &img = DSLib::Matrix<T, TIdx>(), DSTypes::ImageType preferredImageType = DSTypes::itM16);
 		ImagePNG(const TIdx rowCount, const TIdx colCount, const T &initVal, DSTypes::ImageType preferredImageType= DSTypes::itM16);
 		ImagePNG(const TIdx rowCount, const TIdx colCount, DSTypes::ImageType preferredImageType= DSTypes::itM16);
 
@@ -37,7 +37,7 @@ namespace DSImage {
 		bool hasImage() const;
 
 		DSLib::Matrix<T, TIdx> getImage();
-		void setImage(DSLib::Matrix<T, TIdx> &img);
+		void setImage(const DSLib::Matrix<T, TIdx> &img);
 		DSTypes::String getFilename() const;
 		void setFilename(const DSTypes::String &filename);
 		DSTypes::ImageType getImageType() const;

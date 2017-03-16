@@ -154,17 +154,16 @@ namespace DSImage {
 	};
 
 	template <typename T, typename TIdx>
-	ImagePNG<T, TIdx>::ImagePNG(const String &filename, DSLib::Matrix<T, TIdx> &img, ImageType preferredImageType) {
+	ImagePNG<T, TIdx>::ImagePNG(const String &filename, const DSLib::Matrix<T, TIdx> &img, ImageType preferredImageType) {
 		setFilename(filename);
 		setImage(img);
 		setImageType(preferredImageType);
 	}
 
-
-	template <typename T, typename TIdx>
-	ImagePNG<T, TIdx>::ImagePNG(Matrix<T, TIdx> &mat) {
+	/*template <typename T, typename TIdx>
+	ImagePNG<T, TIdx>::ImagePNG(const Matrix<T, TIdx> &mat) {
 		setImage(mat);
-	}
+	}*/
 
 	template <typename T, typename TIdx>
 	ImagePNG<T, TIdx>::ImagePNG(const String &filename, bool prefetch) {
@@ -237,7 +236,7 @@ namespace DSImage {
 	}
 
 	template <typename T, typename TIdx>
-	void ImagePNG<T, TIdx>::setImage(DSLib::Matrix<T, TIdx> &img) {
+	void ImagePNG<T, TIdx>::setImage(const DSLib::Matrix<T, TIdx> &img) {
 		*((Matrix<T, TIdx> *)this) = img;
 	}
 
