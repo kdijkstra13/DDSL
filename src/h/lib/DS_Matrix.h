@@ -43,7 +43,7 @@ namespace DSLib {
 			IteratorBase(const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount, const typename std::vector<T>::iterator &cursor);
 			~IteratorBase();
 
-			IteratorBase& operator=(const IteratorBase& other);			
+			IteratorBase& operator=(const IteratorBase& other);
 			bool operator==(const IteratorBase& other) const;
 			bool operator!=(const IteratorBase& other) const;
 
@@ -59,33 +59,33 @@ namespace DSLib {
 			typename std::vector<T>::iterator cursor_;
 		};
 		void setValues(const typename std::vector<T>::iterator &begin, const typename std::vector<T>::iterator &end, const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount);
-		TInt count();		
+		TInt count();
 		TInt contraCount();
 
 		CellsBase();
 		CellsBase(const typename std::vector<T>::iterator &begin, const typename std::vector<T>::iterator &end, const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount);
 		virtual ~CellsBase(){};
-	protected:						
+	protected:
 		typename std::vector<T>::iterator begin_; //begin of data
 		typename std::vector<T>::iterator end_; //end of of data
 		TInt stride_; //stride when ++
 		TInt contraStride_; //stride to skip a row/column
 		TInt count_; //end_ - begin_
 		TInt contraCount_;
-	};	
-	
+	};
+
 	template <typename T, typename TInt = DSTypes::MatrixIdx>
 	class CellsRegion : public CellsBase<T, TInt> {
 	public:
 		class Iterator : public CellsBase<T, TInt>::IteratorBase {
 		friend class CellsRegion<T, TInt>;
-		public:				
+		public:
 			Iterator();
 			Iterator(const Iterator &other);
 
 			Iterator(const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount, const typename std::vector<T>::iterator &cursor);
 			~Iterator();
-			
+
 			Iterator& operator++();
 			Iterator operator++(int);
 		};
@@ -107,7 +107,7 @@ namespace DSLib {
 	public:
 		class Iterator : public CellsBase<T, TInt>::IteratorBase {
 		friend class CellsContinuous<T, TInt>;
-		public:				
+		public:
 			Iterator();
 			Iterator(const Iterator &other);
 
@@ -118,8 +118,8 @@ namespace DSLib {
 			Iterator operator++(int);
 		};
 		CellsContinuous();
-		CellsContinuous(const typename std::vector<T>::iterator &begin, const typename std::vector<T>::iterator &end, const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount);		
-		
+		CellsContinuous(const typename std::vector<T>::iterator &begin, const typename std::vector<T>::iterator &end, const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount);
+
 		T & val(const TInt index) { return *((*this)[index]); }
 		T & operator()(const TInt index) { return val(index); }
 		T * operator->() { return &(val(0)); }
@@ -200,7 +200,7 @@ namespace DSLib {
 		virtual MatrixBase * copy() const = 0;
 		virtual MatrixBase * move() const = 0;
 		virtual MatrixBase * take() const = 0;
-				
+
 		virtual void toStringMatrix(MatrixBase &dst) = 0;
 
 		virtual void isEqual(MatrixBase &dst, const MatrixBase &other) const = 0;
@@ -229,13 +229,13 @@ namespace DSLib {
 				Iterator(const Iterator &other);
 				Iterator(Index &index, const typename std::vector<T>::iterator &cursor);
 				~Iterator();
-				
+
 				Iterator& operator=(const Iterator& other);
 				bool operator==(const Iterator& other) const;
 				bool operator!=(const Iterator& other) const;
 				Iterator& operator++();
 				Iterator operator++(int);
-				
+
 				CellsBase<T, TInt> & cells(DSTypes::CellsIteratorType cellsIteratorType); //Either CellsRegion or CellContinuous (from beginning to end of row/col)
 				CellsContinuous<T, TInt> * operator->(); //returns the CellContinuous (from beginning to end of row/col)
 				CellsContinuous<T, TInt> & operator*(); //returns the CellContinuous (from beginning to end of row/col)
@@ -256,8 +256,8 @@ namespace DSLib {
 
 			Iterator operator[](const TInt index);
 			Iterator begin();
-			Iterator end();			
-			
+			Iterator end();
+
 			TInt count() const;
 			TInt stride() const;
 			TInt first() const;
@@ -266,7 +266,7 @@ namespace DSLib {
 			//Overridden
 			bool isAligned() const;
 			bool isRow() const;
-			bool isCol() const;			
+			bool isCol() const;
 
 			void add(const T &val);
 			void add(const std::vector<T> &vec);
@@ -291,9 +291,9 @@ namespace DSLib {
 			IndexBase & contraBase_() {return *contra_;}
 			bool isRow_;
 			CellsContinuous<T, TInt> cellsContinuous_;
-			CellsRegion<T, TInt> cellsRegion_;			
+			CellsRegion<T, TInt> cellsRegion_;
 		};
-		
+
 		Matrix();
 		Matrix(DSTypes::Order order);
 		Matrix(const TInt rowCount, const TInt colCount, DSTypes::Order order = DSTypes::oRowMajor);
@@ -322,12 +322,12 @@ namespace DSLib {
 		}
 		MatrixBase * take() const {
 			Matrix<T, TInt> * mat = new Matrix<T, TInt>(order_);
-			mat->cols.take(*this);			
+			mat->cols.take(*this);
 			return mat;
 		}
 
 		virtual ~Matrix();
-		
+
 		Index rows;
 		IndexBase & rowsBase() {return rows;};
 		Index cols;
@@ -335,17 +335,17 @@ namespace DSLib {
 
 		CellsContinuous<T, TInt> & vec();
 		CellsContinuous<T, TInt> & vec() const;
-		
+
 		T & vec(const TInt index);
 		T & val(const TInt row, const TInt col);
 
 		const T & vec(const TInt index) const;
 		const T & val(const TInt row, const TInt col) const;
-	
+
 		TInt getContraCount(const Index &idx) const; //if idx == row return cols.count()
 		TInt getCount(const Index &idx) const; //if idx == row return rows.count()
 		TInt getStride(const Index &idx) const; //if idx == row return cols.stride()
-		TInt getContraStride(const Index &idx) const; //if idx == row return rows.stride()		
+		TInt getContraStride(const Index &idx) const; //if idx == row return rows.stride()
 
 		//Get data vector
 		std::vector<T> & data() {return (up_ == nullptr)?data_:up_->data_;};
@@ -415,10 +415,11 @@ namespace DSLib {
 		void printLess(std::ostream &output) const;
 		std::string printLess() const;
 		std::string printSize() const;
+		std::string to_string() const {return printSize();} //for ChaiScript
 
 		//Slicing
 		void slice(Matrix<T, TInt> &dst, const TInt rowFirst, const TInt rowLast, const TInt colFirst, const TInt colLast);
-		void slice(Matrix<T, TInt> &dst, const Matrix<TInt, TInt> &rowIndices, const Matrix<TInt, TInt> &colIndices);		
+		void slice(Matrix<T, TInt> &dst, const Matrix<TInt, TInt> &rowIndices, const Matrix<TInt, TInt> &colIndices);
 		void slice(MatrixBase &dst, MatrixBase &rowFirst, MatrixBase &rowLast, MatrixBase &colFirst, MatrixBase &colLast);
 		void slice(MatrixBase &dst, MatrixBase &rowIndices, MatrixBase &colIndices);
 		void slice(MatrixBase &dst, MatrixBase &indices, MatrixBase &first, MatrixBase &last, bool rowIndices=true); //TODO: Remove bool: Should be split in two (rowIndices, colFirst, colLast) and (rowFirst, rowLast, colIndices)
@@ -473,18 +474,18 @@ namespace DSLib {
 
 		typename std::vector<T>::const_iterator begin() const;
 		typename std::vector<T>::const_iterator end() const;
-		typename std::vector<T>::const_iterator at(const TInt row, const TInt col) const; 
+		typename std::vector<T>::const_iterator at(const TInt row, const TInt col) const;
 	private:
 		std::vector<T> data_;
 
 		DSTypes::Order order_;
 		std::vector<Matrix<T, TInt> *> down_;
-		void updateIt_(); //Update the iterators of cols_ and rows_. Convert first_ and last_ to begin_ and end_		
+		void updateIt_(); //Update the iterators of cols_ and rows_. Convert first_ and last_ to begin_ and end_
 		void updateStride_(); //Stride can change if up_ adds a col or row
 		Matrix<T, TInt> *up_;
-		
+
 		void invalidate_(); //update iterators
-		void init_();		
+		void init_();
 
 		std::mutex lockRefRel_;
 		Matrix& ref_(Matrix<T, TInt> &mat); //I am *down with *data
