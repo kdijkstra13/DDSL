@@ -43,12 +43,14 @@ namespace DSTypes {
 namespace DSFunc {
 
 	inline DSLib::Matrix<Int32> getCaffeGPUs() {
-		int count;
 		Matrix<Int32> ret;
+#ifndef CPU_ONLY
+		int count;
 		cudaGetDeviceCount(&count);
 		for (int i = 0; i < count; ++i) {
 		  ret | (Int32)i;
 		}
+#endif
 		return ret;
 	}
 
@@ -1302,9 +1304,6 @@ namespace DSModel {
 			}
 			this->incProgress();
 		}
-		//ImagePNG<Float, TIdx> png(rowData);
-		//png.saveImage("c:/temp/blob.png", itM8);
-
 		blobData_ | rowData;
 	}
 
@@ -1324,8 +1323,8 @@ namespace DSModel {
 		}
 		
 		//Check with Caffe blob
-		if (bw != net_->blob_by_name(blobName)->width() || bh != net_->blob_by_name(blobName)->height() || bc != net_->blob_by_name(blobName)->channels())
-			throw Error(ecIncompatible, "addBlobData_", SS("Blob size mismatch between Caffe and DDSL:  " << net_->blob_by_name(blobName)->width() << "x" << net_->blob_by_name(blobName)->height() << "x" << net_->blob_by_name(blobName)->channels() << " != "  << bw << "x" << bh << "x" << bc));
+		if (bw != getActiveNet_()->blob_by_name(blobName)->width() || bh != getActiveNet_()->blob_by_name(blobName)->height() || bc != getActiveNet_()->blob_by_name(blobName)->channels())
+			throw Error(ecIncompatible, "addBlobData_", SS("Blob size mismatch between Caffe and DDSL:  " << getActiveNet_()->blob_by_name(blobName)->width() << "x" << getActiveNet_()->blob_by_name(blobName)->height() << "x" << getActiveNet_()->blob_by_name(blobName)->channels() << " != "  << bw << "x" << bh << "x" << bc));
 
 		blobWidth_ | bw;
 		blobHeight_ | bh;
@@ -1344,14 +1343,16 @@ namespace DSModel {
 					slice = rowData(y, c->rows.count(), 0, c->cols.count());
 				else
 					convert(slice, rowData(y, c->rows.count(), 0, c->cols.count()));
-				if (slice.isSameSize(*c))
-					slice = *c;
-				else
+				if (!slice.isSameSize(*c))
 					throw Error(ecInternal, "addBlobData<Matrix<>>", "Cannot assign data. Direct slice assignment size mismatch");
+				slice = c->dup();									
 				y += c->rows.count();
 			}
 			this->incProgress();
 		}
+
+		//ImagePNG<Float>("c:/temp/blob.png", rowData, itM16).saveImage();
+		
 		blobData_ | rowData;
 	}
 
@@ -1717,8 +1718,7 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	caffe::SolverAction::Enum Caffe<TClassType, TIdx, TId>::SolverCallback_() {
-		UInt32 iters = maxIter_>0?maxIter_:solverIter_;
-		if (solver_->iter() > iters) {
+		if (solver_->iter() >= maxIter_) {
 			this->setStageDone();
 			return caffe::SolverAction::Enum::STOP;
 		} else {
@@ -1753,17 +1753,17 @@ namespace DSModel {
 		this->setStage("Train");
 		solverIter_ = solver_->param().max_iter();
 		this->template parameterValueById<UInt32>("SolverIter") = solverIter_;
-		UInt32 iters = maxIter_>0?maxIter_:solverIter_;
 
 		this->setMinProgress(0);
 		this->setMaxProgress(solverIter_);
 		this->setProgress(solver_->iter());
-
-		//Train the classifier
-		ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
-		solver_->SetActionFunction(cb);
-		solver_->Solve();
-
+		
+		if (solver_->iter() < maxIter_) {
+			//Train the classifier
+			ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
+			solver_->SetActionFunction(cb);
+			solver_->Solve();
+		}
 		UInt32 currIter_ = solver_->iter();
 		this->template parameterValueById<UInt32>("CurrIter") = currIter_;
 
@@ -1812,7 +1812,7 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::setMaxIter(const TIdx maxIter) {
-		this->template parameterValueById<UInt32>("MaxIter") = maxIter_;
+		this->template parameterValueById<UInt32>("MaxIter") = maxIter;
 		updateParameters();
 	}
 

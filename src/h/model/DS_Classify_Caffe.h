@@ -195,7 +195,7 @@ namespace DSModel {
 		TIdx getSolverIter();
 		TIdx getCurrIter();
 
-		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = 0);
+		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = numeric_limits<TIdx>().max());
 		Caffe(const DSTypes::String &filename, const DSTypes::String snapshotModelFile = "");
 
 		M_HDR_MODEL_DESTRUCTOR(Caffe)
