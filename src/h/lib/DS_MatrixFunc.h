@@ -132,6 +132,27 @@ namespace DSFunc {
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> & diag(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &v);
 
+	template <typename T, typename TIdx>
+	T mean(const DSLib::Matrix<T, TIdx> &mat);
+
+	template <typename T, typename TIdx>
+	T sd(const DSLib::Matrix<T, TIdx> &mat);
+
+	template <typename T, typename TIdx>
+	T min(const DSLib::Matrix<T, TIdx> &mat);
+
+	template <typename T, typename TIdx>
+	T max(const DSLib::Matrix<T, TIdx> &mat);
+
+	template <typename T, typename TIdx>
+	DSLib::Matrix<T, TIdx> & scaleAndCenter(DSLib::Matrix<T, TIdx> &mat);
+
+	template <typename T, typename TIdx>
+	DSLib::Matrix<T, TIdx> & scaleMinMax(DSLib::Matrix<T, TIdx> &mat);
+
+	template <typename T, typename TIdx>
+	DSLib::Matrix<T, TIdx> & abs(DSLib::Matrix<T, TIdx> &mat);
+
 	template <typename T, typename TInt>
 	std::ostream & operator<< (std::ostream &str, const DSLib::Matrix<T, TInt> &mat);
 

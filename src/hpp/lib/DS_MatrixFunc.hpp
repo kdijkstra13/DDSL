@@ -1059,4 +1059,65 @@ namespace DSFunc {
 		mat.read(str);
 		return std::move(str);
 	}
+
+	template <typename T, typename TIdx>
+	T mean(const Matrix<T, TIdx> &mat) {
+		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+		T sum = (T)0;
+		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
+			sum += *it;
+		return (sum / ~mat);
+	}
+
+	template <typename T, typename TIdx>
+	T sd(const Matrix<T, TIdx> &mat) {
+		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+		T mn = mean(mat);
+		T sum = (T)0;
+		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
+			sum += (*it - mn) * (*it - mn);
+		return sqrt(sum / ~mat);
+	}
+
+	template <typename T, typename TIdx>
+	T min(const Matrix<T, TIdx> &mat) {
+		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+		T min = (T)mat.val(0, 0);
+		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
+			if (*it<min)
+				min = *it;
+		return min;
+	}
+
+	template <typename T, typename TIdx>
+	T max(const Matrix<T, TIdx> &mat) {
+		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+		T max = (T)mat.val(0, 0);
+		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
+			if (*it>max)
+				max = *it;
+		return max;
+	}
+
+	template <typename T, typename TIdx>
+	Matrix<T, TIdx> & scaleAndCenter(Matrix<T, TIdx> &mat) {
+		T m = mean(mat);
+		T s = sd(mat);
+		(mat - m) / s;
+		return mat;
+	}
+
+	template <typename T, typename TIdx>
+	Matrix<T, TIdx> & scaleMinMax(Matrix<T, TIdx> &mat) {
+		scale(mat, min(mat), max(mat), (T)0, (T)1);
+		return mat;
+	}
+
+	template <typename T, typename TIdx>
+	Matrix<T, TIdx> & abs(Matrix<T, TIdx> &mat) {
+		for (auto it = mat.rows->begin();it != mat.rows->end();it++)
+			if (*it < (T)0)
+				*it = (T)0;
+		return mat;
+	}
 }

@@ -24,6 +24,7 @@
 #include "hpp/lib/DS_Image.hpp"
 #include "hpp/lib/DS_Sampler.hpp"
 #include "hpp/lib/DS_Evolution.hpp"
+#include "hpp/lib/DS_ImageFunc.hpp"
 
 //Models
 #include "hpp/model/DS_Model.hpp"
