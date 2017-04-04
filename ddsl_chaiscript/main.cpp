@@ -26,25 +26,32 @@ using namespace DSFunc;
 using namespace DSLang;
 using namespace DSModel;
 
+//Add a type
 #define CHAI_TYPE(CHAI, CLASS_TYPE, TYPE_NAME) CHAI.add(chaiscript::user_type<CLASS_TYPE>(), TYPE_NAME);
 
+//Add a enum and enum values
 #define CHAI_ENUM(CHAI, ENUM_TYPE, ENUM_NAME) CHAI.add(chaiscript::user_type<ENUM_TYPE>(), ENUM_NAME);
 #define CHAI_ENUM_VALUE(CHAI, ENUM_VALUE, PREFIX) CHAI.add_global_const(chaiscript::const_var(ENUM_VALUE), SS(PREFIX << etos(ENUM_VALUE)));
 
+//Add constructor
 #define CHAI_CONSTRUCTOR(CHAI, CLASS_TYPE, TYPE_NAME, ...) CHAI.add(chaiscript::constructor<CLASS_TYPE(__VA_ARGS__)>(), TYPE_NAME);
 
+//Add member functions
 #define CHAI_MEMBER(CHAI, FUN_NAME, RETURN_TYPE, CLASS_TYPE, ...) CHAI.add(chaiscript::fun(static_cast<RETURN_TYPE(CLASS_TYPE::*)(__VA_ARGS__)>(&CLASS_TYPE::FUN_NAME)), #FUN_NAME);
 #define CHAI_MEMBER_CONST(CHAI, FUN_NAME, RETURN_TYPE, CLASS_TYPE, ...) CHAI.add(chaiscript::fun(static_cast<RETURN_TYPE(CLASS_TYPE::*)(__VA_ARGS__)const>(&CLASS_TYPE::FUN_NAME)), #FUN_NAME);
 
+//Add member operator
 #define CHAI_MEMBER_OPER(CHAI, OP_NAME, RETURN_TYPE, CLASS_TYPE, ...) CHAI.add(chaiscript::fun(static_cast<RETURN_TYPE(CLASS_TYPE::*)(__VA_ARGS__)>(&CLASS_TYPE::operator OP_NAME)), #OP_NAME);
 #define CHAI_MEMBER_OPER_CONST(CHAI, OP_NAME, RETURN_TYPE, CLASS_TYPE, ...) CHAI.add(chaiscript::fun(static_cast<RETURN_TYPE(CLASS_TYPE::*)(__VA_ARGS__)const>(&CLASS_TYPE::operator OP_NAME)), #OP_NAME);
 
+//Add external operator
 #define CHAI_OPER(CHAI, NS, OP_NAME, RETURN_TYPE, ...) CHAI.add(chaiscript::fun(static_cast<RETURN_TYPE(*)(__VA_ARGS__)>(NS::operator OP_NAME)), #OP_NAME);
 
+//Add type conversion
 #define CHAI_CONVERSION(CHAI, TYPE_FROM, TYPE_TO) CHAI.add(chaiscript::type_conversion<TYPE_FROM, TYPE_TO>());
 
-chaiscript::ChaiScript_Basic *chaiGlobal = nullptr;
 
+//Special function to add all enums of a type
 template<typename T>
 void bindEnum(chaiscript::ChaiScript_Basic &chai, const String &name, const String &prefix) {
     CHAI_ENUM(chai, T, name);
@@ -53,6 +60,7 @@ void bindEnum(chaiscript::ChaiScript_Basic &chai, const String &name, const Stri
         CHAI_ENUM_VALUE(chai, (T)i, prefix);
 }
 
+//Add all types
 void bindTypes(chaiscript::ChaiScript_Basic &chai) {
     bindEnum<DataType>(chai, "DataType", "dt");
     bindEnum<ContentType>(chai, "ContentType", "ct");
@@ -64,7 +72,7 @@ void bindTypes(chaiscript::ChaiScript_Basic &chai) {
 	bindEnum<ImageType>(chai, "ImageType", "it");
 
 //These interfere with chai's build in types
-/*  CHAI_TYPE(chai, DSTypes::UInt8, "UInt8");
+ /* CHAI_TYPE(chai, DSTypes::UInt8, "UInt8");
     CHAI_TYPE(chai, DSTypes::UInt16, "UInt16");
     CHAI_TYPE(chai, DSTypes::UInt32, "UInt32");
     CHAI_TYPE(chai, DSTypes::UInt64, "UInt64");
@@ -74,13 +82,16 @@ void bindTypes(chaiscript::ChaiScript_Basic &chai) {
     CHAI_TYPE(chai, DSTypes::Int64, "Int64");
     CHAI_TYPE(chai, DSTypes::Float, "Float");
     CHAI_TYPE(chai, DSTypes::Double, "Double");
-    CHAI_TYPE(chai, DSTypes::String, "String");
-    */
-
+    CHAI_TYPE(chai, DSTypes::String, "String");*/
 }
 
-template <typename T, typename TIdx, typename TMat, typename TMatIdx>
+//Add library for Matrix
+template <typename T, typename TIdx>
 void bindMatrixLibBasic(chaiscript::ChaiScript_Basic &chai) {
+
+    //Typedefs
+    typedef Matrix<T, TIdx> TMat;
+    typedef Matrix<TIdx, TIdx> TMatIdx;
     String name = SS("Matrix" << etos(dataType<T>()));
 
     //Add type and constructors
@@ -92,7 +103,7 @@ void bindMatrixLibBasic(chaiscript::ChaiScript_Basic &chai) {
     CHAI_CONVERSION(chai, TMat, bool);
     CHAI_CONVERSION(chai, TMat, T);
 
-    //Chai interop
+    //Chai interop for converting to a string
     CHAI_MEMBER_CONST(chai, to_string, DSTypes::String, TMat);
 
     //Add class members
@@ -100,13 +111,19 @@ void bindMatrixLibBasic(chaiscript::ChaiScript_Basic &chai) {
     CHAI_MEMBER_CONST(chai, print, void, TMat, std::ostream &);
 }
 
-template <typename T, typename TIdx, typename TMat, typename TMatIdx>
+//Add functions for Matrix
+template <typename T, typename TIdx>
 void bindMatrixFuncBasic(chaiscript::ChaiScript_Basic &chai) {
 
 }
 
-template <typename T, typename TIdx, typename TMat, typename TMatIdx>
+//Add language for Matrix
+template <typename T, typename TIdx>
 void bindMatrixLangBasic(chaiscript::ChaiScript_Basic &chai) {
+    //Typedefs
+    typedef Matrix<T, TIdx> TMat;
+    typedef Matrix<TIdx, TIdx> TMatIdx;
+
     //Printing
     CHAI_OPER(chai, DSScript, ++, TMat, const TMat&);
     CHAI_OPER(chai, DSScript, --, TMat, const TMat&);
@@ -155,9 +172,14 @@ void bindMatrixLangBasic(chaiscript::ChaiScript_Basic &chai) {
 
 }
 
-template <typename T, typename TIdx, typename TMat, typename TMatIdx>
+//Add numerical operators for Matrix
+template <typename T, typename TIdx>
 void bindMatrixLangNumeric(chaiscript::ChaiScript_Basic &chai) {
+    //Typedefs
+    typedef Matrix<T, TIdx> TMat;
+    typedef Matrix<TIdx, TIdx> TMatIdx;
 
+    //Add operators
     CHAI_OPER(chai, DSScript, *=, TMat, TMat&, const TMat&);
     CHAI_OPER(chai, DSScript, >,  TMatIdx, const TMat&, const TMat&);
     CHAI_OPER(chai, DSScript, >,  TMatIdx, const TMat&, const T&);
@@ -169,70 +191,61 @@ void bindMatrixLangNumeric(chaiscript::ChaiScript_Basic &chai) {
     CHAI_OPER(chai, DSScript, <=, TMatIdx, const TMat&, const T&);
 }
 
-template <typename T, typename TIdx, typename TMat, typename TMatIdx>
+//Add basic operators for Matrix
+template <typename T, typename TIdx>
 void bindMatrixBasic(chaiscript::ChaiScript_Basic &chai) {
-    bindMatrixLibBasic<T, TIdx, TMat, TMatIdx>(chai);
-    bindMatrixLangBasic<T, TIdx, TMat, TMatIdx>(chai);
-    bindMatrixFuncBasic<T, TIdx, TMat, TMatIdx>(chai);
+    bindMatrixLibBasic<T, TIdx>(chai);
+    bindMatrixLangBasic<T, TIdx>(chai);
+    bindMatrixFuncBasic<T, TIdx>(chai);
 }
 
-template <typename T, typename TIdx, typename TMat, typename TMatIdx>
+template <typename T, typename TIdx>
 void bindMatrixNumeric(chaiscript::ChaiScript_Basic &chai) {
-    //bindMatrixLibNumeric<T, TIdx, TMat, TMatIdx>(chai);
-    bindMatrixLangNumeric<T, TIdx, TMat, TMatIdx>(chai);
-    //bindMatrixFuncNumeric<T, TIdx, TMat, TMatIdx>(chai);
+    //bindMatrixLibNumeric<T, TIdx>(chai);
+    bindMatrixLangNumeric<T, TIdx>(chai);
+    //bindMatrixFuncNumeric<T, TIdx>(chai);
 }
 
 void bindDDSL(chaiscript::ChaiScript_Basic &chai) {
     bindTypes(chai);
 
+    //Typedefs
     typedef UInt32 TIdx;
-    bindMatrixBasic<UInt8,      TIdx, Matrix<UInt8, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<UInt16,     TIdx, Matrix<UInt16, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<UInt32,     TIdx, Matrix<TIdx, TIdx>,       Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<UInt64,     TIdx, Matrix<UInt64, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Int8,       TIdx, Matrix<Int8, TIdx>,       Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Int16,      TIdx, Matrix<Int16, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Int32,      TIdx, Matrix<Int32, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Int64,      TIdx, Matrix<Int64, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Float,      TIdx, Matrix<Float, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Double,     TIdx, Matrix<Double, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<String,     TIdx, Matrix<String, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<DataType,   TIdx, Matrix<DataType, TIdx>,   Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<ContentType,TIdx, Matrix<ContentType, TIdx>,Matrix<TIdx, TIdx>>(chai);
 
-    bindMatrixBasic<Matrix<UInt32,  TIdx>, TIdx, Matrix<Matrix<UInt32,  TIdx>, TIdx>, Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Matrix<Int32,   TIdx>, TIdx, Matrix<Matrix<Int32,   TIdx>, TIdx>, Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Matrix<Float,   TIdx>, TIdx, Matrix<Matrix<Float,   TIdx>, TIdx>, Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Matrix<Double,  TIdx>, TIdx, Matrix<Matrix<Double,  TIdx>, TIdx>, Matrix<TIdx, TIdx>>(chai);
-    bindMatrixBasic<Matrix<String,  TIdx>, TIdx, Matrix<Matrix<String,  TIdx>, TIdx>, Matrix<TIdx, TIdx>>(chai);
+    //Bind basic operators for basic types
+    bindMatrixBasic<UInt8, TIdx>(chai);
+    bindMatrixBasic<UInt16, TIdx>(chai);
+    bindMatrixBasic<UInt32, TIdx>(chai);
+    bindMatrixBasic<UInt64, TIdx>(chai);
+    bindMatrixBasic<Int8, TIdx>(chai);
+    bindMatrixBasic<Int16, TIdx>(chai);
+    bindMatrixBasic<Int32, TIdx>(chai);
+    bindMatrixBasic<Int64, TIdx>(chai);
+    bindMatrixBasic<Float, TIdx>(chai);
+    bindMatrixBasic<Double, TIdx>(chai);
+    bindMatrixBasic<String, TIdx>(chai);
+    bindMatrixBasic<DataType, TIdx>(chai);
+    bindMatrixBasic<ContentType, TIdx>(chai);
 
-    bindMatrixNumeric<UInt8,      TIdx, Matrix<UInt8, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<UInt16,     TIdx, Matrix<UInt16, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<UInt32,     TIdx, Matrix<UInt32, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<UInt64,     TIdx, Matrix<UInt64, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<Int8,       TIdx, Matrix<Int8, TIdx>,       Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<Int16,      TIdx, Matrix<Int16, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<Int32,      TIdx, Matrix<Int32, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<Int64,      TIdx, Matrix<Int64, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<Float,      TIdx, Matrix<Float, TIdx>,      Matrix<TIdx, TIdx>>(chai);
-    bindMatrixNumeric<Double,     TIdx, Matrix<Double, TIdx>,     Matrix<TIdx, TIdx>>(chai);
-}
+    //Bind basic operators for Matrix of Matrix types
+    bindMatrixBasic<Matrix<UInt32, TIdx>, TIdx>(chai);
+    bindMatrixBasic<Matrix<Int32, TIdx>, TIdx>(chai);
+    bindMatrixBasic<Matrix<Float, TIdx>, TIdx>(chai);
+    bindMatrixBasic<Matrix<Double, TIdx>, TIdx>(chai);
+    bindMatrixBasic<Matrix<String, TIdx>, TIdx>(chai);
 
-void testChai() {
-	if (chaiGlobal == nullptr)
-		throw Error(ecIncompatible, "test", "chaiScript global pointer is not intialized");
-	vector<string> cmd;
-	cmd.push_back("--(dtFloat | 1.0f | 2.0f);");
-	cmd.push_back("var m = (dtFloat | 3.0f | 4.0f);");
-	cmd.push_back("++m;");
-	cmd.push_back("m | (dtFloat | 5.0f | 6.0f);");
-	cmd.push_back("++m;");
+    //Bind numeric operators
+    bindMatrixNumeric<UInt8, TIdx>(chai);
+    bindMatrixNumeric<UInt16, TIdx>(chai);
+    bindMatrixNumeric<UInt32, TIdx>(chai);
+    bindMatrixNumeric<UInt64, TIdx>(chai);
+    bindMatrixNumeric<Int8, TIdx>(chai);
+    bindMatrixNumeric<Int16, TIdx>(chai);
+    bindMatrixNumeric<Int32, TIdx>(chai);
+    bindMatrixNumeric<Int64, TIdx>(chai);
+    bindMatrixNumeric<Float, TIdx>(chai);
+    bindMatrixNumeric<Double, TIdx>(chai);
 
-	for (auto line = cmd.begin(); line!=cmd.begin();line++) {
-		cout << *line;
-		chaiGlobal->eval(*line);
-	}
 }
 
 #ifdef READLINE_AVAILABLE
@@ -483,9 +496,13 @@ int main(int argc, char *argv[]) {
   chai.add(chaiscript::fun(&throws_exception), "throws_exception");
   chai.add(chaiscript::fun(&get_eval_error), "get_eval_error");
   chai.add(chaiscript::fun(&now), "now");
-  chai.add(chaiscript::fun(&testChai), "test");
-  bindDDSL(chai); //bind ddsl
-  chaiGlobal = &chai; //For testing
+  //bindDDSL(chai); //bind ddsl
+  bindTypes(chai);
+  bindMatrixLibBasic<Int32, UInt32>(chai);
+  chai.add(chaiscript::fun(static_cast<Matrix<Int32, UInt32>(Matrix<Int32, UInt32>::*)()>(&Matrix<Int32, UInt32>::operator ())), "()");
+  chai.add(chaiscript::fun(static_cast<Matrix<Int32, UInt32>(Matrix<Int32, UInt32>::*)(const Int32)>(&Matrix<Int32, UInt32>::operator[])), "[]");
+
+   //CHAI_MEMBER_OPER(chai, [], TMat, TMat, const TIdx);
 
   bool eval_error_ok = false;
   bool boxed_exception_ok = false;
@@ -565,48 +582,3 @@ int main(int argc, char *argv[]) {
 
   return EXIT_SUCCESS;
 }
-
-/*int main(void) {
-    chaiscript::ChaiScript chai;
-
-
-
-    string command;
-    while (command != "q") {
-        try {
-            cout << "DDSL $";
-            getline(cin, command);
-            if (command == "t") {
-                cout << "Executing standard test: ";
-                test(chai);
-            } else if (command == "q")
-                break;
-            else if (command == "r") {
-                string script;
-                cout << "Which script? ";
-                getline(cin, script);
-                cout << "Executing: " << script << endl;
-                chai.eval_file(script);
-            } else {
-                cout << "Executing: " << command << endl;
-                chai.eval(command);
-            }
-        } catch (const chaiscript::exception::eval_error &e) {
-            std::cout << e.pretty_print() << endl;
-        } catch (const double &e) {
-            cout << "double: " << e << endl;
-        } catch (int &e) {
-            cout << "int: " << e << endl;
-        } catch (float &e) {
-            cout << "float: " << e << endl;
-        } catch (const std::string &e) {
-            cout << "string: " << e << endl;
-        } catch (const Error &e) {
-            cout << e.what() << endl;
-        } catch (const std::exception &e) {
-            cout << e.what() << endl;
-        }
-        cin.clear();
-    }
-
-}*/
