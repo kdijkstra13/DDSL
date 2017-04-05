@@ -2265,7 +2265,7 @@ namespace DSModel {
 		if (ec) throw Error(ecGeneral, "CaffeMLP::writeSolverToFile_()", ec.message());
 
 		//Save solver to text file for deployment
-		ofstream ofs(solvertxt);
+		std::ofstream ofs(solvertxt);
 		if (!ofs) throw Error(ecNotFound, "CaffeMLP::writeSolverToFile_()", SS("Cannot open solver file: " << solvertxt));
 		ofs << solverProto_;
 
@@ -2285,7 +2285,7 @@ namespace DSModel {
 		string nettxt2 = filename + ".net.prototxt.caffemodel";
 		string netbin = filename + ".net.caffemodel";
 
-		ofstream ofs(nettxt);
+		std::ofstream ofs(nettxt);
 		if (!ofs) throw Error(ecNotFound, "CaffeMLP::write()", SS("Cannot open net file: " << nettxt));
 		ofs << netProto_;
 			
