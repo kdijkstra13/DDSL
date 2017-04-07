@@ -14,23 +14,25 @@ namespace DSEvolution {
 	//************//
 	//** Random **//
 	//************//
-	class Random {
-	protected:
-		std::mt19937 gen_;
-	public:
-		Random() {
-			std::random_device rd;
-			gen_.seed(rd());
-		}
+	namespace {
+		class Random {
+		protected:
+			std::mt19937 gen_;
+		public:
+			Random() {
+				std::random_device rd;
+				gen_.seed(rd());
+			}
 		
-		void seed(std::random_device &rd) {
-			gen_.seed(rd());
-		}
+			void seed(std::random_device &rd) {
+				gen_.seed(rd());
+			}
 		
-		void seed(const DSTypes::UInt32 &s) {
-			gen_.seed(s);
-		}
-	};
+			void seed(const DSTypes::UInt32 &s) {
+				gen_.seed(s);
+			}
+		};
+	}
 
 	template <typename T>
 	class RandomReal : public Random {
@@ -125,30 +127,30 @@ namespace DSEvolution {
 	};
 
 	template <typename T>
-	RandomReal<T> & rndr() {throw Error(DSTypes::ecIncompatible, "rndr", "No RNG for the specified type");}
+	static RandomReal<T> & rndr() {throw Error(DSTypes::ecIncompatible, "rndr", "No RNG for the specified type");}
 
 	static RandomReal<DSTypes::Double> rndd_;
-	template <>
-	RandomReal<DSTypes::Double> & rndr() {return rndd_;}
+	template <> 
+	static RandomReal<DSTypes::Double> & rndr() {return rndd_;}
 
 	static RandomReal<DSTypes::Float> rndf_;
 	template <>
-	RandomReal<DSTypes::Float> & rndr() {return rndf_;}
+	static RandomReal<DSTypes::Float> & rndr() {return rndf_;}
 
 	template <typename T>
-	RandomInt<T> & rndi() {throw Error(DSTypes::ecIncompatible, "rndi", "No RNG for the specified type");}
+	static RandomInt<T> & rndi() {throw Error(DSTypes::ecIncompatible, "rndi", "No RNG for the specified type");}
 
 	static RandomInt<DSTypes::UInt32> rndui32_;
 	template <>
-	RandomInt<DSTypes::UInt32> & rndi() {return rndui32_;}
-
+	static RandomInt<DSTypes::UInt32> & rndi() {return rndui32_;}
 
 	//****************//
 	//** Individual **//
 	//****************//
-	void Individual::clone(const Individual &) {}
-	void Individual::clone(Individual &&) {}
-	
+	namespace {
+		void Individual::clone(const Individual &) {}
+		void Individual::clone(Individual &&) {}
+	}
 	//********************//
 	//** RealIndividual **//
 	//********************//
@@ -377,8 +379,10 @@ namespace DSEvolution {
 	//***************//
 	//** Objective **//
 	//***************//
-	void Objective::clone(const Objective &a) {}
-	void Objective::clone(Objective &&a) {}
+	namespace {
+		void Objective::clone(const Objective &a) {}
+		void Objective::clone(Objective &&a) {}
+	};
 
 	//********************//
 	//** MultiObjective **//
@@ -490,9 +494,10 @@ namespace DSEvolution {
 	//****************//
 	//** Population **//
 	//****************//
-	void Population::clone(const Population &a) {}	
-	void Population::clone(Population &&a) {}
-
+	namespace {
+		void Population::clone(const Population &a) {}	
+		void Population::clone(Population &&a) {}
+	}
 	//************************//
 	//** StandardPopulation **//
 	//************************//
@@ -778,81 +783,83 @@ namespace DSEvolution {
 	//***************//
 	//** Evolution **//
 	//***************//
-	Evolution::Evolution() {
-		currentGeneration_ = 0;
-		maxGenerations_ = 0;
-		lastGeneration_ = 0;
-	}
-
-	void Evolution::clone(const Evolution &a) {
-		maxGenerations_ = a.maxGenerations_;
-		currentGeneration_ = a.currentGeneration_;	
-	}
-
-	void Evolution::clone(Evolution &&a) {
-		maxGenerations_ = a.maxGenerations_;
-		currentGeneration_ = a.currentGeneration_;
-	}
-
-	bool Evolution::hasNewData() {
-		DSTypes::UInt32 old = lastGeneration_;		
-		lastGeneration_ = getCurrentGeneration();
-		return old != lastGeneration_;
-	}
-
-	void Evolution::setMaxGenerations(const DSTypes::UInt32 mg) {
-		std::lock_guard<std::mutex> lock(lockMaxGen_);
-		maxGenerations_ = mg;
-	}
-
-	DSTypes::UInt32 Evolution::getMaxGenerations() {
-		std::lock_guard<std::mutex> lock(lockMaxGen_);
-		return maxGenerations_;
-	}
-
-	DSTypes::UInt32 Evolution::getCurrentGeneration() {
-		std::lock_guard<std::mutex> lock(lockCurrGen_);
-		return currentGeneration_;
-	}
-
-	void Evolution::incCurrentGeneration() {
-		std::lock_guard<std::mutex> lock(lockCurrGen_);
-		currentGeneration_++;
-	}
-
-	void Evolution::run_() {
-		while (getCurrentGeneration() < getMaxGenerations()) {
-			runOnce();
-			incCurrentGeneration();
-		}	
-	}
-
-	void Evolution::run(DSTypes::UInt32 generations) {		
-		if (currentGeneration_ == 0) {			
-			init();
+	namespace {
+		Evolution::Evolution() {
+			currentGeneration_ = 0;
+			maxGenerations_ = 0;
+			lastGeneration_ = 0;
 		}
-		maxGenerations_ = generations;
-		auto f = [this](){run_();};
-		future_ = std::async(ASYNCPOLICY, f);
-	}
 
-	void Evolution::stop() {
-		//Gracefully stop thread
-		setMaxGenerations(getCurrentGeneration());
-	}
+		void Evolution::clone(const Evolution &a) {
+			maxGenerations_ = a.maxGenerations_;
+			currentGeneration_ = a.currentGeneration_;	
+		}
 
-	bool Evolution::wait(DSTypes::UInt32 ms) {
-		if (ms == 0) {
-			if (!future_.valid())
-				return true;
-			future_.get();
-			return true;
-		} else {
-			if (!future_.valid() || future_.wait_for(std::chrono::milliseconds(ms)) == std::future_status::ready) {
+		void Evolution::clone(Evolution &&a) {
+			maxGenerations_ = a.maxGenerations_;
+			currentGeneration_ = a.currentGeneration_;
+		}
+
+		bool Evolution::hasNewData() {
+			DSTypes::UInt32 old = lastGeneration_;		
+			lastGeneration_ = getCurrentGeneration();
+			return old != lastGeneration_;
+		}
+
+		void Evolution::setMaxGenerations(const DSTypes::UInt32 mg) {
+			std::lock_guard<std::mutex> lock(lockMaxGen_);
+			maxGenerations_ = mg;
+		}
+
+		DSTypes::UInt32 Evolution::getMaxGenerations() {
+			std::lock_guard<std::mutex> lock(lockMaxGen_);
+			return maxGenerations_;
+		}
+
+		DSTypes::UInt32 Evolution::getCurrentGeneration() {
+			std::lock_guard<std::mutex> lock(lockCurrGen_);
+			return currentGeneration_;
+		}
+
+		void Evolution::incCurrentGeneration() {
+			std::lock_guard<std::mutex> lock(lockCurrGen_);
+			currentGeneration_++;
+		}
+
+		void Evolution::run_() {
+			while (getCurrentGeneration() < getMaxGenerations()) {
+				runOnce();
+				incCurrentGeneration();
+			}	
+		}
+
+		void Evolution::run(DSTypes::UInt32 generations) {		
+			if (currentGeneration_ == 0) {			
+				init();
+			}
+			maxGenerations_ = generations;
+			auto f = [this](){run_();};
+			future_ = std::async(ASYNCPOLICY, f);
+		}
+
+		void Evolution::stop() {
+			//Gracefully stop thread
+			setMaxGenerations(getCurrentGeneration());
+		}
+
+		bool Evolution::wait(DSTypes::UInt32 ms) {
+			if (ms == 0) {
+				if (!future_.valid())
+					return true;
 				future_.get();
 				return true;
-			} else 
-				return false;
+			} else {
+				if (!future_.valid() || future_.wait_for(std::chrono::milliseconds(ms)) == std::future_status::ready) {
+					future_.get();
+					return true;
+				} else 
+					return false;
+			}
 		}
 	}
 

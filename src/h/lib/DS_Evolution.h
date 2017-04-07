@@ -9,17 +9,19 @@ namespace DSEvolution {
 	//****************//
 	//** Individual **//
 	//****************//
-	class Individual {
-	public:
-		void clone(const Individual &a);
-		void clone(Individual &&a);
-		virtual ~Individual(){};
-		Individual(){};
-		Individual(const Individual &a) {clone(a);};
-		Individual(Individual &&a) {clone(std::move(a));};
-		Individual & operator=(const Individual &a) {clone(a);return *this;}
+	namespace {
+		class Individual {
+		public:
+			void clone(const Individual &a);
+			void clone(Individual &&a);
+			virtual ~Individual(){};
+			Individual(){};
+			Individual(const Individual &a) {clone(a);};
+			Individual(Individual &&a) {clone(std::move(a));};
+			Individual & operator=(const Individual &a) {clone(a);return *this;}
 
-		virtual void randomize() = 0;
+			virtual void randomize() = 0;
+		};
 	};
 
 	template <typename T>
@@ -71,15 +73,17 @@ namespace DSEvolution {
 	//***************//
 	//** Objective **//
 	//***************//
-	class Objective {
-	public:
-		void clone(const Objective &a);
-		void clone(Objective &&a);
-		~Objective(){};
-		Objective(){};
-		Objective(const Objective &a) {clone(a);};
-		Objective(Objective &&a) {clone(std::move(a));};
-		Objective & operator=(const Objective &a) {clone(a);return *this;}
+	namespace {
+		class Objective {
+		public:
+			void clone(const Objective &a);
+			void clone(Objective &&a);
+			~Objective(){};
+			Objective(){};
+			Objective(const Objective &a) {clone(a);};
+			Objective(Objective &&a) {clone(std::move(a));};
+			Objective & operator=(const Objective &a) {clone(a);return *this;}
+		};
 	};
 
 	template <typename T>
@@ -134,15 +138,17 @@ namespace DSEvolution {
 	//****************//
 	//** Population **//
 	//****************//	
-	class Population {
-	public:
-		void clone(const Population &a);
-		void clone(Population &&a);
-		~Population(){};
-		Population(){};
-		Population(const Population &a) {clone(a);};
-		Population(Population &&a) {clone(std::move(a));};
-		Population & operator=(const Population &a) {clone(a);return *this;}
+	namespace {
+		class Population {
+		public:
+			void clone(const Population &a);
+			void clone(Population &&a);
+			~Population(){};
+			Population(){};
+			Population(const Population &a) {clone(a);};
+			Population(Population &&a) {clone(std::move(a));};
+			Population & operator=(const Population &a) {clone(a);return *this;}
+		};
 	};
 
 	template <class TIndividual, class TObjective>
@@ -202,37 +208,39 @@ namespace DSEvolution {
 	//***************//
 	//** Evolution **//
 	//***************//
-	class Evolution {
-	private:
-		DSTypes::UInt32 currentGeneration_;
-		DSTypes::UInt32 maxGenerations_;
-		DSTypes::UInt32 lastGeneration_;
-		std::future<void> future_;
-		std::mutex lockMaxGen_;
-		std::mutex lockCurrGen_;
-		void run_();
-	protected:
-		void incCurrentGeneration();
-		virtual void init() = 0;
-		virtual void runOnce() = 0;
-	public:
-		void setMaxGenerations(const DSTypes::UInt32 mg);
-		DSTypes::UInt32 getMaxGenerations();
-		DSTypes::UInt32 getCurrentGeneration();
-		bool hasNewData();
+	namespace {
+		class Evolution {
+		private:
+			DSTypes::UInt32 currentGeneration_;
+			DSTypes::UInt32 maxGenerations_;
+			DSTypes::UInt32 lastGeneration_;
+			std::future<void> future_;
+			std::mutex lockMaxGen_;
+			std::mutex lockCurrGen_;
+			void run_();
+		protected:
+			void incCurrentGeneration();
+			virtual void init() = 0;
+			virtual void runOnce() = 0;
+		public:
+			void setMaxGenerations(const DSTypes::UInt32 mg);
+			DSTypes::UInt32 getMaxGenerations();
+			DSTypes::UInt32 getCurrentGeneration();
+			bool hasNewData();
 
-		void clone(const Evolution &a);
-		void clone(Evolution &&a);
-		virtual ~Evolution(){};
-		Evolution();
-		Evolution(const Evolution &a) {clone(a);};
-		Evolution(Evolution &&a) {clone(std::move(a));};
-		Evolution & operator=(const Evolution &a) {clone(a);return *this;}
+			void clone(const Evolution &a);
+			void clone(Evolution &&a);
+			virtual ~Evolution(){};
+			Evolution();
+			Evolution(const Evolution &a) {clone(a);};
+			Evolution(Evolution &&a) {clone(std::move(a));};
+			Evolution & operator=(const Evolution &a) {clone(a);return *this;}
 
-		void run(DSTypes::UInt32 generations);
-		void stop();
-		bool wait(DSTypes::UInt32 ms = 0);
-	};
+			void run(DSTypes::UInt32 generations);
+			void stop();
+			bool wait(DSTypes::UInt32 ms = 0);
+		};
+	}
 
 	template <class TPopulation>
 	class GAEvolution : public Evolution {
@@ -276,4 +284,4 @@ namespace DSEvolution {
 		void setMutationProb(const DSTypes::Double &p) {mutationProb_ = p;}
 		DSTypes::Double getMutationProb() {return mutationProb_;}
 	};
-}
+};
