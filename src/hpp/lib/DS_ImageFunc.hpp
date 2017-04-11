@@ -145,7 +145,7 @@ namespace DSFunc {
 			TIdx yo = tileIdx / tileCountY;
 			TIdx xo = tileIdx % tileCountX;
 			for (TIdx y = 0;y<mosaic.rows.count();y += tileCountY) {
-				for (TIdx x = 0;y<mosaic.cols.count();x += tileCountX) {
+				for (TIdx x = 0;x<mosaic.cols.count();x += tileCountX) {
 					mosaic.val(y + yo, x + xo) = tile->val(y / tileCountY, x / tileCountY);
 				}
 			}

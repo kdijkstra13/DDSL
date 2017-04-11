@@ -1,59 +1,69 @@
 DDSL on Windows:
-	Build zlib in .\contrib\zlib\zlib-1.2.8
+	Build zlib in .\contrib\zlib-1.2.8
 		mkdir build
 		cd build
-		'cmake -G "Visual Studio 14 Win64" .."' or 'cmake -G "Visual Studio 12 Win64" ..'
-		Open Visual Studio Solution and compile project "zlib" as Release and Debug
-		Copy Release\zlib.lib and Debug\zlibd.lib to root folder .\contrib\zlib\zlib-1.2.8 
-		Copy build\zonf.h to root folder .\contrib\zlib\zlib-1.2.8 
+		cmake -G "Visual Studio 14 Win64" ..
+		Open Visual Studio Solution and compile as Release and Debug
+		Go to the release folder and copy the zlib.lib and the zconf.h to the .\contrib\zlib-1.2.8
 	Build lpng in .\contrib\lpng1628
 		mkdir build
 		cd build
-		'cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..' or 'cmake -G "Visual Studio 12 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..'
-		Open Visual Studio Solution and compile project "png" as Release and Debug
-		** libpng wil crash if there is a mismatch between (\MD and \MdD, and Visual Studio Versions)
-	Download an install ArrayFire (ArrayFire.com) in its default location
+		cmake -G "Visual Studio 14 Win64" -DZLIB_ROOT="C:\Projects\DSL\contrib\zlib-1.2.8" ..
+		Open Visual Studio Solution and compile as Release and Debug
+		** libpng wil crash if there is a mismatch between (\MD and \MdD, etc.)
+	Download and install ArrayFire in its default location
 	Build Caffe
-		Checkout Caffe Windows branch in /contrib/caffe (git clone -b windows <repo>)
+		Checkout Caffe Windows branch in /contrib/caffe (git clone -b windows https://github.com/BVLC/caffe.git)
 		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
 			In /contrib/caffe/src/caffe/layer_factory.cpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
 			In /contrib/caffe/src/caffe/solver_factory.cpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
-		Install Miniconda and create an python 3.5 environment:
-			conda create -n py35 python=3.5 anaconda
-			activate py35
-		In scripts\build_win.cmd change all occurences to "if NOT DEFINED WITH_NINJA set WITH_NINJA=0" (If using DDSL with VS then Release and Debug folders are needed)
-		In scripts\build_win.cmd change all occurences to "if NOT DEFINED MSVC_VERSION set MSVC_VERSION=12" (NVCC does not work with VS2015)
-		In scripts\build_win.cmd change all occurences to "if NOT DEFINED USE_NCCL set USE_NCCL=0" (Because of an bug)
-			Build Caffe with instructions: https://github.com/BVLC/caffe/tree/windows
-			You can also build debug Caffe by opening the solution and compiling with the Debug profile.
+		Build Caffe with instructions: https://github.com/BVLC/caffe/tree/windows
+			Install Miniconda and create an python 3.5 environment with all dependencies.
+				conda create -n py35 python=3.5 anaconda
+				activate py35
+			** make sure that you are located in the caffe folder and that you are not located in the scripts folder
+			In scripts\build_win.cmd change all occurences of "if NOT DEFINED WITH_NINJA set WITH_NINJA=1" to "if NOT DEFINED WITH_NINJA set WITH_NINJA=0"
+			In scripts\build_win.cmd change all occurences of "if NOT DEFINED CPU_ONLY set CPU_ONLY=1" to "if NOT DEFINED CPU_ONLY set CPU_ONLY=0"
+			In scripts\build_win.cmd change all occurences of "if NOT DEFINED PYTHON_VERSION set PYTON_VERSION=2" to "if NOT DEFINED PYTHON_VERSION set PYTON_VERSION=3"
+			if you want to use the GPU (make sure you have got a NVIDIA GPU that has a compute capabillity >= 6.0)
+			Execute: scripts\build_win.cmd
+			If something fails remove build\CMakeCache.txt
+			You can also build debug Caffe by opening the solution and compiling with the Debug profile.			
 		Patch cmake errors
-			In /contrib/caffe/build/CaffeTargets.cmake rename gflags_shared, hdf5-shared, hdf5-hl_shared to gflags, caffehdf5, caffehdf5_hl
-			In /contrib/caffe/build/CaffeTargets.cmake debug rename leveldb to leveldbd
-			In /contrib/caffe/build/libraries/lib rename libopenblas.dll.a, libopenblas.a to libopenblas.dll.a.lib, libopenblas.a.lib
+			In /contrib/caffe/build/CaffeTargets.cmake rename gflags_shared, hdf5_shared, hdf5_hl_shared to gflags, caffehdf5, caffehdf5_hl
+			In /contrib/caffe/build/CaffeTargets.cmake rename the first occurence of leveldb to leveldbd, that is the variable IMPORTED_LINK_INTERFACE_LIBRARIES_DEBUG version
+			In /contrib/caffe/build/libraries/lib rename libopenblas-dll.a, libopenblas.a to libopenblas-dll.a.lib, libopenblas.a.lib
+		OpenCV is not downloaded by Caffe script anymore. Checkout and build OpenCV in /contrib/opencv
+			git clone https://github.com/opencv/opencv.git
+			mkdir build
+			cd build
+			cmake -G "Visual Studio 14 Win64" ..
+			** if encountering an error on the IPP packages: http://answers.opencv.org/question/74746/problem-extracting-ippicv_zip/
+			** cmake -G "Visual Studio 14 Win64" -D WITH_IPP=OFF ..
 	Build DDSL in .\
 		mkdir build
 		cd build
-		'cmake -G "Visual Studio 14 Win64 .."' or when using NVCC 'cmake -G "Visual Studio 12 Win64 .."'
-		For debugging leveldbd.lib needs to be linked (Somehow this is not autmatically handled by cmake)
+		cmake -G "Visual Studio 14 Win64" ..
 		Open Visual Studio Solution and go add some stuff to ddsl_tester.exe and your good to go.
 	Copy all .dll files from:
 		.\contrib\caffe\build\libraries\bin
 		.\contrib\caffe\build\libraries\lib
-		.\contrib\caffe\build\libraries\x64\vc14\bin or .\contrib\caffe\build\libraries\x64\vc12\bin
+		.\contrib\caffe\build\libraries\x64\vc14\bin
 		.\contrib\zlib-1.2.8\build\Release
 		.\contrib\zlib-1.2.8\build\Debug
 		.\contrib\lpng1628\build\Release
 		.\contrib\lpng1628\build\Debug
 		to .\DLL\ and put this folder in your system path.
+		** If there is an error with executing the program make sure that you also put the python27.dll from C:\Users\...user-name...\Miniconda3\envs\py27
+		   in the .\DLL folder. If you use py35 then you should follow the same path only to the py35 folder instead of the py27.
 	
 DDSL on Ubuntu
 	Install lpng
 		sudo apt-get libpng-dev
-	Download and install ArrayFire from their website
-		sudo apt-get install libglfw3-dev libnnvm3 
-		libnvvm3 will not work on 14.04, therefor disable GPU support for ArrayFire in de CMakeLists of DDSL_APPS
+	Download and install ArrayFirefrom their website
+		sudo apt-get install libglfw3-dev libnnvm-dev
 	Build Caffe
 		sudo apt-get install --no-install-recommends libboost-all-dev
 		sudo apt-get install libopencv-dev libatlas-dev libatlas-base-dev libsnappy-dev
@@ -61,25 +71,19 @@ DDSL on Ubuntu
 		sudo apt-get install libgflags-dev libgoogle-glog-dev protobuf-compiler libprotobuf-dev
 		sudo apt-get install libpython-dev
 		Install Cuda from http://docs.nvidia.com/cuda/index.html#axzz4YZYC9wB0 and https://developer.nvidia.com/cuda-downloads
-		Install cuDNN from NVIDIA website
 		Install NCCL
 			git clone https://github.com/NVIDIA/nccl.git
 			cd nccl
 			make CUDA_HOME=/usr/local/cuda test
 			sudo make PREFIX=/usr/local install
-		Install Caffe from GIT repo in contrib\caffe: git clone https://github.com/BVLC/caffe.git
-			Edit Makefile.config for enabling cuDNN (copy from Makefile.config.example)
+		Install Caffe and DIGITS from GIT repo
 			After pip install -r requirements.txt do pip install -U scikit-image and then pip install -r requirements.txt again
+			Use multi-gpu with cmake -DUSE_NCCL=1 ..
 		Patch for official Caffe branch because (https://github.com/BVLC/caffe/issues/2578)
 			In /contrib/caffe/include/caffe/layer_factory.hpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Layer type " << type << " already registered.";"
 			In /contrib/caffe/include/caffe/solver_factory.hpp
 			Add "if (registry.count(type) > 0) return;" in a line before "CHECK_EQ(registry.count(type), 0) << "Solver type " << type << " already registered.";"
-		Build Caffe
-			mkdir build && de build 
-			cmake -DUSE_NCCL=1 ..
-			make
-			make install
 	Build DDSL in .\
 		mkdir build
 		cd build
@@ -94,21 +98,3 @@ DIGITS in Windows (quite the hassle)
 	Somehow one of the steps breaks packages installed by http://www.lfd.uci.edu/~gohlke/pythonlibs/
 	Fix this by just re-executing the python -m pip install lines before starting DIGITS
 	Manually download and install Pillow from http://www.lfd.uci.edu/~gohlke/pythonlibs/
-
-FAQ:
-Q: c++: error: unrecognized command line option ‘-std=c++14’
-A: You have an old g++ compiler
-sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
-sudo apt-get update
-
-Q: png reading crashes
-A: Make sure you compile all zlib/png libs with the same compiler and compiler options
-
-Q: Cannot compile Caffe with Visual Studio 2015
-A: The NVIDIA NVCC compiler does not support VS2015. Only use VS2015 if you're compiling CPU_ONLY
-
-Q: Multi-GPU does not work
-A: Be sure to build Caffe with NCCL
-
-Q: How can I use eclipse?
-A: cmake -Wno-dev -G "Eclipse CDT4 - Unix Makefiles" -D_ECLIPSE_VERSION=4.6 ..
