@@ -54,16 +54,12 @@ namespace DSFunc {
 		return ret;
 	}
 
-	inline DSLib::Matrix<Int32> setCaffeGPUs(const DSLib::Matrix<Int32> &gpus = DSLib::Matrix<Int32>(), const bool details=true) {
+	inline DSLib::Matrix<Int32> setCaffeGPUs(const DSLib::Matrix<Int32> &gpus, const bool details=true) {
 		Matrix<Int32> gpus2, gpus3;
 #ifndef CPU_ONLY
-		gpus2 = getCaffeGPUs();
-		if (~gpus == 0)
-			gpus3 = gpus2;
-		else {
+		if (~gpus > 0) {
+			gpus2 = getCaffeGPUs();		
 			DSFunc::setIntersection(gpus3, const_cast<Matrix<Int32>&>(gpus), gpus2);
-			if (~gpus3 != ~gpus)
-				cout << "Warning: Not all GPUs were available." << endl;
 		}
 #ifndef USE_NCCL
 		if (~gpus3 > 1) {
@@ -82,13 +78,27 @@ namespace DSFunc {
 			caffe::Caffe::set_mode(caffe::Caffe::GPU);
 			caffe::Caffe::SetDevice(gpus3.vec(0));
 			caffe::Caffe::set_solver_count(~gpus3);
-		} else
+		}
+		
+		if (~gpus3 == 0 && ~gpus > 0) {
 			cout << "Warning: No GPUs detected" << endl;
+		} else if (~gpus == 0) {
+			cout << "Warning: Not using GPUs" << endl;
+		} else if (~gpus3 < ~gpus) {
+			cout << "Warning: Not all GPUs were available." << endl;	
+		}
 #else
 		cout << "Warning: Running CPU Only." << endl;
 		caffe::Caffe::set_mode(caffe::Caffe::CPU);
 #endif
 		return gpus3;
+	}
+
+	inline DSLib::Matrix<Int32> setCaffeGPUs(const Int32 amount, const bool details = true) {
+		Matrix<Int32> gpus;
+		if (amount > 0)
+			gpus = (dtInt32 | 0 || (amount - 1));
+		return setCaffeGPUs(gpus, details);
 	}
 
 	inline DB * openDB(const String filename, const DBMode mode, const Backend be) {

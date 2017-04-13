@@ -20,6 +20,21 @@ namespace DSUtil {
 		*p = nullptr;
 	}
 
+	String inline fileExt(const String &file) {
+		size_t dot = file.find_last_of('.');
+		return (dot == string::npos)?"":file.substr(dot+1);
+	}
+
+	String inline fileBaseName(const String &file) {
+		size_t dot = file.find_last_of('.');
+		return (dot == string::npos) ? file : file.substr(0, dot);
+	}
+
+	String inline fileReplaceExt(const String &file, const String &ext) {
+		return fileBaseName(file) + "." + ext;
+		
+	}
+
 	String inline replaceString(const String & haystack, const String & needle, const String replace) {
 		String r = haystack;
 		while (r.find(needle) != string::npos)
