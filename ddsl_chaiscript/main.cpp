@@ -12,6 +12,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include <ddsl.hpp>
+
 #include <DS_Chai.h>
 #include <chaiscript/chaiscript_basic.hpp>
 #include <chaiscript/language/chaiscript_parser.hpp>

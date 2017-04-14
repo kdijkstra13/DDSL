@@ -1,7 +1,8 @@
 #include <DS_ChaiMatrix.h>
 
+#include <ddsl.hpp>
 namespace DSChai {
-	
+
 	//Add library for Matrix
 	template <typename T, typename TIdx>
 	void bindMatrixLibBasic(chaiscript::ModulePtr chai) {
@@ -101,8 +102,8 @@ namespace DSChai {
 		typedef Matrix<T, TIdx> TMat;
 		typedef Matrix<TIdx, TIdx> TMatIdx;
 
-		//Add operators
-		CHAI_OPER(chai, DSScript, *=, TMat, TMat&, const TMat&);
+		//Arithmetic
+        CHAI_OPER(chai, DSScript, *=, TMat, TMat&, const TMat&);
 		CHAI_OPER(chai, DSScript, >, TMatIdx, const TMat&, const TMat&);
 		CHAI_OPER(chai, DSScript, >, TMatIdx, const TMat&, const T&);
 		CHAI_OPER(chai, DSScript, <, TMatIdx, const TMat&, const TMat&);
@@ -113,22 +114,59 @@ namespace DSChai {
 		CHAI_OPER(chai, DSScript, <= , TMatIdx, const TMat&, const T&);
 
 		//Arithmetic
-		CHAI_OPER(chai, DSScript, +, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, -, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, +, TTab &, TTab &, const TMat &);
-		CHAI_OPER(chai, DSScript, -, TTab &, TTab &, const TMat &);
-		CHAI_OPER(chai, DSScript, *, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, *, TTab &, TTab &, const TMat &);
-		CHAI_OPER(chai, DSScript, / , TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, / , TTab &, TTab &, const TMat &);
-		CHAI_FUNC(chai, DSScript, pow, TTab &, TTab &, const T &);
-		CHAI_FUNC(chai, DSScript, pow, TTab &, TTab &, const TMat &);
-		CHAI_FUNC(chai, DSScript, min, TTab &, TTab &, const T &);
-		CHAI_FUNC(chai, DSScript, max, TTab &, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, +, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, -, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, +, TMat, TMat &, const TMat &);
+		CHAI_OPER(chai, DSScript, -, TMat, TMat &, const TMat &);
+		CHAI_OPER(chai, DSScript, *, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, *, TMat, TMat &, const TMat &);
+		CHAI_OPER(chai, DSScript, /, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, /, TMat, TMat &, const TMat &);
+		CHAI_FUNC(chai, DSScript, pow, TMat, TMat &, const T &);
+		CHAI_FUNC(chai, DSScript, pow, TMat, TMat &, const TMat &);
+        CHAI_FUNC(chai, DSScript, min, TMat, TMat &, const T &);
+        CHAI_FUNC(chai, DSScript, min, TMat, TMat &, const TMat &);
+        CHAI_FUNC(chai, DSScript, max, TMat, TMat &, const T &);
+        CHAI_FUNC(chai, DSScript, max, TMat, TMat &, const TMat &);
 
-		CHAI_OPER(chai, DSScript, %, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, %, TTab &, TTab &, const TMat &);
+		//Add operators
+		CHAI_OPER(chai, DSScript, %, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, %, TMat, TMat &, const TMat &);
 	}
+
+	template <typename T, typename TIdx>
+	void bindMatrixLangReal(chaiscript::ModulePtr chai) {
+		//Typedefs
+		typedef Matrix<T, TIdx> TMat;
+		typedef Matrix<TIdx, TIdx> TMatIdx;
+
+		//Arithmetic
+        CHAI_OPER(chai, DSScript, *=, TMat, TMat&, const TMat&);
+		CHAI_OPER(chai, DSScript, >, TMatIdx, const TMat&, const TMat&);
+		CHAI_OPER(chai, DSScript, >, TMatIdx, const TMat&, const T&);
+		CHAI_OPER(chai, DSScript, <, TMatIdx, const TMat&, const TMat&);
+		CHAI_OPER(chai, DSScript, <, TMatIdx, const TMat&, const T&);
+		CHAI_OPER(chai, DSScript, >= , TMatIdx, const TMat&, const TMat&);
+		CHAI_OPER(chai, DSScript, >= , TMatIdx, const TMat&, const T&);
+		CHAI_OPER(chai, DSScript, <= , TMatIdx, const TMat&, const TMat&);
+		CHAI_OPER(chai, DSScript, <= , TMatIdx, const TMat&, const T&);
+
+		CHAI_OPER(chai, DSScript, +, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, -, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, +, TMat, TMat &, const TMat &);
+		CHAI_OPER(chai, DSScript, -, TMat, TMat &, const TMat &);
+		CHAI_OPER(chai, DSScript, *, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, *, TMat, TMat &, const TMat &);
+		CHAI_OPER(chai, DSScript, /, TMat, TMat &, const T &);
+		CHAI_OPER(chai, DSScript, /, TMat, TMat &, const TMat &);
+		CHAI_FUNC(chai, DSScript, pow, TMat, TMat &, const T &);
+		CHAI_FUNC(chai, DSScript, pow, TMat, TMat &, const TMat &);
+        CHAI_FUNC(chai, DSScript, min, TMat, TMat &, const T &);
+        CHAI_FUNC(chai, DSScript, min, TMat, TMat &, const TMat &);
+        CHAI_FUNC(chai, DSScript, max, TMat, TMat &, const T &);
+        CHAI_FUNC(chai, DSScript, max, TMat, TMat &, const TMat &);
+	}
+
 
 	//Add numerical functions for Matrix
 	template <typename T, typename TIdx>
@@ -148,6 +186,13 @@ namespace DSChai {
 		bindMatrixLibNumeric<T, TIdx>(chai);
 		bindMatrixLangNumeric<T, TIdx>(chai);
 		bindMatrixFuncNumeric<T, TIdx>(chai);
+	}
+
+	template <typename T, typename TIdx>
+	void bindMatrixReal(chaiscript::ModulePtr chai) {
+		//bindMatrixLibReal<T, TIdx>(chai);
+		bindMatrixLangReal<T, TIdx>(chai);
+		//bindMatrixFuncReal<T, TIdx>(chai);
 	}
 
 	void bindMatrix(chaiscript::ModulePtr chai) {
@@ -176,8 +221,20 @@ namespace DSChai {
 		bindMatrixBasic<Matrix<Double, TIdx>, TIdx>(chai);
 		bindMatrixBasic<Matrix<String, TIdx>, TIdx>(chai);
 
+		//Bind real operators
+        bindMatrixReal<UInt8, TIdx>(chai);
+		bindMatrixReal<UInt16, TIdx>(chai);
+		bindMatrixReal<UInt32, TIdx>(chai);
+		bindMatrixReal<UInt64, TIdx>(chai);
+		bindMatrixReal<Int8, TIdx>(chai);
+		bindMatrixReal<Int16, TIdx>(chai);
+		bindMatrixReal<Int32, TIdx>(chai);
+		bindMatrixReal<Int64, TIdx>(chai);
+		bindMatrixReal<Float, TIdx>(chai);
+		bindMatrixReal<Double, TIdx>(chai);
+
 		//Bind numeric operators
-		bindMatrixNumeric<UInt8, TIdx>(chai);
+        bindMatrixNumeric<UInt8, TIdx>(chai);
 		bindMatrixNumeric<UInt16, TIdx>(chai);
 		bindMatrixNumeric<UInt32, TIdx>(chai);
 		bindMatrixNumeric<UInt64, TIdx>(chai);
@@ -185,7 +242,5 @@ namespace DSChai {
 		bindMatrixNumeric<Int16, TIdx>(chai);
 		bindMatrixNumeric<Int32, TIdx>(chai);
 		bindMatrixNumeric<Int64, TIdx>(chai);
-		bindMatrixNumeric<Float, TIdx>(chai);
-		bindMatrixNumeric<Double, TIdx>(chai);
 	}
 }

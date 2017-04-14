@@ -131,12 +131,12 @@ namespace DSLang {
 	}
 
 	template <typename TIdx, typename TId, typename T>
-	DSLib::Matrix<TIdx, TIdx> operator==(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {		
+	DSLib::Matrix<TIdx, TIdx> operator==(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) == rhs);
 	}
 
 	template <typename T, typename TIdx, typename TId>
-	DSLib::Matrix<TIdx, TIdx> operator==(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {		
+	DSLib::Matrix<TIdx, TIdx> operator==(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		const DSLib::Matrix<T, TIdx> & llhs = const_cast<DSLib::Table<TIdx, TId> &>(lhs);
 		return (llhs == rhs);
 	}
@@ -189,10 +189,10 @@ namespace DSLang {
 	DSLib::Matrix<TIdx, TIdx> operator>(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) > rhs);
 	}
-	
+
 	/* Should work??
-	template <typename T, typename TIdx, typename TId>	
-	typename std::enable_if<!std::is_same<T, DSLib::Model<TIdx, TId>>::value, DSLib::Matrix<TIdx, TIdx>>::type 
+	template <typename T, typename TIdx, typename TId>
+	typename std::enable_if<!std::is_same<T, DSLib::Model<TIdx, TId>>::value, DSLib::Matrix<TIdx, TIdx>>::type
 	operator>(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		DSLib::Matrix<T, TIdx> & m = const_cast<DSLib::Table<TIdx, TId>&>(lhs).template mat<T>(0);
 		return (m > rhs);
@@ -208,7 +208,7 @@ namespace DSLang {
 
 	template <typename TIdx, typename TId, typename T>
 	DSLib::Matrix<TIdx, TIdx> operator<=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
-		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) <= rhs);		
+		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) <= rhs);
 	}
 
 	template <typename T, typename TIdx, typename TId>
@@ -225,8 +225,8 @@ namespace DSLang {
 	}
 
 	template <typename TIdx, typename TId, typename T>
-	DSLib::Matrix<TIdx, TIdx> operator>=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {		
-		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) >= rhs);		
+	DSLib::Matrix<TIdx, TIdx> operator>=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return (const_cast<Table<TIdx, TId>&>(lhs).template mat<T>((TIdx)0) >= rhs);
 	}
 
 	template <typename T, typename TIdx, typename TId>
@@ -275,7 +275,7 @@ namespace DSLang {
 	//** Arithmetic **//
 	//****************//
 	template <typename TIdx, typename TId, typename T>  DSLib::Table<TIdx, TId> & operator+(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
-		for (auto matWrap=lhs.matrixByIdx().begin();matWrap!=lhs.matrixByIdx().end();matWrap++) {		
+		for (auto matWrap=lhs.matrixByIdx().begin();matWrap!=lhs.matrixByIdx().end();matWrap++) {
 			if ((*matWrap)->dataType() == DSTypes::dataType(rhs)) {
 				DSLib::Matrix<T, TIdx> & mat = static_cast<DSLib::Matrix<T, TIdx> &>((*matWrap)->data());
 				mat + rhs;
@@ -317,7 +317,7 @@ namespace DSLang {
 		}
 		return lhs;
 	}
-	
+
 	template <typename TIdx, typename TId, typename T>  DSLib::Table<TIdx, TId> & operator-(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		for (auto matWrap = lhs.matrixByIdx().begin();matWrap != lhs.matrixByIdx().end();matWrap++) {
 			if ((*matWrap)->dataType() == rhs.getDataType()) {
@@ -347,7 +347,7 @@ namespace DSLang {
 		}
 		return lhs;
 	}
-	
+
 	template <typename TIdx, typename TId, typename T>  DSLib::Table<TIdx, TId> & operator*(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		for (auto matWrap = lhs.matrixByIdx().begin();matWrap != lhs.matrixByIdx().end();matWrap++) {
 			if ((*matWrap)->dataType() == rhs.getDataType()) {
@@ -377,7 +377,7 @@ namespace DSLang {
 		}
 		return lhs;
 	}
-	
+
 	template <typename TIdx, typename TId, typename T>  DSLib::Table<TIdx, TId> & operator/(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		for (auto matWrap = lhs.matrixByIdx().begin();matWrap != lhs.matrixByIdx().end();matWrap++) {
 			if ((*matWrap)->dataType() == rhs.getDataType()) {
@@ -392,7 +392,7 @@ namespace DSLang {
 		}
 		return lhs;
 	}
-	
+
 	template <typename TIdx, typename TId, typename T>  DSLib::Table<TIdx, TId> & pow(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		for (auto matWrap = lhs.matrixByIdx().begin();matWrap != lhs.matrixByIdx().end();matWrap++) {
 			if ((*matWrap)->dataType() == DSTypes::dataType(rhs)) {
@@ -407,7 +407,7 @@ namespace DSLang {
 		}
 		return lhs;
 	}
-	
+
 	template <typename TIdx, typename TId, typename T>  DSLib::Table<TIdx, TId> & pow(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		for (auto matWrap = lhs.matrixByIdx().begin();matWrap != lhs.matrixByIdx().end();matWrap++) {
 			if ((*matWrap)->dataType() == rhs.getDataType()) {
@@ -532,7 +532,7 @@ namespace DSScript {
 	//****************//
 	//BreakUp matrix
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator!(DSLib::Table<TIdx, TId> &rhs) {
+	DSLib::Table<TIdx, TId> operator!(DSLib::Table<TIdx, TId> &rhs) {
 		return DSLang::operator!(rhs);
 	}
 
@@ -562,23 +562,23 @@ namespace DSScript {
 	//*******************//
 	//Concat two tables
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator|(DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+	DSLib::Table<TIdx, TId> operator|(DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
 		return DSLang::operator|(lhs, rhs);
 	}
 
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator^(DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+	DSLib::Table<TIdx, TId> operator^(DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
 		return DSLang::operator^(lhs, rhs);
 	}
 
 	//Concat a table and a matrix
 	template <typename TIdx, typename TId, typename T>
-	DSLib::Table<TIdx, TId> & operator|(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	DSLib::Table<TIdx, TId> operator|(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::operator|(lhs, rhs);
 	}
 
 	template <typename TIdx, typename TId, typename T>
-	DSLib::Table<TIdx, TId> & operator^(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	DSLib::Table<TIdx, TId> operator^(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::operator^(lhs, rhs);
 	}
 
@@ -587,19 +587,19 @@ namespace DSScript {
 	//*************************//
 	//Set RowIds
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator|(const DSLib::Matrix<TId, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
+	DSLib::Table<TIdx, TId> operator|(const DSLib::Matrix<TId, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
 		return DSLang::operator|(lhs, rhs);
 	}
 
 	//Set ColIds
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator^(const DSLib::Matrix<TId, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
+	DSLib::Table<TIdx, TId> operator^(const DSLib::Matrix<TId, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
 		return DSLang::operator^(lhs, rhs);
 	}
 
 	//Set ContentTypes
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator^(const DSLib::Matrix<DSTypes::ContentType, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
+	DSLib::Table<TIdx, TId> operator^(const DSLib::Matrix<DSTypes::ContentType, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
 		return DSLang::operator^(lhs, rhs);
 	}
 
@@ -720,63 +720,63 @@ namespace DSScript {
 	//****************//
 	//** Arithmetic **//
 	//****************//
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator+(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator+(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		return DSLang::operator+(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator-(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator-(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		return DSLang::operator-(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T> 
-	DSLib::Table<TIdx, TId> & operator+(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator+(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::operator+(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator-(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator-(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::operator-(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator*(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator*(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		return DSLang::operator*(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator*(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator*(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::operator*(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator/(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator/(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		return DSLang::operator/(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator/(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator/(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::operator/(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & pow(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> pow(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		return DSLang::pow(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & pow(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> pow(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::pow(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator%(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator%(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
 		return DSLang::operator%(lhs, rhs);
 	}
 
-	template <typename TIdx, typename TId, typename T>  
-	DSLib::Table<TIdx, TId> & operator%(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> operator%(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
 		return DSLang::operator%(lhs, rhs);
 	}
 
@@ -784,22 +784,22 @@ namespace DSScript {
 	//** Streaming **//
 	//***************//
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator>>(DSLib::Table<TIdx, TId> &lhs, std::ostream &rhs) {
+	DSLib::Table<TIdx, TId> operator>>(DSLib::Table<TIdx, TId> &lhs, std::ostream &rhs) {
 		return DSLang::operator>>(lhs, rhs);
 	}
 
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator<<(DSLib::Table<TIdx, TId> &lhs, std::istream &rhs) {
+	DSLib::Table<TIdx, TId> operator<<(DSLib::Table<TIdx, TId> &lhs, std::istream &rhs) {
 		return DSLang::operator<<(lhs, rhs);
 	}
 
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator>>(DSLib::Table<TIdx, TId> &lhs, const DSTypes::String &rhs) {
+	DSLib::Table<TIdx, TId> operator>>(DSLib::Table<TIdx, TId> &lhs, const DSTypes::String &rhs) {
 		return DSLang::operator>>(lhs, rhs);
 	}
 
 	template <typename TIdx, typename TId>
-	DSLib::Table<TIdx, TId> & operator<<(DSLib::Table<TIdx, TId> &lhs, const DSTypes::String &rhs) {
+	DSLib::Table<TIdx, TId> operator<<(DSLib::Table<TIdx, TId> &lhs, const DSTypes::String &rhs) {
 		return DSLang::operator<<(lhs, rhs);
 	}
 }

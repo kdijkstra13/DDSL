@@ -96,17 +96,17 @@ namespace DSTypes {
 		return dataTypeHash_[dt];
 	}
 
-	template<typename T> struct enumStrings {static char const* data[];};
-
-	template<> char const* enumStrings<ContentType>::data[] = { "Unknown", "Feature", "Target", "Result", "Split", "Confusion", "Index", "Parameter", "Confidence", "Image", "Error", "Correlation"};
-	template<> char const* enumStrings<DataType>::data[] = { "Unknown", "Double", "Float", "UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64", "String", "CString", "ContentType", "DataType", "MatrixFloat", "MatrixDouble", "MatrixInt32", "MatrixUInt32", "MatrixString", "VoidPointer", "CaffeBlobDouble", "ImagePNGDouble", "ImagePNGFloat"};
-	template<> char const* enumStrings<PassThroughType>::data[] = {"All", "Relevant", "None"};
-	template<> char const* enumStrings<ExecType>::data[] = { "Synchronous", "Asynchronous"};
-	template<> char const* enumStrings<Order>::data[] = {"RowMajor", "ColMajor"};
-	template<> char const* enumStrings<ErrorCode>::data[] = {"General", "NotImplemented", "InvalidEnum", "SizeMismatch", "RangeError", "Incompatible", "NotFound", "Unexpected", "Internal", "Parameter", "Unsupported", "ExternalLibrary"};
-	template<> char const* enumStrings<CellsIteratorType>::data[] = {"Region", "Continuous"};
-	template<> char const* enumStrings<ImageType>::data[] = {"M8", "MA8", "RGB8", "RGBA8", "M16", "MA16", "RGB16", "RGBA16", "itDouble", "RGB8Planar", "RGB16Planar", "RGB8PlanarV", "RGB16PlanarV"};
-
+	namespace {
+        template<typename T> struct enumStrings {static char const* data[];};
+        template<> char const* enumStrings<ContentType>::data[] = { "Unknown", "Feature", "Target", "Result", "Split", "Confusion", "Index", "Parameter", "Confidence", "Image", "Error", "Correlation"};
+        template<> char const* enumStrings<DataType>::data[] = { "Unknown", "Double", "Float", "UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64", "String", "CString", "ContentType", "DataType", "MatrixFloat", "MatrixDouble", "MatrixInt32", "MatrixUInt32", "MatrixString", "VoidPointer", "CaffeBlobDouble", "ImagePNGDouble", "ImagePNGFloat"};
+        template<> char const* enumStrings<PassThroughType>::data[] = {"All", "Relevant", "None"};
+        template<> char const* enumStrings<ExecType>::data[] = { "Synchronous", "Asynchronous"};
+        template<> char const* enumStrings<Order>::data[] = {"RowMajor", "ColMajor"};
+        template<> char const* enumStrings<ErrorCode>::data[] = {"General", "NotImplemented", "InvalidEnum", "SizeMismatch", "RangeError", "Incompatible", "NotFound", "Unexpected", "Internal", "Parameter", "Unsupported", "ExternalLibrary"};
+        template<> char const* enumStrings<CellsIteratorType>::data[] = {"Region", "Continuous"};
+        template<> char const* enumStrings<ImageType>::data[] = {"M8", "MA8", "RGB8", "RGBA8", "M16", "MA16", "RGB16", "RGBA16", "itDouble", "RGB8Planar", "RGB16Planar", "RGB8PlanarV", "RGB16PlanarV"};
+	}
 	//Stream a VoidPointer
 	inline std::ostream& operator<<(std::ostream &os, const VoidPointer &vp) { return os << "(void*)" << (UInt)vp.get(); };
 

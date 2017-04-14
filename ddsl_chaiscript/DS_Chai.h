@@ -1,4 +1,3 @@
-#include "ddsl.hpp"
 #include "chaiscript/chaiscript.hpp"
 
 //Add a type
@@ -31,6 +30,7 @@
 
 //Add type conversion
 #define CHAI_CONVERSION(CHAI, TYPE_FROM, TYPE_TO) CHAI->add(chaiscript::type_conversion<TYPE_FROM, TYPE_TO>());
+
 
 //#ifdef DDSL_CHAI_MODULE
 //	#define DDSL_CHAISCRIPT_MODULE_EXPORT CHAISCRIPT_MODULE_EXPORT

@@ -1,5 +1,6 @@
 #include <DS_ChaiTable.h>
 
+#include <ddsl.hpp>
 namespace DSChai {
 
 	//Add library for Table
@@ -24,6 +25,38 @@ namespace DSChai {
 		//Add class members
 		CHAI_MEMBER_CONST(chai, print, DSTypes::String, TTab);
 		CHAI_MEMBER_CONST(chai, print, void, TTab, std::ostream &);
+
+		//Language operators which do not use Matrix<>
+		typedef Matrix<TId, TIdx> TMatId;
+		typedef Matrix<ContentType, TIdx> TMatCT;
+
+		//Specify Ids and ContentType
+		CHAI_OPER(chai, DSScript, |, TTab, const TMatId&, TTab&);
+		CHAI_OPER(chai, DSScript, ^, TTab, const TMatId&, TTab&);
+		CHAI_OPER(chai, DSScript, ^, TTab, const TMatCT&, TTab&);
+
+		//Streaming
+        CHAI_OPER(chai, DSScript, >> , TTab, TTab &, std::ostream &);
+		CHAI_OPER(chai, DSScript, << , TTab, TTab &, std::istream &);
+		CHAI_OPER(chai, DSScript, >> , TTab, TTab &, const DSTypes::String &);
+		CHAI_OPER(chai, DSScript, << , TTab, TTab &, const DSTypes::String &);
+
+        //Printing
+		CHAI_OPER(chai, DSScript, ++, TTab, const TTab&);
+		CHAI_OPER(chai, DSScript, --, TTab, const TTab&);
+
+		//Breakup
+		CHAI_OPER(chai, DSScript, !, TTab, TTab&);
+		CHAI_OPER(chai, DSScript, *, TTab, const TTab&);
+
+		//Concat
+		CHAI_OPER(chai, DSScript, |, TTab, TTab&, const TTab&);
+		CHAI_OPER(chai, DSScript, ^, TTab, TTab&, const TTab&);
+
+		//Comparison
+		CHAI_OPER(chai, DSScript, == , TTabIdx, const TTab&, const TTab&);
+		CHAI_OPER(chai, DSScript, != , TTabIdx, const TTab&, const TTab&);
+
 	}
 
 	//Add functions for Table
@@ -36,16 +69,25 @@ namespace DSChai {
 	template <typename T, typename TIdx, typename TId>
 	void bindTableLangBasic(chaiscript::ModulePtr chai) {
 		typedef Table<TIdx, TId> TTab;
+		typedef Matrix<TIdx, TIdx> TTabIdx;
 		typedef Matrix<T, TIdx> TMat;
-		
+
 		//Add conversions to Matrix
 		CHAI_CONVERSION(chai, TTab, TMat);
-		
-		//Streaming
-		CHAI_OPER(chai, DSScript, >> , TTab &, TTab &, std::ostream &);
-		CHAI_OPER(chai, DSScript, << , TTab &, TTab &, std::istream &);
-		CHAI_OPER(chai, DSScript, >> , TTab &, TTab &, const DSTypes::String &);
-		CHAI_OPER(chai, DSScript, << , TTab &, TTab &, const DSTypes::String &);
+
+		//Static init
+		CHAI_OPER(chai, DSScript, |, TTab, DSTypes::ContentType, const TMat&);
+		CHAI_OPER(chai, DSScript, ^, TTab, DSTypes::ContentType, const TMat&);
+
+		//Concat
+		CHAI_OPER(chai, DSScript, |, TTab, TTab&, const TMat&);
+		CHAI_OPER(chai, DSScript, ^, TTab, TTab&, const TMat&);
+
+		//Comparing
+		CHAI_OPER(chai, DSScript, == , TTabIdx, const TTab&, const TMat&);
+		CHAI_OPER(chai, DSScript, == , TTabIdx, const TTab&, const T&);
+		CHAI_OPER(chai, DSScript, != , TTabIdx, const TTab&, const TMat&);
+		CHAI_OPER(chai, DSScript, != , TTabIdx, const TTab&, const T&);
 	}
 
 	//Add language for Table
@@ -55,26 +97,42 @@ namespace DSChai {
 		typedef Matrix<T, TIdx> TMat;
 
 		//Arithmetic
-		CHAI_OPER(chai, DSScript, +, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, -, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, +, TTab &, TTab &, const TMat &);
-		CHAI_OPER(chai, DSScript, -, TTab &, TTab &, const TMat &);
-		CHAI_OPER(chai, DSScript, *, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, *, TTab &, TTab &, const TMat &);
-		CHAI_OPER(chai, DSScript, / , TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, / , TTab &, TTab &, const TMat &);
-		CHAI_FUNC(chai, DSScript, pow, TTab &, TTab &, const T &);
-		CHAI_FUNC(chai, DSScript, pow, TTab &, TTab &, const TMat &);
-		CHAI_OPER(chai, DSScript, %, TTab &, TTab &, const T &);
-		CHAI_OPER(chai, DSScript, %, TTab &, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, +, TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, -, TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, +, TTab, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, -, TTab, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, *, TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, *, TTab, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, / , TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, / , TTab, TTab &, const TMat &);
+		CHAI_FUNC(chai, DSScript, pow, TTab, TTab &, const T &);
+		CHAI_FUNC(chai, DSScript, pow, TTab, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, %, TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, %, TTab, TTab &, const TMat &);
+	}
+
+		//Add language for Table
+	template <typename T, typename TIdx, typename TId>
+	void bindTableLangReal(chaiscript::ModulePtr chai) {
+		typedef Table<TIdx, TId> TTab;
+		typedef Matrix<T, TIdx> TMat;
+
+		//Arithmetic
+		CHAI_OPER(chai, DSScript, +, TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, -, TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, +, TTab, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, -, TTab, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, *, TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, *, TTab, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, / , TTab, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, / , TTab, TTab &, const TMat &);
+		CHAI_FUNC(chai, DSScript, pow, TTab, TTab &, const T &);
+		CHAI_FUNC(chai, DSScript, pow, TTab, TTab &, const TMat &);
 	}
 
 	//Add basic functions
+	template <typename TIdx, typename TId>
 	void bindTableBasic(chaiscript::ModulePtr chai) {
-		//Typedefs
-		typedef UInt32 TIdx;
-		typedef String TId;
-
 		//Bind basic table
 		bindTableLibBasic<TIdx, TId>(chai);
 		bindTableFuncBasic<TIdx, TId>(chai);
@@ -95,12 +153,9 @@ namespace DSChai {
 		bindTableLangBasic<ContentType, TIdx, TId>(chai);
 	}
 
-	//Add basic functions
+	//Add numeric functions
+	template <typename TIdx, typename TId>
 	void bindTableNumeric(chaiscript::ModulePtr chai) {
-		//Typedefs
-		typedef UInt32 TIdx;
-		typedef String TId;
-
 		//Bind basic table
 		//bindTableLibNumeric<TIdx, TId>(chai);
 		//bindTableFuncNumeric<TIdx, TId>(chai);
@@ -114,8 +169,26 @@ namespace DSChai {
 		bindTableLangNumeric<Int16, TIdx, TId>(chai);
 		bindTableLangNumeric<Int32, TIdx, TId>(chai);
 		bindTableLangNumeric<Int64, TIdx, TId>(chai);
-		bindTableLangNumeric<Float, TIdx, TId>(chai);
-		bindTableLangNumeric<Double, TIdx, TId>(chai);
+	}
+
+	//Add real functions
+	template <typename TIdx, typename TId>
+	void bindTableReal(chaiscript::ModulePtr chai) {
+		//Bind basic table
+		//bindTableLibReal<TIdx, TId>(chai);
+		//bindTableFuncReal<TIdx, TId>(chai);
+
+		//Bind basic lang
+		bindTableLangReal<UInt8, TIdx, TId>(chai);
+		bindTableLangReal<UInt16, TIdx, TId>(chai);
+		bindTableLangReal<UInt32, TIdx, TId>(chai);
+		bindTableLangReal<UInt64, TIdx, TId>(chai);
+		bindTableLangReal<Int8, TIdx, TId>(chai);
+		bindTableLangReal<Int16, TIdx, TId>(chai);
+		bindTableLangReal<Int32, TIdx, TId>(chai);
+		bindTableLangReal<Int64, TIdx, TId>(chai);
+		bindTableLangReal<Float, TIdx, TId>(chai);
+		bindTableLangReal<Double, TIdx, TId>(chai);
 	}
 
 	//Add all Table functions
@@ -123,8 +196,9 @@ namespace DSChai {
 		//Typedefs
 		typedef UInt32 TIdx;
 		typedef String TId;
-		
-		bindTableBasic(chai);
-		bindTableNumeric(chai);
+
+		bindTableBasic<TIdx, TId>(chai);
+		bindTableNumeric<TIdx, TId>(chai);
+		bindTableReal<TIdx, TId>(chai);
 	}
 }

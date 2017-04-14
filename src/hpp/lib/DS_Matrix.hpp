@@ -61,7 +61,7 @@ namespace DSLib {
 	CellsBase<T, TInt>::IteratorBase::~IteratorBase() {};
 
 	template <typename T, typename TInt>
-	typename CellsBase<T, TInt>::IteratorBase& CellsBase<T, TInt>::IteratorBase::operator=(const typename CellsBase<T, TInt>::IteratorBase& other) {		
+	typename CellsBase<T, TInt>::IteratorBase& CellsBase<T, TInt>::IteratorBase::operator=(const typename CellsBase<T, TInt>::IteratorBase& other) {
 		stride_ = other.stride_;
 		count_ = other.count_;
 		contraStride_ = other.contraStride_;
@@ -129,7 +129,7 @@ namespace DSLib {
 		this->counter_ = 0;
 		this->counter2_ = 0;
 	}
-	
+
 	template <typename T, typename TInt>
 	CellsRegion<T, TInt>::Iterator::Iterator(const typename CellsRegion<T, TInt>::Iterator &other) {
 		this->stride_ = other.stride_;
@@ -143,7 +143,7 @@ namespace DSLib {
 
 	template <typename T, typename TInt>
 	CellsRegion<T, TInt>::Iterator::Iterator(const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount, const typename std::vector<T>::iterator &cursor) : CellsBase<T, TInt>::IteratorBase(stride, contraStride, count, contraCount, cursor) {}
-	
+
 	template <typename T, typename TInt>
 	CellsRegion<T, TInt>::Iterator::~Iterator() {
 	}
@@ -162,7 +162,7 @@ namespace DSLib {
 				this->cursor_ -= (this->counter_ * this->stride_) - this->contraStride_; //lf+cr
 			}
 			this->counter_ = 0;
-			this->counter2_++;			
+			this->counter2_++;
 		} else {
 			this->cursor_ += this->stride_;
 			this->counter_++;
@@ -176,7 +176,7 @@ namespace DSLib {
 		++(*this);
 		return it;
 	}
-	
+
 	//CellsRegion
 	template <typename T, typename TInt>
 	CellsRegion<T, TInt>::CellsRegion(const typename std::vector<T>::iterator &begin, const typename std::vector<T>::iterator &end, const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount) : CellsBase<T, TInt>(begin, end, stride, contraStride, count, contraCount) {}
@@ -188,7 +188,7 @@ namespace DSLib {
 	typename CellsRegion<T, TInt>::Iterator CellsRegion<T, TInt>::operator[](const TInt index) {
 		return CellsRegion<T, TInt>::Iterator(this->stride_, this->contraStride_, this->count_, this->contraCount_, this->begin_ + index * this->stride_);
 	}
-	
+
 	template <typename T, typename TInt>
 	typename CellsRegion<T, TInt>::Iterator CellsRegion<T, TInt>::begin() {
 		return CellsRegion<T, TInt>::Iterator(this->stride_, this->contraStride_, this->count_, this->contraCount_, this->begin_);
@@ -223,7 +223,7 @@ namespace DSLib {
 
 	template <typename T, typename TInt>
 	CellsContinuous<T, TInt>::Iterator::Iterator(const TInt stride, const TInt contraStride, const TInt count, const TInt contraCount, const typename std::vector<T>::iterator &cursor) : CellsBase<T, TInt>::IteratorBase(stride, contraStride, count, contraCount, cursor) {}
-	
+
 	template <typename T, typename TInt>
 	CellsContinuous<T, TInt>::Iterator::~Iterator() {
 	}
@@ -252,7 +252,7 @@ namespace DSLib {
 	typename CellsContinuous<T, TInt>::Iterator CellsContinuous<T, TInt>::operator[](const TInt index) {
 		return Iterator(this->stride_, this->contraStride_, this->count_, this->contraCount_, this->begin_ + index * this->stride_);
 	}
-	
+
 	template <typename T, typename TInt>
 	typename CellsContinuous<T, TInt>::Iterator CellsContinuous<T, TInt>::begin() {
 		return Iterator(this->stride_, this->contraStride_, this->count_, this->contraCount_, this->begin_);
@@ -269,7 +269,7 @@ namespace DSLib {
 		stride_ = index.stride();
 		count_ = index.count();
 	};
-	
+
 	template<typename T, typename TInt>
 	Matrix<T, TInt>::Index::Iterator::Iterator() {
 		stride_ = 0;
@@ -316,7 +316,7 @@ namespace DSLib {
 	CellsContinuous<T, TInt>& Matrix<T, TInt>::Index::Iterator::operator*() {
 		return dynamic_cast<CellsContinuous<T, TInt> &> (cells(citContinuous));
 	}
-	
+
 	template <typename T, typename TInt>
 	typename Matrix<T, TInt>::Index::Iterator& Matrix<T, TInt>::Index::Iterator::operator=(const typename Matrix<T, TInt>::Index::Iterator& other) {
 		index_ = other.index_;
@@ -325,7 +325,7 @@ namespace DSLib {
 		count_ = other.count_;
 		return(*this);
 	}
-	
+
 	template <typename T, typename TInt>
 	bool Matrix<T, TInt>::Index::Iterator::operator==(const typename Matrix<T, TInt>::Index::Iterator& other) const {
 		return cursor_ == other.cursor_;
@@ -341,7 +341,7 @@ namespace DSLib {
 		cursor_ += stride_;
 		return(*this);
 	}
-	
+
 	template <typename T, typename TInt>
 	typename Matrix<T, TInt>::Index::Iterator Matrix<T, TInt>::Index::Iterator::operator++(int) {
 		Iterator tmp(*this);
@@ -354,7 +354,7 @@ namespace DSLib {
 		return typename CellsContinuous<T, TInt>::Iterator(index_->contra_->stride_, index_->stride_, index_->contra_->count_, index_->count_, cursor_ + index * index_->contra_->stride_);
 	}
 
-	//Matrix::Index	
+	//Matrix::Index
 	template <typename T, typename TInt>
 	Matrix<T, TInt>::Index::Index() : matrix_(nullptr), first_(0), last_(0), stride_(0), count_(0), contra_(nullptr), isRow_(false) {
 		//begin_ = matrix_->data_.end();
@@ -398,10 +398,10 @@ namespace DSLib {
 	TInt Matrix<T, TInt>::Index::first() const {return first_;};
 
 	template <typename T, typename TInt>
-	TInt Matrix<T, TInt>::Index::last() const {return last_;};	
+	TInt Matrix<T, TInt>::Index::last() const {return last_;};
 
 	template <typename T, typename TInt>
-	bool Matrix<T, TInt>::Index::isAligned() const {		
+	bool Matrix<T, TInt>::Index::isAligned() const {
 		return (isRow() && matrix_->order_ == oRowMajor) || (isCol() && matrix_->order_ == oColMajor);
 	}
 
@@ -427,11 +427,11 @@ namespace DSLib {
 			case citRegion: {
 				//cellsRegion_.setValues(matrix_->begin(), matrix_->begin() + (contraCount * contraStride), stride, contraStride, count, contraCount);
 				//if (matrix_->order_ == oRowMajor)
-					//cellsRegion_.setValues(matrix_->begin(), matrix_->at(matrix_->rows.count_, 0), stride, contraStride, count, contraCount);					
+					//cellsRegion_.setValues(matrix_->begin(), matrix_->at(matrix_->rows.count_, 0), stride, contraStride, count, contraCount);
 					if (contraCount == 0)
 						cellsRegion_.setValues(matrix_->begin(), matrix_->begin(), stride, contraStride, count, contraCount);
 					else
-						cellsRegion_.setValues(matrix_->begin(), matrix_->at(matrix_->rows.count_-1, matrix_->cols.count_-1)+1, stride, contraStride, count, contraCount);						
+						cellsRegion_.setValues(matrix_->begin(), matrix_->at(matrix_->rows.count_-1, matrix_->cols.count_-1)+1, stride, contraStride, count, contraCount);
 				//else
 					//cellsRegion_.setValues(matrix_->begin(), matrix_->at(matrix_->rows.count_-1, matrix_->cols.count_-1)+1, stride, contraStride, count, contraCount);
 				return cellsRegion_;
@@ -448,7 +448,7 @@ namespace DSLib {
 				throw Error(ecInvalidEnum, "Matrix<T, TInt>::Index::cells()", SS(etos(cellsIteratorType)));
 		}
 	}
-	
+
 	template <typename T, typename TInt>
 	CellsRegion<T, TInt> * Matrix<T, TInt>::Index::operator->() {
 		return &(dynamic_cast<CellsRegion<T, TInt> &> (cells(citRegion)));
@@ -466,7 +466,7 @@ namespace DSLib {
 		rows.end_ = at(rows.count_, 0);
 		cols.begin_ = rows.begin_;
 		cols.end_ = at(0, cols.count_);
-		
+
 		//traverser crisis
 		/*rows.begin_ = at(0, 0);
 		cols.begin_ = at(0, 0);
@@ -569,10 +569,10 @@ namespace DSLib {
 		up_ = nullptr;
 	}
 
-	template <typename T, typename TInt>	
+	template <typename T, typename TInt>
 	void Matrix<T, TInt>::slice(Matrix<T, TInt> &dst, const Matrix<TInt, TInt> &rowIndices, const Matrix<TInt, TInt> &colIndices) {
 		TInt rowFirst, rowLast, colFirst, colLast;
-		bool rowSlicable, colSlicable;		
+		bool rowSlicable, colSlicable;
 		dst.setOrder(order()); //Set order flag
 
 		if (rowIndices.vec().count() == 0 && colIndices.vec().count() == 0) {
@@ -592,7 +592,7 @@ namespace DSLib {
 			colFirst = 0;
 			colLast = cols.count()-1;
 		} else
-			colSlicable = colIndices.isSlicable(colFirst, colLast);		
+			colSlicable = colIndices.isSlicable(colFirst, colLast);
 
 		if (rowLast > rows.count() || colLast > cols.count())
 			throw Error(ecRangeError, "Matrix::slice(rowIndices, colIndices)", SS("Slice row (" << rowLast << ") exceeds row count (" << rows.count() << ") OR slice col (" << colLast << ") exceeds col count (" << cols.count() << ")."));
@@ -652,7 +652,7 @@ namespace DSLib {
 			//Create reference
 			dst.up_ = &(ref_(dst));
 
-			//Copy relevant stuff		
+			//Copy relevant stuff
 			dst.order_ = order_;
 			dst.cols.first_ = colFirst;
 			dst.cols.last_ = colLast;
@@ -679,7 +679,7 @@ namespace DSLib {
 		data_.resize(0);
 
 		//Reference this and get the root Matrix
-		up_ = &(const_cast<Matrix<T, TInt>&>(src).ref_(*this)); 
+		up_ = &(const_cast<Matrix<T, TInt>&>(src).ref_(*this));
 
 		//Copy other relevant stuff from mat
 		order_ = src.order_;
@@ -720,11 +720,11 @@ namespace DSLib {
 		cols.stride_ = src.cols.stride_;
 
 		//force this to update the begin_ and end_ iterators.
-		invalidate_();	
+		invalidate_();
 	}
 
 	template<typename T, typename TInt>
-	Matrix<T, TInt> Matrix<T, TInt>::dup() const {		
+	Matrix<T, TInt> Matrix<T, TInt>::dup() const {
 		Matrix<T, TInt> m = const_cast<Matrix<T, TInt>&>(*this);
 		m.breakUp();
 		if (~m > 0) {
@@ -752,7 +752,7 @@ namespace DSLib {
 		auto itPrev = it;
 		it++;
 		first = (TInt) *itPrev;
-		while (it != end()) {			
+		while (it != end()) {
 			if (*it - *itPrev != 1)
 				slicable = false;
 			itPrev = it;
@@ -788,10 +788,10 @@ namespace DSLib {
 	}
 
 	template <typename T, typename TInt>
-	bool Matrix<T, TInt>::isRegion() const {		
+	bool Matrix<T, TInt>::isRegion() const {
 		if (up_ == nullptr)
 			return false;
-		else 
+		else
 			return (cols.stride_ != rows.count_ && rows.stride_ != cols.count_);
 	}
 
@@ -808,13 +808,13 @@ namespace DSLib {
 	template<typename T, typename TInt>
 	bool Matrix<T, TInt>::isFullSlice() const {
 		return isSlice() && isSameData(*up_);
-		
+
 	}
 
 	template<typename T, typename TInt>
 	bool Matrix<T, TInt>::isSameData(const Matrix<T, TInt> &other) const {
 		//Check memory address in case of incompatible iterators.
-		return (&(*(this->at(0,0))) == &(*(other.at(0,0))) && 
+		return (&(*(this->at(0,0))) == &(*(other.at(0,0))) &&
 				&(*(this->at(this->rows.count()-1, this->cols.count()-1))) == &(*(other.at(other.rows.count()-1, other.cols.count()-1))));
 	}
 
@@ -848,7 +848,7 @@ namespace DSLib {
 						std::copy(cols->begin(), cols->end(), data_.begin());
 						rows.stride_ = 1;
 						cols.stride_ = rows.count_;
-					} else { 
+					} else {
 						rows.count_ = 0;
 						cols.count_ = 0;
 						rows.stride_ = 0;
@@ -886,8 +886,8 @@ namespace DSLib {
 	void Matrix<T, TInt>::resize(TInt rowCount, TInt colCount) {
 		if (rowCount == 0 || colCount == 0)
 			clear();
-		if (colCount < cols.count_ || rowCount < rows.count_ || 
-			(order_ == oRowMajor && colCount != cols.count_) || 
+		if (colCount < cols.count_ || rowCount < rows.count_ ||
+			(order_ == oRowMajor && colCount != cols.count_) ||
 			(order_ == oColMajor && rowCount != rows.count_)) //Only break ties if data structure is smaller or 1-d data gets misaligned.
 			breakDown();
 		breakUp();
@@ -908,30 +908,30 @@ namespace DSLib {
 		}
 		if (order_ == oRowMajor)
 			data_.resize(cols.count_ * rows.count_ + cols.count_);
-		else if (order_ == oColMajor) 
+		else if (order_ == oColMajor)
 			data_.resize(cols.count_ * rows.count_ + rows.count_);
 		updateIt_();
 	}
 
 	template <typename T, typename TInt>
-	void Matrix<T, TInt>::Index::add(const T &value) {		
+	void Matrix<T, TInt>::Index::add(const T &value) {
 
 		if (!matrix_->isVector() && matrix_->isInitialized())
 			throw Error(ecIncompatible, "Matrix<T>::Index::add()", "Cannot add single value to a non-vector.");
-			
+
 		if (stride_ == 0) { //Initialization
 			stride_ = 1;
-			contra_->stride_ = 1;	
+			contra_->stride_ = 1;
 			contra_->count_ = 1;
 			contra_->last_ = contra_->count_;
 		} else
 			matrix_->breakUp();
-		
+
 		if (contra_->count_ != 1)
 			throw Error(ecSizeMismatch, "Matrix<T>::Index::add()", "Cannot add a single value to the row of a col vector, or a col of a row vector.");
-		
+
 		matrix_->data_.insert(matrix_->data_.begin() + count_, value);
-		
+
 		if (isAligned() || count_ == 0) {
 			if (count_ == 0)
 				matrix_->data_.resize(2); //deadweight
@@ -944,8 +944,8 @@ namespace DSLib {
 		//Update iterator administration
 		count_++;
 		last_++;
-		
-		matrix_->invalidate_();				
+
+		matrix_->invalidate_();
 	};
 
 	template <typename T, typename TInt>
@@ -955,9 +955,9 @@ namespace DSLib {
 		if (stride_ == 0) { //Initialization
 			if (isAligned()) {
 				stride_ = (TInt)vec.size();
-				contra_->stride_ = 1;				
-			} else {				
-				stride_ = 1;		
+				contra_->stride_ = 1;
+			} else {
+				stride_ = 1;
 				contra_->stride_ = 1;
 			}
 			contra_->count_ = (TInt) vec.size();
@@ -968,7 +968,7 @@ namespace DSLib {
 			throw Error(ecSizeMismatch, "Matrix::Index::add()", SS("Invalid vector length: " << vec.size() << " and " << count_));
 
 		matrix_->breakUp();
-		
+
 		if (isAligned() || count_ == 0) {
 			matrix_->data_.insert(matrix_->data_.begin() + (count_ * contra_->count_), vec.begin(), vec.end());
 			//initialize dead weight
@@ -985,9 +985,9 @@ namespace DSLib {
 			typename vector<T>::iterator itto = matrix_->data_.begin();
 			while (itfrom != vec.end()) {
 				itto+=contra_->stride_;
-				itto=matrix_->data_.insert(itto, *itfrom);					
+				itto=matrix_->data_.insert(itto, *itfrom);
 				itto++;
-				itfrom++;					
+				itfrom++;
 			}
 			contra_->stride_ = count_+1;
 			//Add deadWeight
@@ -998,11 +998,11 @@ namespace DSLib {
 		last_++;
 		matrix_->invalidate_();
 	};
-	
+
 
 	template <typename T, typename TInt>
 	void Matrix<T, TInt>::Index::add(const Matrix<T, TInt> &mat) {
-		static const char * f = "Index::add(Matrix)";		
+		static const char * f = "Index::add(Matrix)";
 
 		if (mat.order_ != matrix_->order_)
 			throw Error(ecIncompatible, f, SS("Incompatible order:" << etos(matrix_->order_) << " and " << etos(mat.order())));
@@ -1014,7 +1014,7 @@ namespace DSLib {
 			matrix_->clone(mat);
 			//*matrix_ = mat.dup();
 			return;
-		}		
+		}
 
 		if (isRow() && matrix_->cols.count_ != mat.cols.count_)
 			throw Error(ecSizeMismatch, f, SS("Column count mismatch:" << matrix_->cols.count_ << " and " << mat.cols.count_));
@@ -1024,7 +1024,7 @@ namespace DSLib {
 
 		this->matrix_->breakUpDown(const_cast<Matrix<T, TInt>&>(mat));
 		matrix_->breakUp();
-		
+
 		if (isAligned()) {
 			Matrix<T, TInt> matcpy = mat.dup();
 			matrix_->data_.insert(matrix_->data_.begin() + count_ * contra_->count_, matcpy.begin(), matcpy.end());
@@ -1082,7 +1082,7 @@ namespace DSLib {
 			if (mat.isFullSlice())
 				mat2 = const_cast<Matrix<T, TInt>&>(mat).up_; //In this case mat is handled by mat.up_.down_
 			else
-				mat2 = &(const_cast<Matrix<T, TInt>&>(mat));			
+				mat2 = &(const_cast<Matrix<T, TInt>&>(mat));
 
 			//move each down slice to this
 			for (auto m = mat2->down_.begin();m!=mat2->down_.end();m++) {
@@ -1162,7 +1162,7 @@ namespace DSLib {
 		if (order_ == oRowMajor)
 			rows.add(vec);
 		else
-			cols.add(vec);		
+			cols.add(vec);
 	}
 
 	template<typename T, typename TInt>
@@ -1215,7 +1215,7 @@ namespace DSLib {
 
 	template<typename T, typename TInt>
 	Matrix<T, TInt>::Matrix(const MatrixBase & matbase) {
-		try {			
+		try {
 			const Matrix<T, TInt> & mat = dynamic_cast<const Matrix<T, TInt> &>(matbase);
 			init_();
 			clone(mat);
@@ -1280,7 +1280,7 @@ namespace DSLib {
 			}*/
 			data_.clear();
 			//Update iterators
-			updateIt_();		
+			updateIt_();
 		}
 	}
 
@@ -1293,7 +1293,7 @@ namespace DSLib {
 
 	template<typename T, typename TInt>
 	CellsContinuous<T, TInt> &Matrix<T, TInt>::vec() {
-		if (rows.count_ > 1 && cols.count_ > 1) 
+		if (rows.count_ > 1 && cols.count_ > 1)
 			throw Error(ecIncompatible, "Matrix<T, TInt>::vector()", "Matrix contains multiple vectors.");
 
 		if (!isInitialized() || rows.count() == 0 || cols.count() == 0) {
@@ -1330,7 +1330,7 @@ namespace DSLib {
 			return *(getData() + (index * cols.stride_));
 		else if (isColVector())
 			return *(getData() + (index * rows.stride_));
-		else 
+		else
 			throw Error(ecIncompatible, "vec(TInt)", "This is not a vector");
 	}
 
@@ -1345,13 +1345,13 @@ namespace DSLib {
 	}
 
 	template<typename T, typename TInt>
-	const T & Matrix<T, TInt>::val(const TInt row, const TInt col) const {		
+	const T & Matrix<T, TInt>::val(const TInt row, const TInt col) const {
 		return *(getData() + (row * rows.stride_ + col * cols.stride_));
 	}
 
 	template<typename T, typename TInt>
 	T & Matrix<T, TInt>::val(const TInt row, const TInt col) {
-		return *(getData() + (row * rows.stride_ + col * cols.stride_));	
+		return *(getData() + (row * rows.stride_ + col * cols.stride_));
 	}
 
 	template<typename T, typename TInt>
@@ -1374,7 +1374,7 @@ namespace DSLib {
 		if (coli == nullptr || rowi == nullptr)
 			throw Error(ecIncompatible, "slice(MatrixBase, MatrixBase, MatrixBase)", "Incompatible types");
 		slice(*dest, *rowi, *coli);
-	}		
+	}
 
 	template<typename T, typename TInt>
 	void Matrix<T, TInt>::slice(MatrixBase &dst, MatrixBase &indices, MatrixBase &first, MatrixBase &last, bool rowIndices) {
@@ -1450,17 +1450,17 @@ namespace DSLib {
 		DSUtil::write(output, (String)"Matrix");
 		DSUtil::write(output, this->getDataType());
 		DSUtil::write(output, this->getIntDataType());
-		DSUtil::write(output, this->order_);		
+		DSUtil::write(output, this->order_);
 		DSUtil::write(output, this->rows.count_);
 		DSUtil::write(output, this->cols.count_);
 		Matrix<T, TInt> * t = const_cast<Matrix<T, TInt>*>(this);
 		if (order_ == oRowMajor) {
-			for (auto it=t->rows->begin();it!=t->rows->end();it++) 
+			for (auto it=t->rows->begin();it!=t->rows->end();it++)
 				DSUtil::write(output, *it);
 		} else {
 			for (auto it = t->cols->begin();it != t->cols->end();it++)
 				DSUtil::write(output, *it);
-		}			
+		}
 	}
 
 	template<typename T, typename TInt>
@@ -1509,7 +1509,7 @@ namespace DSLib {
 		Matrix<T, TInt> & m = const_cast<Matrix<T, TInt>&>(*this);
 		TInt cnt = 0;
 		if (order_ == oRowMajor) {
-			for (auto row = m.rows.begin(); row != m.rows.end(); row++,cnt++) {								
+			for (auto row = m.rows.begin(); row != m.rows.end(); row++,cnt++) {
 				output << "(dt" << etos(getDataType());
 				for (auto cell=row->begin(); cell!=row->end();cell++) {
 					output << " | ";
@@ -1550,8 +1550,7 @@ namespace DSLib {
 		stringstream ss;
 		T t;
 		TInt tInt;
-		output << "DataType: " << typeName(t) << endl;
-		output << "Indexing DataType: " << typeName(tInt) << endl;
+		output << "DataType: " << typeName(t) << "(" << typeName(tInt) << ")" << endl;
 		output << "Order: "  << etos(order_) << endl;
 		output << "Rows x Cols: "  << rows.count_ << " x " << cols.count_ << endl;
 		if (up_ != nullptr)
@@ -1567,7 +1566,7 @@ namespace DSLib {
 
 	template <typename T, typename TInt>
 	std::string Matrix<T, TInt>::printSize() const {
-		return SS("(" << rows.count() << "x" << cols.count() << ")"); 
+		return SS("(" << rows.count() << "x" << cols.count() << ")");
 	}
 
 	//** DSLang **//
@@ -1605,7 +1604,7 @@ namespace DSLib {
 		DSLib::Matrix<T, TInt> * rhs = static_cast<DSLib::Matrix<T, TInt> *>(const_cast<MatrixBase *> (&other));
 		static_cast<Matrix<TInt, TInt> &>(dst) = *lhs >= *rhs;
 	}
-	
+
 	template <typename T, typename TInt>
 	void Matrix<T, TInt>::isSmallerEqual(MatrixBase &dst, const MatrixBase &other) const {
 		DSLib::Matrix<T, TInt> * lhs = const_cast<DSLib::Matrix<T, TInt> *> (this);
@@ -1676,7 +1675,7 @@ namespace DSLib {
 		slice(dst, rowBegin, rowBegin + rowLength, 0, cols.count_);
 		return dst;
 	}
-	
+
 	template <typename T, typename TInt>
 	Matrix<T, TInt> Matrix<T, TInt>::operator()(const TInt rowBegin, const TInt rowLength, const TInt col) {
 		Matrix<T, TInt> dst(order_);
@@ -1690,21 +1689,21 @@ namespace DSLib {
 		slice(dst, rowBegin, rowBegin + rowLength, colBegin, colBegin + colLength);
 		return dst;
 	}
-	
+
 	template <typename T, typename TInt>
 	Matrix<T, TInt> Matrix<T, TInt>::operator()(const Matrix<TInt, TInt> &rowIndices, const Matrix<TInt, TInt> &colIndices) {
 		Matrix<T, TInt> dst(order_);
 		slice(dst, rowIndices, colIndices);
 		return dst;
 	}
-	
+
 	template <typename T, typename TInt>
 	Matrix<T, TInt> Matrix<T, TInt>::operator[](const TInt col) {
 		Matrix<T, TInt> dst(order_);
 		slice(dst, 0, rows.count_, col, col+1);
 		return dst;
 	}
-	
+
 	template <typename T, typename TInt>
 	Matrix<T, TInt> Matrix<T, TInt>::operator[](const Matrix<TInt, TInt> &colIndices) {
 		Matrix<T, TInt> dst(order_);
@@ -1734,7 +1733,7 @@ namespace DSLib {
 		}
 		return dst;
 	}
-	
+
 	template <typename T, typename TInt>
 	Matrix<T, TInt> Matrix<T, TInt>::operator()(const Matrix<TInt, TInt> &rowIndices, const TInt colBegin, const TInt colLength) {
 		if (!rowIndices.isVector())
@@ -1753,7 +1752,7 @@ namespace DSLib {
 		}
 		return dst;
 	}
-	
+
 	template <typename T, typename TInt>
 	Matrix<T, TInt> Matrix<T, TInt>::operator()(const TInt row, const Matrix<TInt, TInt> &colIndices) {
 		if (!colIndices.isVector())
@@ -1769,7 +1768,7 @@ namespace DSLib {
 		}
 		return dst;
 	}
-	
+
 	template <typename T, typename TInt>
 	Matrix<T, TInt> Matrix<T, TInt>::operator()(const TInt rowBegin, const TInt rowLength, const Matrix<TInt, TInt> &colIndices) {
 		if (!colIndices.isVector())

@@ -3,6 +3,7 @@
 #include <DS_ChaiTable.h>
 #include <DS_ChaiModel.h>
 
+#include <ddsl.hpp>
 namespace DSChai {
 	//Special function to add all enums of a type
 	template<typename T>
