@@ -258,6 +258,19 @@ namespace DSLang {
 		return const_cast<DSLib::Table<TIdx, TId> &>(lhs);
 	}
 
+	//Print full Matrix
+	template <typename TIdx, typename TId> DSLib::Table<TIdx, TId> & operator++(const DSLib::Table<TIdx, TId> &lhs) {
+		lhs.print(std::cout);
+		std::cout << std::endl;
+		return const_cast<DSLib::Table<TIdx, TId> &>(lhs);
+	}
+
+	//Print Matrix meta information
+	template <typename TIdx, typename TId> DSLib::Table<TIdx, TId> & operator--(const DSLib::Table<TIdx, TId> &lhs) {
+		lhs.printLess(std::cout);
+		return const_cast<DSLib::Table<TIdx, TId> &>(lhs);
+	}
+
 	//****************//
 	//** Arithmetic **//
 	//****************//
@@ -511,6 +524,285 @@ namespace DSLang {
 	//Defined as member functions
 
 };
+
+
+namespace DSScript {
+	//****************//
+	//** Assignment **//
+	//****************//
+	//BreakUp matrix
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator!(DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator!(rhs);
+	}
+
+	//Inline Duplicate Table
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> operator*(const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator*(rhs);
+	}
+
+	//********************//
+	//** Initialization **//
+	//********************//
+
+	//Initialize with a matrix
+	template <typename T, typename TIdx, typename TId = DSTypes::TableId>
+	DSLib::Table<TIdx> operator|(DSTypes::ContentType lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator|(lhs, rhs);
+	}
+
+	template <typename T, typename TIdx>
+	DSLib::Table<TIdx> operator^(DSTypes::ContentType lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator^(lhs, rhs);
+	}
+
+	//*******************//
+	//** Concatenation **//
+	//*******************//
+	//Concat two tables
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator|(DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator|(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator^(DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator^(lhs, rhs);
+	}
+
+	//Concat a table and a matrix
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> & operator|(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator|(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Table<TIdx, TId> & operator^(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator^(lhs, rhs);
+	}
+
+	//*************************//
+	//** Specify Col/Row Ids **//
+	//*************************//
+	//Set RowIds
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator|(const DSLib::Matrix<TId, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator|(lhs, rhs);
+	}
+
+	//Set ColIds
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator^(const DSLib::Matrix<TId, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator^(lhs, rhs);
+	}
+
+	//Set ContentTypes
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator^(const DSLib::Matrix<DSTypes::ContentType, TIdx> &lhs, DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator^(lhs, rhs);
+	}
+
+	//*******************//
+	//** Selection **//
+	//*******************//
+	//+ = Table<>
+	//- = Table<>.isRowTuple()
+	//| = Table<>.isColTuple()
+	//. = T
+	//Return indices (+ @ +) Table index, (+ @ -) row indices of rowTuple of Table, (+ @ .) row|col indices of Table, (| @ .) row indices, (- @ .) col indices
+	template <typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator==(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator==(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Matrix<TIdx, TIdx> operator==(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator==(lhs, rhs);
+	}
+
+	template <typename T, typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator==(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator==(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator!=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator!=(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Matrix<TIdx, TIdx> operator!=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator!=(lhs, rhs);
+	}
+
+	template <typename T, typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator!=(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator!=(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator<(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator<(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Matrix<TIdx, TIdx> operator<(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator<(lhs, rhs);
+	}
+
+	template <typename T, typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator<(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator<(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator>(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator>(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Matrix<TIdx, TIdx> operator>(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator>(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator<=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator<=(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Matrix<TIdx, TIdx> operator<=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator<=(lhs, rhs);
+	}
+
+	template <typename T, typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator<=(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator<=(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator>=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator|(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>
+	DSLib::Matrix<TIdx, TIdx> operator>=(const DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator>=(lhs, rhs);
+	}
+
+	template <typename T, typename TIdx, typename TId>
+	DSLib::Matrix<TIdx, TIdx> operator>=(const DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator>=(lhs, rhs);
+	}
+
+	//**************//
+	//** Counting **//
+	//**************//
+	//Get the number of cells (slices give you the number of rows/cols
+	template <typename TIdx, typename TId> TIdx operator~(const DSLib::Table<TIdx, TId> &rhs) {
+		return DSLang::operator~(rhs);
+	}
+
+	//***********//
+	//** Print **//
+	//***********//
+	//Print full Matrix
+	template <typename TIdx, typename TId> DSLib::Table<TIdx, TId> operator++(const DSLib::Table<TIdx, TId> &lhs) {
+		return DSLang::operator++(lhs);
+	}
+
+	//Print Matrix meta information
+	template <typename TIdx, typename TId> DSLib::Table<TIdx, TId> operator--(const DSLib::Table<TIdx, TId> &lhs) {
+		return DSLang::operator--(lhs);
+	}
+
+	//****************//
+	//** Arithmetic **//
+	//****************//
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator+(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator+(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator-(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator-(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T> 
+	DSLib::Table<TIdx, TId> & operator+(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator+(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator-(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator-(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator*(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator*(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator*(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator*(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator/(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator/(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator/(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator/(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & pow(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::pow(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & pow(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::pow(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator%(DSLib::Table<TIdx, TId> &lhs, const T &rhs) {
+		return DSLang::operator%(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId, typename T>  
+	DSLib::Table<TIdx, TId> & operator%(DSLib::Table<TIdx, TId> &lhs, const DSLib::Matrix<T, TIdx> &rhs) {
+		return DSLang::operator%(lhs, rhs);
+	}
+
+	//***************//
+	//** Streaming **//
+	//***************//
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator>>(DSLib::Table<TIdx, TId> &lhs, std::ostream &rhs) {
+		return DSLang::operator>>(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator<<(DSLib::Table<TIdx, TId> &lhs, std::istream &rhs) {
+		return DSLang::operator<<(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator>>(DSLib::Table<TIdx, TId> &lhs, const DSTypes::String &rhs) {
+		return DSLang::operator>>(lhs, rhs);
+	}
+
+	template <typename TIdx, typename TId>
+	DSLib::Table<TIdx, TId> & operator<<(DSLib::Table<TIdx, TId> &lhs, const DSTypes::String &rhs) {
+		return DSLang::operator<<(lhs, rhs);
+	}
+}
 
 #ifdef MSVS_VER
 	#pragma warning(pop)

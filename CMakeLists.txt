@@ -19,6 +19,7 @@ option(OPTION_CAFFE_GPU "Build with Caffe with GPU support" ON)
 option(OPTION_CAFFE_NCCL "Multi-GPU support" ON)
 option(OPTION_BUILD_GCC_O3 "Build using -O3 optimization" ON)
 option(OPTION_GCC_OFAST "Build using Ofast optimization" ON)
+option(OPTION_CHAI_BUILD_DDSL "Build chai ddsl interpreter with buildin DDSL support" ON)
 
 #Projects
 option(BUILD_DDSL_NO_EXT_LIB "Build vanilla DDSL" ON) 						#Depend on: None
@@ -27,7 +28,6 @@ option(BUILD_LIBPNG_DDSL "Build a library for PNG" ON) 						#Depend on: DDSL_EX
 option(BUILD_LIBSVM_DDSL "Build a library for SVM" ON) 						#Depend on: DDSL_EXT_LIB_SVM
 option(BUILD_LIBAF_DDSL "Build a library for ArrayFire" ON) 				#Depend on: DDSL_EXT_LIB_AF
 option(BUILD_LIBCAFFE_DDSL "Build a library for Caffe" ON) 					#Depend on: DDSL_EXT_LIB_CAFFE
-#option(BUILD_LIB_DDSL "Build DDSL as a static library" OFF) 				#Depricated/unmaintained use header file code instead
 
 option(BUILD_DDSL_CHAISCRIPT "Build the ddsl chai script interpreter" ON) 		#Depend on: DDSL_EXT_LIB_CHAISCRIPT
 option(BUILD_LIBCHAI_MODULE_DDSL "Build DDSL as a chai scipt module" ON) 	#Depend on: DDSL_EXT_LIB_CHAISCRIPT
@@ -320,15 +320,19 @@ if (BUILD_DDSL_NO_EXT_LIB)
 endif()
 
 if (BUILD_DDSL_CHAISCRIPT)
-	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/main.cpp")	
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_Chai.h")
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_Chai.cpp")	
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiMatrix.h")
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiMatrix.cpp")
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiTable.h")
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiTable.cpp")
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiModel.h")
-	#list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiModel.cpp")
+	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/main.cpp")
+	set(DEFS ${DEFAULT_DEFS})
+	if (OPTION_CHAI_BUILD_DDSL)
+		list (APPEND DEFS "OPTION_CHAI_BUILD_DDSL")
+ 	    list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_Chai.h")
+		list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_Chai.cpp")	
+		list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiMatrix.h")
+		list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiMatrix.cpp")
+		list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiTable.h")
+		list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiTable.cpp")
+		list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiModel.h")
+		list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_chaiscript/DS_ChaiModel.cpp")
+	endif()
 	
 	set (EXE_NAME "ddsl")
 	message("Make exe ${EXE_NAME}")
@@ -340,7 +344,6 @@ if (BUILD_DDSL_CHAISCRIPT)
 	add_ddsl_h_groups()
 	add_ddsl_hpp_groups()
     
-	set(DEFS ${DEFAULT_DEFS})
 	addExtLibChai()
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")
 endif()

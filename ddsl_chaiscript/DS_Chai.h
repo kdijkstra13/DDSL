@@ -26,6 +26,9 @@
 //Add external operator
 #define CHAI_OPER(CHAI, NS, OP_NAME, RETURN_TYPE, ...) CHAI->add(chaiscript::fun(static_cast<RETURN_TYPE(*)(__VA_ARGS__)>(NS::operator OP_NAME)), #OP_NAME);
 
+//Add function
+#define CHAI_FUNC(CHAI, NS, FUNC_NAME, RETURN_TYPE, ...) CHAI->add(chaiscript::fun(static_cast<RETURN_TYPE(*)(__VA_ARGS__)>(NS::FUNC_NAME)), #FUNC_NAME);
+
 //Add type conversion
 #define CHAI_CONVERSION(CHAI, TYPE_FROM, TYPE_TO) CHAI->add(chaiscript::type_conversion<TYPE_FROM, TYPE_TO>());
 

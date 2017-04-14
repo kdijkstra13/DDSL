@@ -111,6 +111,23 @@ namespace DSChai {
 		CHAI_OPER(chai, DSScript, >= , TMatIdx, const TMat&, const T&);
 		CHAI_OPER(chai, DSScript, <= , TMatIdx, const TMat&, const TMat&);
 		CHAI_OPER(chai, DSScript, <= , TMatIdx, const TMat&, const T&);
+
+		//Arithmetic
+		CHAI_OPER(chai, DSScript, +, TTab &, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, -, TTab &, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, +, TTab &, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, -, TTab &, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, *, TTab &, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, *, TTab &, TTab &, const TMat &);
+		CHAI_OPER(chai, DSScript, / , TTab &, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, / , TTab &, TTab &, const TMat &);
+		CHAI_FUNC(chai, DSScript, pow, TTab &, TTab &, const T &);
+		CHAI_FUNC(chai, DSScript, pow, TTab &, TTab &, const TMat &);
+		CHAI_FUNC(chai, DSScript, min, TTab &, TTab &, const T &);
+		CHAI_FUNC(chai, DSScript, max, TTab &, TTab &, const TMat &);
+
+		CHAI_OPER(chai, DSScript, %, TTab &, TTab &, const T &);
+		CHAI_OPER(chai, DSScript, %, TTab &, TTab &, const TMat &);
 	}
 
 	//Add numerical functions for Matrix

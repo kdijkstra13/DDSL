@@ -275,9 +275,9 @@ int main(int argc, char *argv[]) {
   chai.add(chaiscript::fun(&get_eval_error), "get_eval_error");
   chai.add(chaiscript::fun(&now), "now");
 
-  //Static link the DDSL module
-  //chai.add(create_chaiscript_module_chaiscript_ddsl());
-
+  #ifdef OPTION_CHAI_BUILD_DDSL
+    chai.add(create_chaiscript_module_chaiscript_ddsl());
+  #endif
   bool eval_error_ok = false;
   bool boxed_exception_ok = false;
 

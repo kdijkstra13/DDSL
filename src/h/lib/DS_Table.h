@@ -206,6 +206,8 @@ namespace DSLib {
 		std::string print() const;
 		void printLess(std::ostream &output) const;
 		std::string printLess() const;
+		std::string printSize() const;
+		std::string to_string() const { return printSize(); } //for ChaiScript
 		void setContentTypes(const DSLib::Matrix<DSTypes::ContentType, TIdx> &cts);
 
 		const std::vector<TableMatrix *> & matrixByIdx() const {return matrixByIdx_;};
@@ -219,6 +221,7 @@ namespace DSLib {
 				throw Error(ecGeneral, "Table<>.mat<T>()", e.what() + SS(" to " << typeid(Matrix<T, TIdx>).name() << " from " << typeid(mat(index)).name()));
 			}
 		};
+		operator bool() { return isInitialized(); }
 
 		void addRows(const Table &tab);
 		void takeRows(const Table &tab);

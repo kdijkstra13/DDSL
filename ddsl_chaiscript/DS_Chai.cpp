@@ -42,6 +42,7 @@ namespace DSChai {
 		chaiscript::ModulePtr chai(new chaiscript::Module());
 		bindTypes(chai);
 		bindMatrix(chai);
+		bindTable(chai);
 		return chai;
 	}
 }

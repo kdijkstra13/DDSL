@@ -927,6 +927,11 @@ namespace DSLib {
 		return ss.str();
 	}
 
+	template <typename TIdx, typename TId>
+	std::string Table<TIdx, TId>::printSize() const {
+		return SS("(" << rows.count() << "x" << cols.count() << ")");
+	}
+
 
 	template <typename TIdx, typename TId>
 	void Table<TIdx, TId>::clear() {
