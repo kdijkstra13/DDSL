@@ -886,42 +886,62 @@ namespace DSModel {
 		} else if (netProtoFile_ != "") {
 			*net = readNet_(netProtoFile_, snapshotModelFile_);
 		} else 
-			throw Error(ecIncompatible, "loadCaffeModel", "Not solver and net filenames known");
+			throw Error(ecIncompatible, "loadCaffeModel", "No solver and net filenames known");
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::readModel(std::istream &input, const DSTypes::String &filename) {
 		updateParameters();
+		clearCaffeModel();
+		
+		loadCaffeModel_(&net_, &solver_);
+		string solverstatefile = SS("_iter_" << currIter_ << ".solverstate");
+		readSolverState(filePath(filename) + solverstatefile);
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::writeModel(std::ostream &input, const DSTypes::String &filename) {		
-		if (solver_ == nullptr) 
-			throw Error(ecNotFound, "Caffe::writeModel()", "No solver present");
+		if (solver_ == nullptr)
+			throw Error(ecNotImplemented, "Caffe::writeModel()", "Solver is empty. Currently only solvers can be written to disk");
+		writeSolverState(filename);
+	}
 
-/*		string solvertxt = filename + ".solver.prototxt";
-
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::writeSolverState(const DSTypes::String &filepath) {
 		//Set current path
-		using namespace boost::filesystem;			
-		path newPath(filename);
+		using namespace boost::filesystem;		
+		path newPath(filepath);
 		newPath.remove_filename();
 		path oldPath = boost::filesystem::current_path();
 		boost::system::error_code ec;
 		if (newPath != "") current_path(newPath, ec);		
-		if (ec) throw Error(ecGeneral, "CaffeMLP::writeSolverToFile_()", ec.message());
-
-		//Save solver to text file for deployment
-		ofstream ofs(solvertxt);
-		if (!ofs) throw Error(ecNotFound, "CaffeMLP::writeSolverToFile_()", SS("Cannot open solver file: " << solvertxt));
-		ofs << solverProto_;
+		if (ec) throw Error(ecGeneral, "Caffe::writeModel()", ec.message());
 
 		//Save solver state
 		solver_->Snapshot();
 		
 		//Restore path
 		current_path(oldPath, ec);
-		if (ec) throw Error(ecGeneral, "CaffeMLP::writeSolverToFile_()", ec.message());
-		*/
+		if (ec) throw Error(ecGeneral, "Caffe::writeModel()", ec.message());
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::readSolverState(const DSTypes::String &filename) {
+				//Set current path
+		using namespace boost::filesystem;		
+		path newPath(filename);
+		newPath.remove_filename();
+		path oldPath = boost::filesystem::current_path();
+		boost::system::error_code ec;
+		if (newPath != "") current_path(newPath, ec);		
+		if (ec) throw Error(ecGeneral, "Caffe::writeModel()", ec.message());
+
+		//Save solver state
+		solver_->Restore(fileNameWithoutPath(filename).c_str());
+		
+		//Restore path
+		current_path(oldPath, ec);
+		if (ec) throw Error(ecGeneral, "Caffe::readSolverState()", ec.message());
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1195,7 +1215,7 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	TIdx Caffe<TClassType, TIdx, TId>::getLayerBlobCount(const String &layerName) {
-		return getActiveNet_()->layer_by_name(layerName)->blobs().size();
+		return (TIdx) getActiveNet_()->layer_by_name(layerName)->blobs().size();
 	}
 
 
@@ -1728,7 +1748,7 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	caffe::SolverAction::Enum Caffe<TClassType, TIdx, TId>::SolverCallback_() {
-		if (solver_->iter() >= maxIter_) {
+		if ((TIdx)solver_->iter() >= maxIter_) {
 			this->setStageDone();
 			return caffe::SolverAction::Enum::STOP;
 		} else {
@@ -1768,7 +1788,7 @@ namespace DSModel {
 		this->setMaxProgress(solverIter_);
 		this->setProgress(solver_->iter());
 		
-		if (solver_->iter() < maxIter_) {
+		if ((TIdx)solver_->iter() < maxIter_) {
 			//Train the classifier
 			ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
 			solver_->SetActionFunction(cb);

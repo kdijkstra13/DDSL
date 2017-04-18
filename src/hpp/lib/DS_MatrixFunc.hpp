@@ -25,6 +25,7 @@ namespace DSFunc {
 			case dtDataType: return new Matrix<DataType, TInt>();
 			case dtString: return new Matrix<String, TInt>();
 			case dtMatrixString: return new Matrix<MatrixString, TInt>();
+			case dtMatrixInt32: return new Matrix<Matrix<Int32, TInt>, TInt>();
 #ifndef DDSL_NO_EXT_LIB_PNG
 			case dtImagePNGDouble: return new Matrix<ImagePNG<Double>, TInt>();
 			case dtImagePNGFloat: return new Matrix<ImagePNG<Float>, TInt>();

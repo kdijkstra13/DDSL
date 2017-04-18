@@ -33,15 +33,10 @@ DDSL on Windows:
 			You can also build debug Caffe by opening the solution and compiling with the Debug profile.			
 		Patch cmake errors
 			In /contrib/caffe/build/CaffeTargets.cmake rename gflags_shared, hdf5_shared, hdf5_hl_shared to gflags, caffehdf5, caffehdf5_hl
-			In /contrib/caffe/build/CaffeTargets.cmake rename the first occurence of leveldb to leveldbd, that is the variable IMPORTED_LINK_INTERFACE_LIBRARIES_DEBUG version
-			In /contrib/caffe/build/libraries/lib rename libopenblas-dll.a, libopenblas.a to libopenblas-dll.a.lib, libopenblas.a.lib
-		OpenCV is not downloaded by Caffe script anymore. Checkout and build OpenCV in /contrib/opencv
-			git clone https://github.com/opencv/opencv.git
-			mkdir build
-			cd build
-			cmake -G "Visual Studio 14 Win64" ..
-			** if encountering an error on the IPP packages: http://answers.opencv.org/question/74746/problem-extracting-ippicv_zip/
-			** cmake -G "Visual Studio 14 Win64" -D WITH_IPP=OFF ..
+			In /contrib/caffe/build/CaffeTargets.cmake rename the first occurence of leveldb to leveldbd, that is the variable IMPORTED_LINK_INTERFACE_LIBRARIES_DEBUG version.
+			In c:/users/<username>/.caffe/.caffe\dependencies\libraries_v140_x64_py35_1.1.0\libraries\lib rename libopenblas-dll.a, libopenblas.a to libopenblas-dll.a.lib, libopenblas.a.lib
+		Download OpenCV binaries to /contrib/opencv
+		Add (or equivalent) C:\Projects\DSL\contrib\opencv\build\x64\vc14\bin to your path
 	Build DDSL in .\
 		mkdir build
 		cd build

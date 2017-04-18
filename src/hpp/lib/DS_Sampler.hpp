@@ -731,7 +731,7 @@ namespace DSLib {
 		if (coords.rows.count() != samples.rows.count())
 			throw Error(ecParameter, "samplesToMatrices", "The number of provided samples is not equal to the number of coordinates");
 		if (coords.rows.count() % n != 0)
-			throw Error(ecParameter, "samplesToMatrices", SS("The number of provided coords is not a multiple of count " << coords.rows.count() << " % " << n << " != 0"));
+			throw Error(ecParameter, "samplesToMatrices", SS("The number of provided coords is not a multiple of count " << coords.rows.count() << " % " << n << " != 0"));		
 		mats.resize(n, samples.cols.count());
 		auto sampleRow = samples2.rows.begin();
 		auto coordsRow = coords2.rows.begin();

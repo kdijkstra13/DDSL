@@ -29,6 +29,26 @@ namespace DSUtil {
 		size_t dot = file.find_last_of('.');
 		return (dot == string::npos) ? file : file.substr(0, dot);
 	}
+	
+	String inline fileNameWithoutPath(const String &file) {
+		if (size_t s = file.find_last_of("\\") != String::npos) {
+			return file.substr(file.find_last_of("\\")+2);
+		} else if (file.find_last_of("/") != String::npos) {
+			return file.substr(file.find_last_of("/")+1);
+		} else {
+			return file;
+		}			
+	}
+
+	String inline filePath(const String &file) {
+		if (file.find_last_of("\\") != String::npos) {
+			return file.substr(0, file.find_last_of("\\")+2);
+		} else if (file.find_last_of("/") != String::npos) {
+			return file.substr(0, file.find_last_of("/")+1);
+		} else {
+			return "";
+		}			
+	}
 
 	String inline fileReplaceExt(const String &file, const String &ext) {
 		return fileBaseName(file) + "." + ext;
@@ -74,6 +94,11 @@ namespace DSUtil {
 		ifs.seekg(0);
 		ifs.read(&str[0], size);
 		return str;
+	}
+
+	void inline writeFromString(const DSTypes::String &filename, const DSTypes::String &content) {
+		std::ofstream ofs(filename, ios::binary);
+		ofs << content;
 	}
 	
 	template<typename T>

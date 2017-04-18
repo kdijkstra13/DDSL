@@ -168,6 +168,8 @@ namespace DSModel {
 		void apply(const DSLib::Table<TIdx, TId> &table, DSLib::Table<TIdx, TId> &input, DSLib::Table<TIdx, TId> &output) override;
 		void readModel(std::istream &input, const DSTypes::String &filename) override;
 		void writeModel(std::ostream &output, const DSTypes::String &filename) override;
+		void writeSolverState(const DSTypes::String &filepath);
+		void readSolverState(const DSTypes::String &filename);
 	public:
 		using Model<TIdx, TId>::train;
 		using Model<TIdx, TId>::apply;

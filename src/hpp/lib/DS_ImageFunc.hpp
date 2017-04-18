@@ -116,7 +116,7 @@ namespace DSFunc {
 	Matrix<T, TIdx> tilesToSmallMosaic(const Matrix<Matrix<T, TIdx>, TIdx> &tiles) {
 		Matrix<Matrix<T, TIdx>, TIdx> & tiles2 = const_cast<Matrix<Matrix<T, TIdx>, TIdx>&>(tiles);
 		Matrix<T, TIdx> ret(tiles2.val(0, 0).rows.count(), tiles2.val(0, 0).cols.count());
-		TIdx tileSize = sqrt(~tiles2);
+		TIdx tileSize = (TIdx)sqrt(~tiles2);
 		for (TIdx y = 0;y<ret.rows.count();y += tileSize) {
 			for (TIdx x = 0;x<ret.cols.count();x += tileSize) {
 				Matrix<T, TIdx> part = ret(y, tileSize, x, tileSize);
