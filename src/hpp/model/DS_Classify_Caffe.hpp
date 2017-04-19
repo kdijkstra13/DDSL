@@ -1653,6 +1653,33 @@ namespace DSModel {
 				return blobData_.vec(idx).getData();
 		throw Error(ecNotFound, "getBlobDataByName_", SS("Blob with name: " << name << " not found "));
 	}
+	
+	template<typename TClassType, typename TIdx, typename TId>
+	TIdx Caffe<TClassType, TIdx, TId>::getBatchSize() {
+		const String inputName = "ddslMemoryDataInput";
+		vector<String> names = solver_->net()->layer_names();
+		TIdx bs=0;
+		for (auto layerName = names.begin();layerName != names.end();layerName++) {
+			if (layerName->substr(0, inputName.size()) == inputName) {
+				boost::shared_ptr<MemoryDataLayer<Float>> dataLayer = dynamic_pointer_cast<MemoryDataLayer<Float>>(solver_->net()->layer_by_name(*layerName));
+				bs = dataLayer->batch_size();
+			}
+		}
+		return bs;
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	TIdx Caffe<TClassType, TIdx, TId>::getBatchSizeOfPhaseTest() {
+		const String inputName = "ddslMemoryDataInput";
+		vector<String> names = net_->layer_names();
+		TIdx bs = 0;
+		for (auto layerName = names.begin();layerName != names.end();layerName++) {
+			if (layerName->substr(0, inputName.size()) == inputName) {
+				boost::shared_ptr<MemoryDataLayer<Float>> dataLayer = dynamic_pointer_cast<MemoryDataLayer<Float>>(net_->layer_by_name(*layerName));
+				bs = dataLayer->batch_size();
+			}
+		}
+	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::fillMemoryDataLayer_(const TIdx n) {
@@ -1764,9 +1791,6 @@ namespace DSModel {
 			throw Error(ecIncompatible, "CaffeMLP::train()", "Cannot train without a solver");
 
 		setCaffeGPUs(gpuDevices_, false);
-		//caffe::Caffe::set_mode(caffe::Caffe::GPU);
-		//caffe::Caffe::SetDevice(0);
-		//caffe::Caffe::set_solver_count(~gpus3);
 
 		//Keep batchsize for checking
 		batchSize_ = 0;
@@ -1843,6 +1867,12 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::setMaxIter(const TIdx maxIter) {
 		this->template parameterValueById<UInt32>("MaxIter") = maxIter;
+		updateParameters();
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::setGPUDevices(const Matrix<Int32, TIdx> &gpuDevices) {
+		this->template parameterValueById<Matrix<Int32, TIdx>>("GPUDevices") = gpuDevices;
 		updateParameters();
 	}
 

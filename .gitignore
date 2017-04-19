@@ -16,3 +16,7 @@
 
 #ignore cmake builds
 **/build/
+
+#ignore temp files
+**/*.TMP
+**/*.swp

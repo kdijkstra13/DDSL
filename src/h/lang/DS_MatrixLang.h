@@ -289,7 +289,7 @@ namespace DSLang {
 	DSLib::Matrix<T, TInt> operator<<(DSLib::Matrix<T, TInt> &&lhs, std::istream &rhs);
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> & operator >> (DSLib::Matrix<T, TInt> &lhs, const DSTypes::String &rhs);
+	DSLib::Matrix<T, TInt> & operator>>(DSLib::Matrix<T, TInt> &lhs, const DSTypes::String &rhs);
 
 	template <typename T, typename TInt>
 	DSLib::Matrix<T, TInt> operator >> (DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs);

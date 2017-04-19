@@ -168,8 +168,6 @@ namespace DSModel {
 		void apply(const DSLib::Table<TIdx, TId> &table, DSLib::Table<TIdx, TId> &input, DSLib::Table<TIdx, TId> &output) override;
 		void readModel(std::istream &input, const DSTypes::String &filename) override;
 		void writeModel(std::ostream &output, const DSTypes::String &filename) override;
-		void writeSolverState(const DSTypes::String &filepath);
-		void readSolverState(const DSTypes::String &filename);
 	public:
 		using Model<TIdx, TId>::train;
 		using Model<TIdx, TId>::apply;
@@ -181,6 +179,9 @@ namespace DSModel {
 		void loadCaffeModel();
 		void clearCaffeModel();
 		void updateCaffeModel(bool copyWeights=true);
+		
+		void writeSolverState(const DSTypes::String &filepath);
+		void readSolverState(const DSTypes::String &filename);
 
 		template<typename T> void getBlobData(const String &blobName, Matrix<T, TIdx> &out);
 		template<typename T> void getBlobData(const String &blobName, Matrix<ImagePNG<T, TIdx>, TIdx> &out);
@@ -194,8 +195,11 @@ namespace DSModel {
 		void setMaxIter(const TIdx maxIter); //when maxIter is zero, maxITer will be set to the solver's iter.
 		bool incMaxIter(const TIdx amount); //Increase maxIter not further than solver's iter. Return false if maxIter cannot be increased further.
 		TIdx getMaxIter();
+		TIdx getBatchSize();
+		TIdx getBatchSizeOfPhaseTest();
 		TIdx getSolverIter();
 		TIdx getCurrIter();
+		void setGPUDevices(const DSLib::Matrix<Int32, TIdx> &gpuDevices);
 
 		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = numeric_limits<TIdx>().max());
 		Caffe(const DSTypes::String &filename, const DSTypes::String snapshotModelFile = "");

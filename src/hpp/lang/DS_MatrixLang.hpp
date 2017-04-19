@@ -606,13 +606,13 @@ namespace DSLang {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> & operator >> (DSLib::Matrix<T, TInt> &lhs, const DSTypes::String &rhs) {
+	DSLib::Matrix<T, TInt> & operator>>(DSLib::Matrix<T, TInt> &lhs, const DSTypes::String &rhs) {
 		lhs.write(rhs);
 		return lhs;
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> operator >> (DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs) {
+	DSLib::Matrix<T, TInt> operator>>(DSLib::Matrix<T, TInt> &&lhs, const DSTypes::String &rhs) {
 		lhs.write(rhs);
 		return std::move(lhs);
 	}
