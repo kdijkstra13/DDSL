@@ -22,15 +22,15 @@ option(OPTION_GCC_OFAST "Build using Ofast optimization" ON)
 option(OPTION_CHAI_BUILD_DDSL "Build chai ddsl interpreter with buildin DDSL support" ON)
 
 #Projects
-option(BUILD_DDSL_NO_EXT_LIB "Build vanilla DDSL" ON) 						#Depend on: None
-option(BUILD_DDSL_TESTER "Build testing project for debugging DDSL" ON) 	#Depend on: Any (See ddsl.hpp and ddsl.h)
+option(BUILD_DDSL_NO_EXT_LIB "Build vanilla DDSL" OFF) 						#Depend on: None
+option(BUILD_DDSL_TESTER "Build testing project for debugging DDSL" OFF) 	#Depend on: Any (See ddsl.hpp and ddsl.h)
 option(BUILD_LIBPNG_DDSL "Build a library for PNG" ON) 						#Depend on: DDSL_EXT_LIB_PNG
 option(BUILD_LIBSVM_DDSL "Build a library for SVM" ON) 						#Depend on: DDSL_EXT_LIB_SVM
 option(BUILD_LIBAF_DDSL "Build a library for ArrayFire" ON) 				#Depend on: DDSL_EXT_LIB_AF
 option(BUILD_LIBCAFFE_DDSL "Build a library for Caffe" ON) 					#Depend on: DDSL_EXT_LIB_CAFFE
 
-option(BUILD_DDSL_CHAISCRIPT "Build the ddsl chai script interpreter" ON) 		#Depend on: DDSL_EXT_LIB_CHAISCRIPT
-option(BUILD_LIBCHAI_MODULE_DDSL "Build DDSL as a chai scipt module" ON) 	#Depend on: DDSL_EXT_LIB_CHAISCRIPT
+option(BUILD_DDSL_CHAISCRIPT "Build the ddsl chai script interpreter" OFF) 		#Depend on: DDSL_EXT_LIB_CHAISCRIPT
+option(BUILD_LIBCHAI_MODULE_DDSL "Build DDSL as a chai scipt module" OFF) 	#Depend on: DDSL_EXT_LIB_CHAISCRIPT
 
 #Set build flags
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
@@ -63,7 +63,7 @@ function(addExtLibPNG)
 	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 		set(ZLIB_ROOT ${DDSL_ROOT}/contrib/zlib-1.2.8)
 		find_package(ZLIB REQUIRED)
-		set(PNG_INCLUDE_DIRS ${DDSL_ROOT}/contrib/lpng1628)		
+		set(PNG_INCLUDE_DIRS ${DDSL_ROOT}/contrib/lpng1628)
 		set(PNG_LIBRARIES ${DDSL_ROOT}/contrib/lpng1628/build/Release/libpng16.lib)
 		set(PNG_LIBRARIES_DEBUG ${DDSL_ROOT}/contrib/lpng1628/build/Debug/libpng16d.lib)
 		target_link_libraries(${EXE_NAME} debug ${PNG_LIBRARIES_DEBUG} optimized ${PNG_LIBRARIES})
@@ -71,7 +71,7 @@ function(addExtLibPNG)
 		#sudo apt-get libpng-dev
 		find_package(ZLIB REQUIRED)
 		find_package(PNG REQUIRED)
-		target_link_libraries(${EXE_NAME} ${DDSL_ROOT}/build/libpng_ddsl.a)
+		#target_link_libraries(${EXE_NAME} ${DDSL_ROOT}/build/libpng_ddsl.a)
 		target_link_libraries(${EXE_NAME} ${PNG_LIBRARIES})
 	endif()
 	include_directories (${ZLIB_INCLUDE_DIRS})
@@ -81,7 +81,11 @@ endfunction()
 function(addLibPNG)
 	message("* addLibPNG")
 	list(REMOVE_ITEM DEFS "DDSL_NO_EXT_LIB_PNG")
-	target_link_libraries(${EXE_NAME} debug ${DDSL_ROOT}/build/Debug/png_ddsl.lib optimized ${DDSL_ROOT}/build/Release/png_ddsl.lib)
+	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+		target_link_libraries(${EXE_NAME} debug ${DDSL_ROOT}/build/Debug/png_ddsl.lib optimized ${DDSL_ROOT}/build/Release/png_ddsl.lib)
+	else()
+		target_link_libraries(${EXE_NAME} ${DDSL_ROOT}/build/png_ddsl.a)
+	endif()
 	include_directories (${DDSL_ROOT}/libpng_ddsl)
 	set(DEFS ${DEFS} PARENT_SCOPE)
 endfunction()
