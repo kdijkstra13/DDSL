@@ -650,7 +650,7 @@ namespace DSModel {
 		if ((srcTable.cols.count() == 0 || srcTable.cols.hasIds()) && !this->cols.hasIds()) {
 			String mi;
 			convertValue(modelIndex(), mi);
-			genIds(modelName() + "." + mi + ".", TIdx(0), this->cols.count()) ^ *this;
+			genIds(modelName() + "_" + mi + "_", TIdx(0), this->cols.count()) ^ *this;
 		}
 		
 		//Make dstTable_		
