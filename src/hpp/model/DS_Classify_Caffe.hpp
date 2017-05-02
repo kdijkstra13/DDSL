@@ -1198,6 +1198,8 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	template<typename T> 
 	void Caffe<TClassType, TIdx, TId>::getLayerBlob(const String &layerName, const TIdx blobIdx, Matrix<T, TIdx> &mat) {
+		if (getActiveNet_()->layer_by_name(layerName) == nullptr)
+			throw Error(ecRangeError, "getLayerBlob", SS("Layer named " << layerName << ", does not exist out of range."));
 		if (blobIdx >= getLayerBlobCount(layerName))
 			throw Error(ecRangeError, "getLayerBlob", SS("Blob index " << blobIdx << " out of range."));
 		boost::shared_ptr<Blob<Float>> blob = getActiveNet_()->layer_by_name(layerName)->blobs()[blobIdx];
@@ -1219,6 +1221,25 @@ namespace DSModel {
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
+	template<typename T>
+	void Caffe<TClassType, TIdx, TId>::setLayerBlob(const String &layerName, const TIdx blobIdx, const Matrix<T, TIdx> &mat) {
+		if (getActiveNet_()->layer_by_name(layerName) == nullptr)
+			throw Error(ecRangeError, "setLayerBlob", SS("Layer named " << layerName << ", does not exist out of range."));
+		if (blobIdx >= getLayerBlobCount(layerName))
+			throw Error(ecRangeError, "setLayerBlob", SS("Blob index " << blobIdx << " out of range."));
+		boost::shared_ptr<Blob<Float>> blob = getActiveNet_()->layer_by_name(layerName)->blobs()[blobIdx];
+		Matrix<Float> blobFloat(mat.rows.count(), mat.cols.count());
+		convert(blobFloat, mat);
+		TIdx rowcnt = 1;
+		if (blob->count() != ~blobFloat)
+			throw Error(ecRangeError, "setLayerBlob", SS("Size mismatch between blob and Matrix: " << blob->count() << " != " << blobFloat.printSize()));
+		Float * f = blob->mutable_cpu_data();
+		for (auto it=blobFloat.rows->begin();it!=blobFloat.rows->end();it++, f++)
+			*f = *it;
+	}
+
+
+	template<typename TClassType, typename TIdx, typename TId>
 	TIdx Caffe<TClassType, TIdx, TId>::getLayerBlobCount(const String &layerName) {
 		return (TIdx) getActiveNet_()->layer_by_name(layerName)->blobs().size();
 	}
@@ -1228,7 +1249,8 @@ namespace DSModel {
 	template<typename T> 
 	void Caffe<TClassType, TIdx, TId>::getInnerProductData(const String &layerName, Matrix<T, TIdx> &weights, Matrix<T, TIdx> &bias) {
 		getLayerBlob(layerName, 0, weights);
-		getLayerBlob(layerName, 1, bias);
+		if (getLayerBlobCount(layerName) > 1)
+			getLayerBlob(layerName, 1, bias);
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1950,6 +1972,12 @@ namespace DSModel {
 		} else if (other.net_ != nullptr) {
 			copyWeights_(*other.net_, *net_);
 		}
+		if (other.activeNet_.get() == other.solver_->net().get()) {
+			setActiveNet_(solver_->net());
+		} else {
+			boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n) {});
+			setActiveNet_(n);
+		}
 		Model<TIdx, TId>::clone(other);
 	}
 
@@ -1982,9 +2010,12 @@ namespace DSModel {
 
 		net_ = other.net_;
 		solver_ = other.solver_;
-	
+		activeNet_ = other.activeNet_;
+
 		other.net_ = nullptr; //move semantics
 		other.solver_ = nullptr; //move semantics
+		other.activeNet_ = nullptr; //move
+
 		other.clear();
 
 		Model<TIdx, TId>::clone(std::move(other));

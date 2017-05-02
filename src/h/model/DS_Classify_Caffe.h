@@ -188,6 +188,8 @@ namespace DSModel {
 		template<typename T> void getBlobData(const String &blobName, Matrix<Matrix<T, TIdx>, TIdx> &out);
 
 		template<typename T> void getLayerBlob(const String &layerName, const TIdx blobIdx, Matrix<T, TIdx> &mat);
+		template<typename T> void setLayerBlob(const String &layerName, const TIdx blobIdx, const Matrix<T, TIdx> &mat);
+
 		TIdx getLayerBlobCount(const String &layerName);
 		template<typename T> void getInnerProductData(const String &layerName, Matrix<T, TIdx> &weights, Matrix<T, TIdx> &bias);
 		template<typename T> void getConvolutionData(const String &layerName, Matrix<T, TIdx> &out);
