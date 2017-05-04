@@ -12,28 +12,16 @@ using namespace DSLang;
 using namespace DSModel;
 using namespace DSImage;
 
-void initGlog() {
-	//Start logging for caffe
-	cout << "Init google log" << endl;
-	google::InitGoogleLogging("DDSL");
-	google::SetLogDestination(google::GLOG_INFO, "/tmp/DDSL");
-}
-
-void initCaffe(UInt32 ngpus) {
-	cout << "Init caffe" << endl;
-	caffe::Caffe::set_mode(caffe::Caffe::GPU);
-	caffe::Caffe::set_solver_count(ngpus);
-}
 
 int main(void) {
 	try {
-		initGlog();
-		UInt32 ngpus = 4;
-		initCaffe(ngpus);
-		cout << "Start" << endl;
-//		Table<>() > DSModel::Caffe<String>(dtString|"a"|"b");
-		ImagePNG<Float> png("C:\\DATASETS\\PlastcisSWIR2\\0000_0.png" , true);
-		png(0U, 10U, 0U, 10U)++;
+		Matrix<Float> m = ImagePNG<Float>("C:/temp/resultA.png", true).mat();
+		Matrix<Float> m2;
+		auto mn = makeAggrMean<Float, UInt32>(11, 11, 5, 5);
+		auto lin = makeFuncLinear(1.0f, 50.0f);
+		slide<Float, UInt32, 11U, 11U, 5U, 5U>(m, m2, mn, lin);
+		ImagePNG<Float>("c:/temp/!!.png", m2).saveImage();
+		m2++;
 
 	} catch (const double &e) {
 		cout << "double: " << e << endl;
@@ -43,9 +31,9 @@ int main(void) {
 		cout << "float: " << e << endl;
 	} catch (const std::string &e) {
 		cout << "string: " << e << endl;
-	} catch (const std::exception &e) {
-		cout << e.what();
   	} catch (const Error &e) {
+		cout << e.what();
+	} catch (const std::exception &e) {
 		cout << e.what();
 	}
 	cout << endl << "Say something: ";

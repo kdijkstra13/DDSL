@@ -886,4 +886,93 @@ namespace DSImage {
 			assign(from.px(), to.px());
 		return true;
 	};
+
+	/** General sliding window methods **/
+	template <typename T, typename TIdx>
+	T aggrMean(const T * const pixelPtr, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const TIdx imgStrideY, const TIdx imgStrideX) {
+		T sum = 0;
+		for (int winy = -(int)windowOriginY; winy < (int)windowHeight - (int)windowOriginY;winy++) {
+			const int pre = (winy * imgStrideY);
+			for (int winx = -(int)windowOriginX;winx < (int)windowWidth - (int)windowOriginX;winx++) {
+				const T pxval = *(pixelPtr + winx + pre);
+				sum += pxval;
+			}
+		}
+		return sum / (windowWidth * windowHeight);
+	}
+
+	template <typename T, typename TIdx>
+	T aggrMin(const T * const pixelPtr, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const TIdx imgStrideY, const TIdx imgStrideX) {
+		T min = *pixelPtr;
+		for (int winy = -(int)windowOriginY;winy < windowHeight - windowOriginY;winy++) {
+			const int pre = (winy * imgStrideY);
+			for (int winx = -(int)windowOriginX;winx < windowWidth - windowOriginX;winx++) {
+				const T pxval = *(pixelPtr + winx + pre);
+				if (pxval < min)
+					min = pxval;
+			}
+		}
+		return min;
+	}
+
+	template <typename T, typename TIdx>
+	std::function<T(const T * const, const TIdx, const TIdx)> makeAggrMean(const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX) {
+		return [windowHeight, windowWidth, windowOriginY, windowOriginX](const T * const p, const TIdx imgStrideY, const TIdx imgStrideX) {
+			return aggrMean(p, windowHeight, windowWidth, windowOriginY, windowOriginX, imgStrideY, imgStrideX);
+		};
+	}
+
+	template <typename T, typename TIdx>
+	std::function<T(const T * const, const TIdx, const TIdx)> makeAggrMin(const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX) {
+		return [windowHeight, windowWidth, windowOriginY, windowOriginX](const T * const p, const TIdx imgStrideY, const TIdx imgStrideX) {
+			return aggrMin(p, windowHeight, windowWidth, windowOriginY, windowOriginX, imgStrideY, imgStrideX);
+		};
+	}
+
+	template <typename T>
+	std::function<T(const T)> makeFuncQuadratic(const T a, const T b, const T c) {
+		return [a, b, c](const T x) {
+			return a * x * x + b * x + c;
+		};
+	}
+
+	template <typename T>
+	std::function<T(const T)> makeFuncLinear(const T a, const T b) {
+		return [a, b](const T x) {
+			return a * x + b;
+		};
+	}
+
+	template <typename T, typename TIdx, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginX, const TIdx windowOriginY>
+	void slide(const DSLib::Matrix<T, TIdx> &src, DSLib::Matrix<T, TIdx> &dst, std::function<T(const T * const, const TIdx, const TIdx)> aggr, std::function<T(const T)> func) {
+		if (src.order() != oRowMajor || dst.order() != oRowMajor)
+			throw Error(ecParameter, "slide", "Invalid order for either source or destination");
+		if (!dst.isSameSize(src))
+			dst.resize(src.rows.count(), src.cols.count());
+
+		const int startx = windowOriginX;
+		const int imgw = src.cols.count();
+		const int endx = src.cols.count() - (windowWidth - windowOriginX);
+		const int starty = windowOriginY;
+		const int endy = src.rows.count() - (windowHeight - windowOriginY);
+		//const int dststridex = 1;
+		const int dststridey = dst.getDataStride();
+		const int srcstridex = 1;
+		const int srcstridey = src.getDataStride();
+
+		const T * const srcPtr = src.getData();
+		T * const dstPtr = dst.getData();
+
+//#pragma omp parallel for
+		for (int y = starty;y<endy;y++) {
+			const int presrc = y * srcstridey;
+			const int predst = y * dststridey;
+			for (int x = startx;x<endx;x++) {
+				const T * pixelPtr = srcPtr + presrc + x;
+				T val = aggr(pixelPtr, srcstridey, srcstridex);
+				dstPtr[predst + x] = func(val);
+			}
+		}
+	}
+
 }

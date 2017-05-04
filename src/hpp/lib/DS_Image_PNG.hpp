@@ -381,4 +381,5 @@ namespace DSImage {
 			throw Error(ecInternal, "ImagePNG copy constructor from Matrix", String(e.what()));
 		}
 	}
+
 };
