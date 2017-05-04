@@ -900,7 +900,8 @@ namespace DSModel {
 		clearCaffeModel();
 		
 		loadCaffeModel_(&net_, &solver_);
-		string solverstatefile = SS("_iter_" << currIter_ << ".solverstate");
+		
+		string solverstatefile = solver_->SnapshotFilename();
 		readSolverState(filePath(filename) + solverstatefile);
 	}
 
@@ -914,7 +915,7 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::writeSolverState(const DSTypes::String &filepath) {
 		//Set current path
-		using namespace boost::filesystem;		
+		using namespace boost::filesystem;
 		path newPath(filepath);
 		newPath.remove_filename();
 		path oldPath = boost::filesystem::current_path();
