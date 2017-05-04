@@ -901,7 +901,7 @@ namespace DSModel {
 		
 		loadCaffeModel_(&net_, &solver_);
 		
-		string solverstatefile = SS(solver_->param().snapshot_prefix() << "_iter_" << solver_->iter() + ".prototxt");			
+		string solverstatefile = SS(solver_->param().snapshot_prefix() << "_iter_" << currIter_ << ".solverstate");			
 		readSolverState(filePath(filename) + solverstatefile);
 	}
 
