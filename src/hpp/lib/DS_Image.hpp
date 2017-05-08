@@ -945,8 +945,8 @@ namespace DSImage {
 
 	template <typename T, typename TIdx, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginX, const TIdx windowOriginY>
 	void slide(const DSLib::Matrix<T, TIdx> &src, DSLib::Matrix<T, TIdx> &dst, std::function<T(const T * const, const TIdx, const TIdx)> aggr, std::function<T(const T)> func) {
-		if (src.order() != oRowMajor || dst.order() != oRowMajor)
-			throw Error(ecParameter, "slide", "Invalid order for either source or destination");
+		if (src.order() != DSTypes::oRowMajor || dst.order() != DSTypes::oRowMajor)
+			throw DSTypes::Error(DSTypes::ecParameter, "slide", "Invalid order for either source or destination");
 		if (!dst.isSameSize(src))
 			dst.resize(src.rows.count(), src.cols.count());
 
