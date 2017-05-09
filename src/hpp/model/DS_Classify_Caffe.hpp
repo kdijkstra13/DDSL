@@ -1057,6 +1057,7 @@ namespace DSModel {
 		solverProtoFile_ = "";
 		netProtoFile_ = "";
 		snapshotModelFile_ = "";
+		resetSkips();
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1812,59 +1813,107 @@ namespace DSModel {
 		}
 		return caffe::SolverAction::Enum::NONE;
 	}
+	
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipTrain() {
+		skipTrain_ = true;
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipApply() {
+		skipApply_ = true;
+	}
+	
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipCopy() {
+		skipCopy_ = true;
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipGPUInit() {
+		skipGPUInit_ = true;
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::resetSkips() {
+		skipTrain_ = false;
+		skipApply_ = false;
+		skipCopy_ = false;
+		skipGPUInit_ = false;
+	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::train(const Table<TIdx, TId> &table, Table<TIdx, TId> &input, Table<TIdx, TId> &output) {
 		if (solver_ == nullptr)
 			throw Error(ecIncompatible, "CaffeMLP::train()", "Cannot train without a solver");
 
-		setCaffeGPUs(gpuDevices_, false);
+		if (!skipGPUInit_)
+			setCaffeGPUs(gpuDevices_, false);
+		else {
+			cout << "skipGPUInit" << endl;
+			skipGPUInit_ = false;
+		}
 
 		//Keep batchsize for checking
 		batchSize_ = 0;
 
-		//Initialize all blobs
-		this->setStage("Copy");
+		if (!skipCopy_) {
+			//Initialize all blobs
+			this->setStage("Copy");
 
-		//Set inputs of solver network
-		setActiveNet_(solver_->net());
-		setInputData_(input);
-		fillMemoryDataLayer_(input.rows.count());
-
-		//Train network
-		this->setStage("Train");
-		solverIter_ = solver_->param().max_iter();
-		this->template parameterValueById<UInt32>("SolverIter") = solverIter_;
-
-		this->setMinProgress(0);
-		this->setMaxProgress(solverIter_);
-		this->setProgress(solver_->iter());
-		
-		if ((TIdx)solver_->iter() < maxIter_) {
-			//Train the classifier
-			ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
-			solver_->SetActionFunction(cb);
-			solver_->Solve();
+			//Set inputs of solver network
+			setActiveNet_(solver_->net());
+			setInputData_(input);
+			fillMemoryDataLayer_(input.rows.count());
+		} else  {
+			cout << "skipCopy" << endl;
+			skipCopy_ = false;
 		}
-		UInt32 currIter_ = solver_->iter();
-		this->template parameterValueById<UInt32>("CurrIter") = currIter_;
 
-		//Initialize
-		this->setStage("Apply");
-		this->setMinProgress(0);
-		this->setMaxProgress(output.rows.count());
+		if (!skipTrain_) {
+			//Train network
+			this->setStage("Train");
+			solverIter_ = solver_->param().max_iter();
+			this->template parameterValueById<UInt32>("SolverIter") = solverIter_;
 
-		//Set inputs and weights of main network (for apply only)
-		shareWeights_(*(solver_->net()), *net_);
-		//boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
-		//setActiveNet_(n);
-		fillMemoryDataLayer_(input.rows.count());
+			this->setMinProgress(0);
+			this->setMaxProgress(solverIter_);
+			this->setProgress(solver_->iter());
+		
+			if ((TIdx)solver_->iter() < maxIter_) {
+				//Train the classifier
+				ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
+				solver_->SetActionFunction(cb);
+				solver_->Solve();
+			}
+			UInt32 currIter_ = solver_->iter();
+			this->template parameterValueById<UInt32>("CurrIter") = currIter_;
+		} else {
+			cout << "skipTrain" << endl;
+			skipTrain_ = false;
+		}
 
-		//Apply
-		for (TIdx i=0;i<output.rows.count();i+=batchSize_) {
-			Table<TIdx, TId> slice = output(i, batchSize_);
-			getOutputData_(slice);
-			this->incProgress(batchSize_);
+		if (!skipApply_) {
+			//Initialize
+			this->setStage("Apply");
+			this->setMinProgress(0);
+			this->setMaxProgress(output.rows.count());
+
+			//Set inputs and weights of main network (for apply only)
+			shareWeights_(*(solver_->net()), *net_);
+			//boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
+			//setActiveNet_(n);
+			fillMemoryDataLayer_(input.rows.count());
+
+			//Apply
+			for (TIdx i=0;i<output.rows.count();i+=batchSize_) {
+				Table<TIdx, TId> slice = output(i, batchSize_);
+				getOutputData_(slice);
+				this->incProgress(batchSize_);
+			}
+		} else {
+			cout << "skipApply" << endl;
+			skipApply_ = false;
 		}
 	}
 

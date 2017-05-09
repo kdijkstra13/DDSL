@@ -100,6 +100,11 @@ namespace DSModel {
 		TIdx solverIter_;
 		TIdx batchSize_;
 
+		bool skipApply_;
+		bool skipTrain_;
+		bool skipCopy_;
+		bool skipGPUInit_;
+
 		map<TClassType, DSTypes::Float> classToNum_;
 		Matrix<TClassType> classes_;		
 		
@@ -201,6 +206,11 @@ namespace DSModel {
 		TIdx getBatchSizeOfPhaseTest();
 		TIdx getSolverIter();
 		TIdx getCurrIter();
+		void skipTrain();
+		void skipApply();
+		void skipCopy();
+		void skipGPUInit();
+		void resetSkips();
 		void setGPUDevices(const DSLib::Matrix<Int32, TIdx> &gpuDevices);
 
 		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = numeric_limits<TIdx>().max());
