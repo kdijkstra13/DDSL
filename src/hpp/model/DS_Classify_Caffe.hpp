@@ -1990,6 +1990,21 @@ namespace DSModel {
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::copyWeightsFrom(const Caffe<TClassType, TIdx, TId> &other) {
+		if (other.solver_ != nullptr) {
+			copyWeights_(*(other.solver_->net().get()), *(solver_->net().get()));
+		} else if (other.net_ != nullptr) {
+			copyWeights_(*other.net_, *net_);
+		}
+		if (other.activeNet_.get() == other.solver_->net().get()) {
+			setActiveNet_(solver_->net());
+		} else {
+			boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n) {});
+			setActiveNet_(n);
+		}
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::clone(const Caffe<TClassType, TIdx, TId> & other) {
 		clearCaffeModel();
 		init_();

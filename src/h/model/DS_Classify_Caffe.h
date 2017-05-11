@@ -211,6 +211,7 @@ namespace DSModel {
 		void skipCopy();
 		void skipGPUInit();
 		void resetSkips();
+		void copyWeightsFrom(const Caffe<TClassType, TIdx, TId> &other); //copy weights from another network (only if models are clones before training)
 		void setGPUDevices(const DSLib::Matrix<Int32, TIdx> &gpuDevices);
 
 		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = numeric_limits<TIdx>().max());
