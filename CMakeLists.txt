@@ -29,7 +29,7 @@ option(BUILD_LIBSVM_DDSL "Build a library for SVM" ON) 						#Depend on: DDSL_EX
 option(BUILD_LIBAF_DDSL "Build a library for ArrayFire" ON) 				#Depend on: DDSL_EXT_LIB_AF
 option(BUILD_LIBCAFFE_DDSL "Build a library for Caffe" ON) 					#Depend on: DDSL_EXT_LIB_CAFFE
 
-option(BUILD_DDSL_CHAISCRIPT "Build the ddsl chai script interpreter" OFF) 		#Depend on: DDSL_EXT_LIB_CHAISCRIPT
+option(BUILD_DDSL_CHAISCRIPT "Build the ddsl chai script interpreter" OFF) 	#Depend on: DDSL_EXT_LIB_CHAISCRIPT
 option(BUILD_LIBCHAI_MODULE_DDSL "Build DDSL as a chai scipt module" OFF) 	#Depend on: DDSL_EXT_LIB_CHAISCRIPT
 
 #Set build flags
@@ -173,11 +173,11 @@ endfunction()
 function (addExtLibCaffe)
 	message("* addExtLibCaffe")
 	list(REMOVE_ITEM DEFS "DDSL_NO_EXT_LIB_CAFFE")
-	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-		#set (OpenCV_DIR ${DDSL_ROOT}/contrib/caffe/build/libraries)
+	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)		
 		set (OpenBLAS_DIR ${DDSL_ROOT}/contrib/openblas/lib/cmake/openblas)
 		find_package(OpenBLAS REQUIRED)
-		set (OpenCV_DIR ${DDSL_ROOT}/contrib/opencv/build)		
+		set (OpenCV_DIR $ENV{ProgramFiles}/opencv/build)
+		#set (OpenCV_DIR ${DDSL_ROOT}/contrib/opencv/build)
 		find_package(OpenCV REQUIRED)
 		set (Caffe_DIR ${DDSL_ROOT}/contrib/caffe/build)
 		find_package(Caffe REQUIRED)
