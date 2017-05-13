@@ -902,6 +902,19 @@ namespace DSImage {
 	}
 
 	template <typename T, typename TIdx>
+	T aggrSum(const T * const pixelPtr, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const TIdx imgStrideY, const TIdx imgStrideX) {
+		T sum = 0;
+		for (int winy = -(int)windowOriginY; winy < (int)windowHeight - (int)windowOriginY;winy++) {
+			const int pre = (winy * imgStrideY);
+			for (int winx = -(int)windowOriginX;winx < (int)windowWidth - (int)windowOriginX;winx++) {
+				const T pxval = *(pixelPtr + winx + pre);
+				sum += pxval;
+			}
+		}
+		return sum;
+	}
+
+	template <typename T, typename TIdx>
 	T aggrMin(const T * const pixelPtr, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const TIdx imgStrideY, const TIdx imgStrideX) {
 		T min = *pixelPtr;
 		for (int winy = -(int)windowOriginY;winy < windowHeight - windowOriginY;winy++) {
@@ -916,9 +929,122 @@ namespace DSImage {
 	}
 
 	template <typename T, typename TIdx>
+	T aggrConvolution(const T * const pixelPtr, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const TIdx imgStrideY, const TIdx imgStrideX, const DSLib::Matrix<T, TIdx> &mask) {
+		T sum = 0;
+		int masky = 0;
+		for (int winy = -(int)windowOriginY; winy < (int)windowHeight - (int)windowOriginY;winy++,masky++) {
+			int maskx = 0;
+			const int pre = (winy * imgStrideY);
+			for (int winx = -(int)windowOriginX;winx < (int)windowWidth - (int)windowOriginX;winx++,maskx++) {
+				const T pxval = *(pixelPtr + winx + pre);
+				sum += pxval * mask.val(masky, maskx);
+			}
+		}
+		return sum;
+	}
+
+	template <typename T, typename TIdx>
+	T aggrSSIM(const T * const pixelPtr1, const T * const pixelPtr2, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const TIdx imgStrideY1, const TIdx imgStrideX1, const TIdx imgStrideY2, const TIdx imgStrideX2, const DSLib::Matrix<T, TIdx> &mask, const T C1, const T C2, const T C3) {
+		//mean
+		T mean1 = 0;
+		T mean2 = 0;
+		int masky = 0;
+		for (int winy = -(int)windowOriginY; winy < (int)windowHeight - (int)windowOriginY;winy++,masky++) {
+			int maskx = 0;
+			const int pre1 = (winy * imgStrideY1);
+			const int pre2 = (winy * imgStrideY2);
+			for (int winx = -(int)windowOriginX;winx < (int)windowWidth - (int)windowOriginX;winx++,maskx++) {				
+				const T pxval1 = *(pixelPtr1 + winx + pre1);
+				const T pxval2 = *(pixelPtr2 + winx + pre2);
+				const T w = mask.val(masky, maskx);
+				mean1 += pxval1 * w;				
+				mean2 += pxval2 * w;
+			}
+		}
+		
+		//var and cov
+		T var1 = 0;
+		T var2 = 0;
+		T cov = 0;
+		masky = 0;
+		for (int winy = -(int)windowOriginY; winy < (int)windowHeight - (int)windowOriginY;winy++,masky++) {
+			int maskx = 0;
+			const int pre1 = (winy * imgStrideY1);
+			const int pre2 = (winy * imgStrideY2);
+			for (int winx = -(int)windowOriginX;winx < (int)windowWidth - (int)windowOriginX;winx++,maskx++) {
+				const T pxval1 = *(pixelPtr1 + winx + pre1);
+				const T pxval2 = *(pixelPtr2 + winx + pre2);
+				const T w = mask.val(masky, maskx);
+				var1 += (pxval1-mean1) * (pxval1-mean1) * w;
+				var2 += (pxval2-mean2) * (pxval2-mean2) * w;
+				cov += (pxval1-mean1) * (pxval2-mean2) * w;
+			}
+		}
+		//const T sd1 = sqrt(var1);
+		//const T sd2 = sqrt(var2);
+
+		//ssim
+		const T two = (T)2;
+		const T mean1sq = mean1 * mean1;
+		const T mean2sq = mean2 * mean2;
+		const T num = (two * mean1 * mean2  + C1) * (two * cov + C2);
+		const T divi = (mean1sq + mean2sq + C1) * (var1 + var1 + C2);
+		return (num/divi);
+	}
+
+	template <typename T, typename TIdx>
 	std::function<T(const T * const, const TIdx, const TIdx)> makeAggrMean(const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX) {
 		return [windowHeight, windowWidth, windowOriginY, windowOriginX](const T * const p, const TIdx imgStrideY, const TIdx imgStrideX) {
 			return aggrMean(p, windowHeight, windowWidth, windowOriginY, windowOriginX, imgStrideY, imgStrideX);
+		};
+	}
+
+	template <typename T, typename TIdx>
+	std::function<T(const T * const, const TIdx, const TIdx)> makeAggrSum(const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX) {
+		return [windowHeight, windowWidth, windowOriginY, windowOriginX](const T * const p, const TIdx imgStrideY, const TIdx imgStrideX) {
+			return aggrSum(p, windowHeight, windowWidth, windowOriginY, windowOriginX, imgStrideY, imgStrideX);
+		};
+	}
+
+	template <typename T, typename TIdx>
+	void drawGaussian(DSLib::Matrix<T, TIdx> &mat, const TIdx meanY, const TIdx meanX, const T sigma) {		
+		//http://mathworld.wolfram.com/GaussianFunction.html
+		T scale = T(1)/(T(2)*T(C_PI)*sigma*sigma);
+		T mul = T(1)/(T(2)*sigma*sigma);
+		T mnx = (T)meanX;
+		T mny = (T)meanY;
+		for (TIdx y=0;y<mat.rows.count();y++) {
+			for (TIdx x=0;x<mat.cols.count();x++) {
+				T parm = (x-mnx)*(x-mnx) + (y-mny)*(y-mny);
+				mat.val(y, x) = scale * exp(-parm * mul);
+			}
+		}
+	}
+
+	template <typename T, typename TIdx>
+	std::function<T(const T * const, const TIdx, const TIdx)> makeAggrConvolution(const DSLib::Matrix<T, TIdx> &mask, const TIdx windowOriginY, const TIdx windowOriginX) {
+		TIdx windowHeight = mask.rows.count();
+		TIdx windowWidth = mask.cols.count();
+		return [windowHeight, windowWidth, windowOriginY, windowOriginX, mask](const T * const p, const TIdx imgStrideY, const TIdx imgStrideX) {
+			return aggrConvolution(p, windowHeight, windowWidth, windowOriginY, windowOriginX, imgStrideY, imgStrideX, mask);
+		};
+	}
+
+	template <typename T, typename TIdx>
+	std::function<T(const T * const p1, const TIdx, const TIdx, const T * const, const TIdx, const TIdx)> makeAggrSSIM(const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const T sigma, const T C1, const T C2, const T C3) {
+		DSLib::Matrix<T, TIdx> mask(windowHeight, windowWidth);
+		drawGaussian(mask, windowHeight/2, windowWidth/2, sigma);
+		return [windowHeight, windowWidth, windowOriginY, windowOriginX, mask, C1, C2, C3](const T * const p1, const TIdx imgStrideY1, const TIdx imgStrideX1, const T * const p2, const TIdx imgStrideY2, const TIdx imgStrideX2) {
+			return aggrSSIM(p1, p2, windowHeight, windowWidth, windowOriginY, windowOriginX, imgStrideY1, imgStrideX1, imgStrideY2, imgStrideX2, mask, C1, C2, C3);
+		};
+	}
+
+	template <typename T, typename TIdx>
+	std::function<T(const T * const, const TIdx, const TIdx)> makeAggrGauss(const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginY, const TIdx windowOriginX, const T sigma) {
+		DSLib::Matrix<T, TIdx> mask(windowHeight, windowWidth);
+		drawGaussian(mask, windowHeight/2, windowWidth/2, sigma);
+		return [windowHeight, windowWidth, windowOriginY, windowOriginX, mask](const T * const p, const TIdx imgStrideY, const TIdx imgStrideX) {
+			return aggrConvolution(p, windowHeight, windowWidth, windowOriginY, windowOriginX, imgStrideY, imgStrideX, mask);
 		};
 	}
 
@@ -943,8 +1069,35 @@ namespace DSImage {
 		};
 	}
 
+	template <typename T>
+	T getSlideArea(const T height, const T width, const T windowHeight, const T windowWidth) {
+		return (height * width) - (windowHeight * width) - (windowWidth * height) + (windowWidth * windowHeight);
+	}
+
 	template <typename T, typename TIdx, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginX, const TIdx windowOriginY>
-	void slide(const DSLib::Matrix<T, TIdx> &src, DSLib::Matrix<T, TIdx> &dst, std::function<T(const T * const, const TIdx, const TIdx)> aggr, std::function<T(const T)> func) {
+	T slide(DSLib::Matrix<T, TIdx> &mat, std::function<T(const T)> func) {
+		const int startx = windowOriginX;
+		const int imgw = mat.cols.count();
+		const int endx = mat.cols.count() - (windowWidth - windowOriginX);
+		const int starty = windowOriginY;
+		const int endy = mat.rows.count() - (windowHeight - windowOriginY);
+		const int stridey = mat.getDataStride();
+		T * const ptr = mat.getData();
+		T sum = 0;
+
+//#pragma omp parallel for private(y) schedule(dynamic) reduction(+:sum)
+		for (int y = starty;y<endy;y++) {
+			const int pre = y * stridey;
+			for (int x = startx;x<endx;x++) {
+				ptr[pre + x] = func(ptr[pre + x]);
+				sum += ptr[pre + x];
+			}
+		}
+		return sum / getSlideArea(mat.rows.count(), mat.cols.count(), windowHeight, windowWidth);
+	}
+
+	template <typename T, typename TIdx, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginX, const TIdx windowOriginY>
+	T slide(const DSLib::Matrix<T, TIdx> &src, DSLib::Matrix<T, TIdx> &dst, std::function<T(const T * const, const TIdx, const TIdx)> aggr, std::function<T(const T)> func) {
 		if (src.order() != DSTypes::oRowMajor || dst.order() != DSTypes::oRowMajor)
 			throw DSTypes::Error(DSTypes::ecParameter, "slide", "Invalid order for either source or destination");
 		if (!dst.isSameSize(src))
@@ -962,8 +1115,9 @@ namespace DSImage {
 
 		const T * const srcPtr = src.getData();
 		T * const dstPtr = dst.getData();
+		T sum = 0;
 
-//#pragma omp parallel for
+//#pragma omp parallel for private(y) schedule(dynamic) reduction(+:sum)
 		for (int y = starty;y<endy;y++) {
 			const int presrc = y * srcstridey;
 			const int predst = y * dststridey;
@@ -971,8 +1125,56 @@ namespace DSImage {
 				const T * pixelPtr = srcPtr + presrc + x;
 				T val = aggr(pixelPtr, srcstridey, srcstridex);
 				dstPtr[predst + x] = func(val);
+				sum += dstPtr[predst + x];
 			}
 		}
+		return sum / getSlideArea(src.rows.count(), src.cols.count(), windowHeight, windowWidth);
 	}
 
+	//Returns mean response
+	template <typename T, typename TIdx, const TIdx windowHeight, const TIdx windowWidth, const TIdx windowOriginX, const TIdx windowOriginY>
+	T slide(const DSLib::Matrix<T, TIdx> &a, const DSLib::Matrix<T, TIdx> &b, DSLib::Matrix<T, TIdx> &dst, std::function<T(const T * const p1, const TIdx, const TIdx, const T * const, const TIdx, const TIdx)> aggr, std::function<T(const T)> func) {
+		if (a.order() != DSTypes::oRowMajor)
+			throw DSTypes::Error(DSTypes::ecParameter, "slide2", "Invalid order for either a");
+		if (b.order() != DSTypes::oRowMajor)
+			throw DSTypes::Error(DSTypes::ecParameter, "slide2", "Invalid order for either b");
+		if (dst.order() != DSTypes::oRowMajor)
+			throw DSTypes::Error(DSTypes::ecParameter, "slide2", "Invalid order for either dst");
+		if (!a.isSameSize(b))
+			throw DSTypes::Error(DSTypes::ecParameter, "slide2", SS("a and b have different sizes " << a.printSize() << " != " << b.printSize()));
+		if (!dst.isSameSize(a))
+			dst.resize(a.rows.count(), a.cols.count());
+		
+		const int startx = windowOriginX;
+		const int imgw = a.cols.count();
+		const int endx = a.cols.count() - (windowWidth - windowOriginX);
+		const int starty = windowOriginY;
+		const int endy = a.rows.count() - (windowHeight - windowOriginY);
+		//const int dststridex = 1;
+		const int dststridey = dst.getDataStride();
+		const int astridex = 1;
+		const int astridey = b.getDataStride();
+		const int bstridex = 1;
+		const int bstridey = b.getDataStride();
+
+		const T * const aPtr = a.getData();
+		const T * const bPtr = b.getData();
+		T * const dstPtr = dst.getData();
+		T sum = 0;
+
+//#pragma omp parallel for private(y) schedule(dynamic) reduction(+:sum)
+		for (int y = starty;y<endy;y++) {
+			const int prea = y * astridey;
+			const int preb = y * bstridey;
+			const int predst = y * dststridey;
+			for (int x = startx;x<endx;x++) {
+				const T * pixelPtra = aPtr + prea + x;
+				const T * pixelPtrb = bPtr + preb + x;
+				T val = aggr(pixelPtra, astridey, astridex, pixelPtrb, bstridey, bstridex);
+				dstPtr[predst + x] = func(val);
+				sum += dstPtr[predst + x];
+			}
+		}
+		return sum / getSlideArea(a.rows.count(), a.cols.count(), windowHeight, windowWidth);
+	}
 }
