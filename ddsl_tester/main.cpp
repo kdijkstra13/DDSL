@@ -12,18 +12,14 @@ using namespace DSLang;
 using namespace DSModel;
 using namespace DSImage;
 
+template <typename T, typename TIdx>
+void readENVI(Matrix<T, TIdx> &dst, const String &filename) {
+
+}
 
 int main(void) {
 	try {		
-		Matrix<Float> a = ImagePNG<Float>("c:/temp/simul/original.png", true).getChannel(1);
-		Matrix<Float> b = ImagePNG<Float>("c:/temp/simul/upsampled.png", true).getChannel(1);
-
-
-		Matrix<Float> dst;
-		cout << SSIM(a, b, dst, 255.0f) << endl;
-		cout << PSNR(a, b, 255.0f) << endl;
-
-		ImagePNG<Float>("c:/temp/simul/SSIM.png", dst * 100.0f).saveImage();
+		//readENVI(cube, 
 
 	} catch (const double &e) {
 		cout << "double: " << e << endl;
