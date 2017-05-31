@@ -73,7 +73,7 @@ namespace DSFunc {
 	Matrix<T, TIdx> tiledToTile(const Matrix<T, TIdx> &tiled, const TIdx tileCountX, const TIdx tileCountY, const TIdx tileIdx) {
 		Matrix<T, TIdx> & tiled2 = const_cast<Matrix<T, TIdx>&>(tiled);
 
-		TIdx y = tileIdx / tileCountY;
+		TIdx y = tileIdx / tileCountX;
 		TIdx x = tileIdx % tileCountX;
 		TIdx tileWidth = (tiled2.cols.count() / tileCountX);
 		TIdx tileHeight = (tiled2.rows.count() / tileCountY);

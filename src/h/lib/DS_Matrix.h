@@ -352,6 +352,8 @@ namespace DSLib {
 
 		//Functions for low level data access. Higher performance compared to iterators
 		T* getData() { return (up_ == nullptr) ? data_.data() : up_->data_.data() + rows.first_ * rows.stride_ + cols.first_ * cols.stride_; };
+		T* getData(const TInt y, const TInt x) { return (up_ == nullptr) ? data_.data() + y * rows.stride_ + x * cols.stride_ :	up_->data_.data() + (rows.first_+y) * rows.stride_ + (cols.first_+x) * cols.stride_; };		
+		const T* getData (const TInt y, const TInt x) const { return (up_ == nullptr) ? data_.data() + y * rows.stride_ + x * cols.stride_ : up_->data_.data() + (rows.first_ + y) * rows.stride_ + (cols.first_ + x) * cols.stride_; };
 		const T* getData() const { return (up_ == nullptr) ? data_.data() : up_->data_.data() + rows.first_ * rows.stride_ + cols.first_ * cols.stride_; };
 		TInt getDataStride() const {return (order_ == DSTypes::oRowMajor)?rows.stride_ :cols.stride_;};
 		TInt getDataLineSize() const {return (order_ == DSTypes::oRowMajor)?cols.count():rows.count();};

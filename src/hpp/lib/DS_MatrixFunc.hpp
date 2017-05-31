@@ -70,6 +70,7 @@ namespace DSFunc {
 	template<> inline DataType & convertValue(const String &from, DataType &to) { stringstream ss;ss << from;ss >> stoe(to);return to; }
 
 	template<> inline Double & convertValue(const UInt32 &from, Double &to) { to = from; return to; }
+	template<> inline Double & convertValue(const UInt16 &from, Double &to) { to = from; return to; }
 	template<> inline UInt32 & convertValue(const Double &from, UInt32 &to) { to = (UInt32)from; return to; }
 
 	template<> inline Float & convertValue(const UInt32 &from, Float &to) { to = (Float)from; return to; }
