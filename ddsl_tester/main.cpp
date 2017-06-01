@@ -106,45 +106,14 @@ void normalizeENVI(Matrix<T, TIdx> &cube, const Matrix<T, TIdx> &black, const Ma
 
 int main(int argc, char *argv[]) {
 	try {
-		if (argc == 10) {
-			UInt32 width = atoi(argv[5]); //640
-			UInt32 bands = atoi(argv[6]); //224;
-			UInt32 tilesx = atoi(argv[7]); //16;
-			UInt32 tilesy = atoi(argv[8]); //14;
-			Matrix<UInt16> cube, white, black;
-			Matrix<Double> cubef, whitef, blackf, whitef2, blackf2;
-			cout << "Reading " << String(argv[1]) << endl;
-			readRawENVI(cube, String(argv[1]), width, bands, elBandInterleaveByLine);
-			cout << "Reading " << String(argv[2]) << endl;
-			readRawENVI(white, String(argv[2]), width, bands, elBandInterleaveByLine);
-			cout << "Reading " << String(argv[3]) << endl;
-			readRawENVI(black, String(argv[3]), width, bands, elBandInterleaveByLine);
-			cout << "Converting " << String(argv[1]) << endl;
-			convert(cubef, cube);
-			cout << "Converting " << String(argv[2]) << endl;
-			convert(whitef, white);
-			cout << "Converting " << String(argv[3]) << endl;
-			convert(blackf, black);
-			cout << "Normalizing " << endl;
-			normalizeENVI(cubef, blackf, whitef, bands, elBandInterleaveByLine);
-			cout << "Generating tiled image" << endl;
-			Matrix<Double> tiled = BILToTiled(cubef, tilesx, tilesy);
-			cout << "Scaling image " << (Double)atof(argv[9]) << endl;
-			tiled * (Double)atof(argv[9]);
-			cout << "Saving " << String(argv[4]) << endl;
-			ImagePNG<Double>(String(argv[4]), tiled, itM16).saveImage();
-		} else {
-			cout << "cube.raw" << endl <<
-					"white.raw" << endl <<
-					"black.raw" << endl <<
-					"output.png" << endl <<
-					"width" << endl <<
-					"bands" << endl <<
-					"tiles x" << endl <<
-					"tiles y" << endl <<
-					"mul" << endl;
-		};
-	
+		const String folder = "x:/DemosaicLarge/HLB/";
+		const String file1 = folder + "downsample_to_original_crosstalk/16_m4_D4_D16_CAM_XIMEACamVIS03601.jl.png";
+		const String file2 = folder + "crosstalk/CAM_XIMEACamVIS03601.jl.png";
+		Matrix<Float> img = ImagePNG<Float>(file2, true).mat();
+		Matrix<Float> ref = ImagePNG<Float>(file1, true).mat();
+		Matrix<Float> dst;
+		cout << SSIM(img, ref, dst, 1023.0f);
+		
 	} catch (const double &e) {
 		cout << "double: " << e << endl;
 	} catch (int &e) {
@@ -159,4 +128,5 @@ int main(int argc, char *argv[]) {
 		cout << e.what();
 	}
 	cout << endl << "Done.";
+	cin.get();
 }

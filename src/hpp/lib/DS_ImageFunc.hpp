@@ -276,7 +276,7 @@ namespace DSFunc {
 		const T mean1sq = mean1 * mean1;
 		const T mean2sq = mean2 * mean2;
 		const T num = (two * mean1 * mean2 + C1) * (two * cov + C2);
-		const T divi = (mean1sq + mean2sq + C1) * (var1 + var1 + C2);
+		const T divi = (mean1sq + mean2sq + C1) * (var1 + var2 + C2);
 		return (num / divi);
 	}
 
