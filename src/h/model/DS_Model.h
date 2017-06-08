@@ -121,10 +121,7 @@ namespace DSModel {
 	protected:
 		virtual void updateParameters() {}; //Parameter update event
 		void registerParameters(const DSLib::Table<TIdx, DSTypes::Literal> &parms);
-		bool & parameterExists(const DSTypes::Literal &id) {
-			
-			return parms_[id].template mat<T>(0).vec(0);
-		};
+		bool parameterExists(const DSTypes::Literal &id) {return parms_.cols.hasId(id);};
 		template<typename T> T & parameterValueById(const DSTypes::Literal &id) {return parms_[id].template mat<T>(0).vec(0);};
 		template<typename T> T & parameterMinById(const DSTypes::Literal &id) { return parms_[id].template mat<T>(0).vec(1);};
 		template<typename T> T & parameterMaxById(const DSTypes::Literal &id) { return parms_[id].template mat<T>(0).vec(2);};		

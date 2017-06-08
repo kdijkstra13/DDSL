@@ -549,6 +549,13 @@ namespace DSLib {
 	}
 
 	template <typename TIdx, typename TId>
+	bool Table<TIdx, TId>::Index::hasId(const TId &id) {
+		if (idToIdx_.find(id) != idToIdx_.end())
+			return true;
+		return false;
+	}
+
+	template <typename TIdx, typename TId>
 	typename Table<TIdx, TId>::TableMatrix * Table<TIdx, TId>::findMatrix(DSTypes::ContentType ct, DSTypes::DataType dt) {
 		auto res = matrixByType_.find(pair<DSTypes::ContentType, DSTypes::DataType>(ct, dt));
 		if (res != matrixByType_.end())

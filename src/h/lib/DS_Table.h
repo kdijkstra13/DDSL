@@ -71,6 +71,7 @@ namespace DSLib {
 			bool isRow() const {return (this == &(table_->rows));}
 			bool isCol() const {return (this == &(table_->cols));}
 			bool hasIds() const {return idxToId_.begin() != idxToId_.end();};			
+			bool hasId(const TId &id);
 
 			TIdx idToIdx(const TId id);
 			std::map<TId, TIdx> idToIdxAsMap(const TIdx start, const TIdx count) const;

@@ -818,7 +818,8 @@ namespace DSModel {
 		}
 
 		classes_ = this->template parameterValueById<Matrix<TClassType>>("Classes");
-		seed_ = this->template parameterValueById<Int32>("Seed");
+		if (this->parameterExists("Seed"))
+			seed_ = this->template parameterValueById<Int32>("Seed");
 		netProtoFile_ = this->template parameterValueById<String>("NetProtoFile");
 		solverProtoFile_ = this->template parameterValueById<String>("SolverProtoFile");
 		maxIter_ = this->template parameterValueById<UInt32>("MaxIter");
@@ -1961,8 +1962,10 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::setSeed(const Int32 seed) {
-		this->template parameterValueById<Int32>("Seed") = seed;
-		updateParameters();
+		if (this->parameterExists("Seed")) {
+			this->template parameterValueById<Int32>("Seed") = seed;
+			updateParameters();
+		}
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>

@@ -89,8 +89,8 @@ namespace DSFunc {
 		Matrix<T, TIdx> mosaic(tiled2.rows.count(), tiled2.cols.count());
 		for (TIdx y = 0; y != tiled2.rows.count();y += tileHeight) {
 			for (TIdx x = 0; x != tiled2.cols.count();x += tileWidth) {
-				for (auto yo = 0;yo<tileHeight;yo++) {
-					for (auto xo = 0;xo<tileWidth;xo++) {
+				for (TIdx yo = 0;yo<tileHeight;yo++) {
+					for (TIdx xo = 0;xo<tileWidth;xo++) {
 						mosaic.val((y / tileHeight) + (yo*tileCountY), (x / tileWidth) + (xo*tileCountX)) = tiled2.val(y + yo, x + xo);
 					}
 				}
