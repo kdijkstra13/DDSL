@@ -95,6 +95,7 @@ namespace DSModel {
 		Matrix<String, TIdx> dataBlobName_;
 		Matrix<String, TIdx> labelBlobName_;
 
+		Int32 seed_;
 		TIdx maxIter_;
 		TIdx currIter_;
 		TIdx solverIter_;
@@ -199,6 +200,7 @@ namespace DSModel {
 		template<typename T> void getInnerProductData(const String &layerName, Matrix<T, TIdx> &weights, Matrix<T, TIdx> &bias);
 		template<typename T> void getConvolutionData(const String &layerName, Matrix<T, TIdx> &out);
 
+		void setSeed(const Int32 seed); //Set random seed for networks (does not override max_seed)
 		void setMaxIter(const TIdx maxIter); //when maxIter is zero, maxITer will be set to the solver's iter.
 		bool incMaxIter(const TIdx amount); //Increase maxIter not further than solver's iter. Return false if maxIter cannot be increased further.
 		TIdx getMaxIter();
@@ -214,7 +216,7 @@ namespace DSModel {
 		void copyWeightsFrom(const Caffe<TClassType, TIdx, TId> &other); //copy weights from another network (only if models are clones before training)
 		void setGPUDevices(const DSLib::Matrix<Int32, TIdx> &gpuDevices);
 
-		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = numeric_limits<TIdx>().max());
+		Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const DSLib::Matrix<Int32, TIdx> &gpuDevices = DSLib::Matrix<Int32, TIdx>(), const TIdx maxIter = numeric_limits<TIdx>().max(), const Int32 seed = -1);
 		Caffe(const DSTypes::String &filename, const DSTypes::String snapshotModelFile = "");
 
 		M_HDR_MODEL_DESTRUCTOR(Caffe)

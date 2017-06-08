@@ -818,6 +818,7 @@ namespace DSModel {
 		}
 
 		classes_ = this->template parameterValueById<Matrix<TClassType>>("Classes");
+		seed_ = this->template parameterValueById<Int32>("Seed");
 		netProtoFile_ = this->template parameterValueById<String>("NetProtoFile");
 		solverProtoFile_ = this->template parameterValueById<String>("SolverProtoFile");
 		maxIter_ = this->template parameterValueById<UInt32>("MaxIter");
@@ -883,7 +884,7 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::loadCaffeModel_(Net<Float> **net, Solver<Float> **solver) {
 		freeNet_(net);
-		freeSolver_(solver);	
+		freeSolver_(solver);
 		if (solverProtoFile_ != "") {
 			*solver = readSolver_(solverProtoFile_, snapshotModelFile_);
 			*net = readNet_(netProtoFile_);
@@ -1012,6 +1013,10 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::loadCaffeModel() {
+		if (seed_ >= 0) {			
+			caffe::Caffe::set_random_seed(seed_);
+			cout << "Set seed to " << seed_;
+		}
 		loadCaffeModel_(&net_, &solver_);
 	}
 
@@ -1025,6 +1030,10 @@ namespace DSModel {
 	void Caffe<TClassType, TIdx, TId>::updateCaffeModel(bool copyWeights) {		
 		caffe::Solver<Float> * tempSolver = nullptr;
 		caffe::Net<Float> * tempNet = nullptr;
+		if (seed_ >= 0) {
+			caffe::Caffe::set_random_seed(seed_);
+			cout << "Set seed to " << seed_;
+		}
 		try {
 			loadCaffeModel_(&tempNet, &tempSolver);
 			if (copyWeights) {
@@ -1050,6 +1059,7 @@ namespace DSModel {
 		//Should only be called from the constructor, otherwise call clearCaffeModel_() first
 		solver_ = nullptr;
 		net_ = nullptr;
+		seed_ = -1;
 		maxIter_ = 0;
 		currIter_ = 0;
 		solverIter_ = 0;
@@ -1121,16 +1131,18 @@ namespace DSModel {
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
-	Caffe<TClassType, TIdx, TId>::Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const Matrix<Int32, TIdx> &gpuDevices, const TIdx maxIter) {
+	Caffe<TClassType, TIdx, TId>::Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const Matrix<Int32, TIdx> &gpuDevices, const TIdx maxIter, const Int32 seed) {
 		init_();
 		gpuDevices_ = gpuDevices;
 		maxIter_ = maxIter;
+		seed_ = seed;
 		Table<TIdx, TId> tab =
 			(Matrix<Literal, TIdx>() | "Val") |
 			(
 			(((Matrix<Literal, TIdx>() | "Classes")				^ (ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes))))) |
-			(((Matrix<Literal, TIdx>() | "NetProtoFile")			^ (ctParameter | (Matrix<String>() | netProtoFile)))) |
-			(((Matrix<Literal, TIdx>() | "SolverProtoFile")			^ (ctParameter | (Matrix<String>() | solverProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "NetProtoFile")		^ (ctParameter | (Matrix<String>() | netProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "SolverProtoFile")		^ (ctParameter | (Matrix<String>() | solverProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "Seed")				^ (ctParameter | (Matrix<Int32>() | (Int32)seed)))) |
 			(((Matrix<Literal, TIdx>() | "MaxIter")				^ (ctParameter | (Matrix<UInt32>() | (UInt32)maxIter)))) |
 			(((Matrix<Literal, TIdx>() | "CurrIter")			^ (ctParameter | (Matrix<UInt32>() | (UInt32)currIter_)))) |
 			(((Matrix<Literal, TIdx>() | "SolverIter")			^ (ctParameter | (Matrix<UInt32>() | (UInt32)solverIter_)))) |
@@ -1944,6 +1956,12 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::setMaxIter(const TIdx maxIter) {
 		this->template parameterValueById<UInt32>("MaxIter") = maxIter;
+		updateParameters();
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::setSeed(const Int32 seed) {
+		this->template parameterValueById<Int32>("Seed") = seed;
 		updateParameters();
 	}
 
