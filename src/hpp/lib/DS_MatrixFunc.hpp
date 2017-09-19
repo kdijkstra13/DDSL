@@ -70,6 +70,7 @@ namespace DSFunc {
 	template<> inline DataType & convertValue(const String &from, DataType &to) { stringstream ss;ss << from;ss >> stoe(to);return to; }
 
 	template<> inline Double & convertValue(const UInt32 &from, Double &to) { to = from; return to; }
+	template<> inline Double & convertValue(const UInt16 &from, Double &to) { to = from; return to; }
 	template<> inline UInt32 & convertValue(const Double &from, UInt32 &to) { to = (UInt32)from; return to; }
 
 	template<> inline Float & convertValue(const UInt32 &from, Float &to) { to = (Float)from; return to; }
@@ -374,10 +375,16 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> randomInt(TInt rows, TInt cols, T min, T max) {
-		Matrix<T, TInt> m(rows, cols);
-		std::random_device rd;
-		std::mt19937 gen(rd());
+	inline DSLib::Matrix<T, TInt> randomInt(TInt rows, TInt cols, T min, T max, const Int32 seed=-1) {
+		Matrix<T, TInt> m(rows, cols);		
+		std::mt19937 gen;
+		if (seed >= 0) {
+			gen.seed(seed);
+		} else {
+			std::random_device rd;
+			gen.seed(rd());
+		}
+			
 		std::uniform_int_distribution<> dis(min, max);
 		for (auto it=m.rows->begin();it!=m.rows->end();it++)
 			*it = T(dis(gen));
@@ -385,7 +392,7 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> randomReal(TInt rows, TInt cols, T min, T max) {
+	inline DSLib::Matrix<T, TInt> randomReal(TInt rows, TInt cols, T min, T max, const Int32 seed=-1) {
 		Matrix<T, TInt> m(rows, cols);
 		std::random_device rd;
 		std::mt19937 gen(rd());
@@ -396,11 +403,11 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> random(TInt rows, TInt cols, const Matrix<T> & vec) {
+	inline DSLib::Matrix<T, TInt> random(TInt rows, TInt cols, const Matrix<T> & vec, const Int32 seed=-1) {
 		Matrix<T, TInt> m(rows, cols);
 		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_int_distribution<> dis(0, vec.vec().count()-1);
+		std::mt19937 gen;
+		std::uniform_int_distribution<> dis(0, vec.vec().count() - 1);
 		for (auto it = m.rows->begin();it != m.rows->end();it++)
 			*it = vec.vec(TInt(dis(gen)));
 		return m;

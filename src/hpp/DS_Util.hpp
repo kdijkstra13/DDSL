@@ -84,6 +84,19 @@ namespace DSUtil {
 		return r;
 	}
 
+	template <typename T>
+	size_t inline readToVector(const DSTypes::String &filename, vector<T> &buf) {
+		std::ifstream ifs(filename, ios::binary);
+		if (!ifs) throw Error(ecNotFound, "readToVector()", SS("Cannot open file: " << filename));
+		ifs.seekg(0, std::ios::end);
+		size_t size = (size_t)ifs.tellg();
+		ifs.seekg(0);
+		buf.resize(size / sizeof(T));
+		ifs.read(static_cast<char*>(static_cast<void*>(buf.data())), size);
+		if (!ifs) throw Error(ecNotFound, "readToVector()", SS("Not all bytes read, only " << ifs.gcount() << " of " << size));
+		return buf.size();
+	}
+
 	DSTypes::String inline readToString(const DSTypes::String &filename) {
 		std::ifstream ifs(filename, ios::binary);
 		if (!ifs) 

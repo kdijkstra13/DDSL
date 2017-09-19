@@ -818,6 +818,8 @@ namespace DSModel {
 		}
 
 		classes_ = this->template parameterValueById<Matrix<TClassType>>("Classes");
+		if (this->parameterExists("Seed"))
+			seed_ = this->template parameterValueById<Int32>("Seed");
 		netProtoFile_ = this->template parameterValueById<String>("NetProtoFile");
 		solverProtoFile_ = this->template parameterValueById<String>("SolverProtoFile");
 		maxIter_ = this->template parameterValueById<UInt32>("MaxIter");
@@ -883,7 +885,7 @@ namespace DSModel {
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::loadCaffeModel_(Net<Float> **net, Solver<Float> **solver) {
 		freeNet_(net);
-		freeSolver_(solver);	
+		freeSolver_(solver);
 		if (solverProtoFile_ != "") {
 			*solver = readSolver_(solverProtoFile_, snapshotModelFile_);
 			*net = readNet_(netProtoFile_);
@@ -1012,6 +1014,10 @@ namespace DSModel {
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::loadCaffeModel() {
+		if (seed_ >= 0) {			
+			caffe::Caffe::set_random_seed(seed_);
+			cout << "Set seed to " << seed_;
+		}
 		loadCaffeModel_(&net_, &solver_);
 	}
 
@@ -1025,6 +1031,10 @@ namespace DSModel {
 	void Caffe<TClassType, TIdx, TId>::updateCaffeModel(bool copyWeights) {		
 		caffe::Solver<Float> * tempSolver = nullptr;
 		caffe::Net<Float> * tempNet = nullptr;
+		if (seed_ >= 0) {
+			caffe::Caffe::set_random_seed(seed_);
+			cout << "Set seed to " << seed_;
+		}
 		try {
 			loadCaffeModel_(&tempNet, &tempSolver);
 			if (copyWeights) {
@@ -1050,6 +1060,7 @@ namespace DSModel {
 		//Should only be called from the constructor, otherwise call clearCaffeModel_() first
 		solver_ = nullptr;
 		net_ = nullptr;
+		seed_ = -1;
 		maxIter_ = 0;
 		currIter_ = 0;
 		solverIter_ = 0;
@@ -1057,6 +1068,7 @@ namespace DSModel {
 		solverProtoFile_ = "";
 		netProtoFile_ = "";
 		snapshotModelFile_ = "";
+		resetSkips();
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1120,16 +1132,18 @@ namespace DSModel {
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
-	Caffe<TClassType, TIdx, TId>::Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const Matrix<Int32, TIdx> &gpuDevices, const TIdx maxIter) {
+	Caffe<TClassType, TIdx, TId>::Caffe(const DSLib::Matrix<TClassType, TIdx> &classes, const DSTypes::String netProtoFile, const DSTypes::String solverProtoFile, const Matrix<Int32, TIdx> &gpuDevices, const TIdx maxIter, const Int32 seed) {
 		init_();
 		gpuDevices_ = gpuDevices;
 		maxIter_ = maxIter;
+		seed_ = seed;
 		Table<TIdx, TId> tab =
 			(Matrix<Literal, TIdx>() | "Val") |
 			(
 			(((Matrix<Literal, TIdx>() | "Classes")				^ (ctParameter | (Matrix<Matrix<TClassType>>() | (Matrix<TClassType>() | classes))))) |
-			(((Matrix<Literal, TIdx>() | "NetProtoFile")			^ (ctParameter | (Matrix<String>() | netProtoFile)))) |
-			(((Matrix<Literal, TIdx>() | "SolverProtoFile")			^ (ctParameter | (Matrix<String>() | solverProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "NetProtoFile")		^ (ctParameter | (Matrix<String>() | netProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "SolverProtoFile")		^ (ctParameter | (Matrix<String>() | solverProtoFile)))) |
+			(((Matrix<Literal, TIdx>() | "Seed")				^ (ctParameter | (Matrix<Int32>() | (Int32)seed)))) |
 			(((Matrix<Literal, TIdx>() | "MaxIter")				^ (ctParameter | (Matrix<UInt32>() | (UInt32)maxIter)))) |
 			(((Matrix<Literal, TIdx>() | "CurrIter")			^ (ctParameter | (Matrix<UInt32>() | (UInt32)currIter_)))) |
 			(((Matrix<Literal, TIdx>() | "SolverIter")			^ (ctParameter | (Matrix<UInt32>() | (UInt32)solverIter_)))) |
@@ -1812,59 +1826,107 @@ namespace DSModel {
 		}
 		return caffe::SolverAction::Enum::NONE;
 	}
+	
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipTrain() {
+		skipTrain_ = true;
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipApply() {
+		skipApply_ = true;
+	}
+	
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipCopy() {
+		skipCopy_ = true;
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::skipGPUInit() {
+		skipGPUInit_ = true;
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::resetSkips() {
+		skipTrain_ = false;
+		skipApply_ = false;
+		skipCopy_ = false;
+		skipGPUInit_ = false;
+	}
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::train(const Table<TIdx, TId> &table, Table<TIdx, TId> &input, Table<TIdx, TId> &output) {
 		if (solver_ == nullptr)
 			throw Error(ecIncompatible, "CaffeMLP::train()", "Cannot train without a solver");
 
-		setCaffeGPUs(gpuDevices_, false);
+		if (!skipGPUInit_)
+			setCaffeGPUs(gpuDevices_, false);
+		else {
+			cout << "skipGPUInit" << endl;
+			skipGPUInit_ = false;
+		}
 
 		//Keep batchsize for checking
 		batchSize_ = 0;
 
-		//Initialize all blobs
-		this->setStage("Copy");
+		if (!skipCopy_) {
+			//Initialize all blobs
+			this->setStage("Copy");
 
-		//Set inputs of solver network
-		setActiveNet_(solver_->net());
-		setInputData_(input);
-		fillMemoryDataLayer_(input.rows.count());
-
-		//Train network
-		this->setStage("Train");
-		solverIter_ = solver_->param().max_iter();
-		this->template parameterValueById<UInt32>("SolverIter") = solverIter_;
-
-		this->setMinProgress(0);
-		this->setMaxProgress(solverIter_);
-		this->setProgress(solver_->iter());
-		
-		if ((TIdx)solver_->iter() < maxIter_) {
-			//Train the classifier
-			ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
-			solver_->SetActionFunction(cb);
-			solver_->Solve();
+			//Set inputs of solver network
+			setActiveNet_(solver_->net());
+			setInputData_(input);
+			fillMemoryDataLayer_(input.rows.count());
+		} else  {
+			cout << "skipCopy" << endl;
+			skipCopy_ = false;
 		}
-		UInt32 currIter_ = solver_->iter();
-		this->template parameterValueById<UInt32>("CurrIter") = currIter_;
 
-		//Initialize
-		this->setStage("Apply");
-		this->setMinProgress(0);
-		this->setMaxProgress(output.rows.count());
+		if (!skipTrain_) {
+			//Train network
+			this->setStage("Train");
+			solverIter_ = solver_->param().max_iter();
+			this->template parameterValueById<UInt32>("SolverIter") = solverIter_;
 
-		//Set inputs and weights of main network (for apply only)
-		shareWeights_(*(solver_->net()), *net_);
-		//boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
-		//setActiveNet_(n);
-		fillMemoryDataLayer_(input.rows.count());
+			this->setMinProgress(0);
+			this->setMaxProgress(solverIter_);
+			this->setProgress(solver_->iter());
+		
+			if ((TIdx)solver_->iter() < maxIter_) {
+				//Train the classifier
+				ActionCallback cb = boost::bind(&Caffe<TClassType, TIdx, TId>::SolverCallback_, this);
+				solver_->SetActionFunction(cb);
+				solver_->Solve();
+			}
+			UInt32 currIter_ = solver_->iter();
+			this->template parameterValueById<UInt32>("CurrIter") = currIter_;
+		} else {
+			cout << "skipTrain" << endl;
+			skipTrain_ = false;
+		}
 
-		//Apply
-		for (TIdx i=0;i<output.rows.count();i+=batchSize_) {
-			Table<TIdx, TId> slice = output(i, batchSize_);
-			getOutputData_(slice);
-			this->incProgress(batchSize_);
+		if (!skipApply_) {
+			//Initialize
+			this->setStage("Apply");
+			this->setMinProgress(0);
+			this->setMaxProgress(output.rows.count());
+
+			//Set inputs and weights of main network (for apply only)
+			shareWeights_(*(solver_->net()), *net_);
+			//boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
+			//setActiveNet_(n);
+			fillMemoryDataLayer_(input.rows.count());
+
+			//Apply
+			for (TIdx i=0;i<output.rows.count();i+=batchSize_) {
+				Table<TIdx, TId> slice = output(i, batchSize_);
+				getOutputData_(slice);
+				this->incProgress(batchSize_);
+			}
+		} else {
+			cout << "skipApply" << endl;
+			skipApply_ = false;
 		}
 	}
 
@@ -1896,6 +1958,14 @@ namespace DSModel {
 	void Caffe<TClassType, TIdx, TId>::setMaxIter(const TIdx maxIter) {
 		this->template parameterValueById<UInt32>("MaxIter") = maxIter;
 		updateParameters();
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::setSeed(const Int32 seed) {
+		if (this->parameterExists("Seed")) {
+			this->template parameterValueById<Int32>("Seed") = seed;
+			updateParameters();
+		}
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1938,6 +2008,21 @@ namespace DSModel {
 	Caffe<TClassType, TIdx, TId>::~Caffe() {
 		clearCaffeModel();
 		clearInputData_();
+	}
+
+	template<typename TClassType, typename TIdx, typename TId>
+	void Caffe<TClassType, TIdx, TId>::copyWeightsFrom(const Caffe<TClassType, TIdx, TId> &other) {
+		if (other.solver_ != nullptr) {
+			copyWeights_(*(other.solver_->net().get()), *(solver_->net().get()));
+		} else if (other.net_ != nullptr) {
+			copyWeights_(*other.net_, *net_);
+		}
+		if (other.activeNet_.get() == other.solver_->net().get()) {
+			setActiveNet_(solver_->net());
+		} else {
+			boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n) {});
+			setActiveNet_(n);
+		}
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
