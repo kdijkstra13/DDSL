@@ -8,26 +8,26 @@ set(DDSL_ROOT ${CMAKE_CURRENT_LIST_DIR})
 #Compiler flags for external library support
 #option(DDSL_EXT_LIB "Use external libraries" ON) #Disabling all external libraries in all projects is usually not a good idea
 option(DDSL_EXT_LIB_PNG "PNG support in DDSL_TESTER" ON)
-option(DDSL_EXT_LIB_SVM "SVM support in DDSL_TESTER" ON)
-option(DDSL_EXT_LIB_AF "ArrayFire support in DDSL_TESTER" ON)
-option(DDSL_EXT_LIB_CAFFE "Caffe support in DDSL_TESTER" ON)
-option(DDSL_EXT_LIB_CHAISCRIPT "Build with ChaiScript support in DDSL_TESTER" ON)
+option(DDSL_EXT_LIB_SVM "SVM support in DDSL_TESTER" OFF)
+option(DDSL_EXT_LIB_AF "ArrayFire support in DDSL_TESTER" OFF)
+option(DDSL_EXT_LIB_CAFFE "Caffe support in DDSL_TESTER" OFF)
+option(DDSL_EXT_LIB_CHAISCRIPT "Build with ChaiScript support in DDSL_TESTER" OFF)
 
 #General options
-option(OPTION_AF_GPU "Build with ArrayFire with GPU support" ON)
-option(OPTION_CAFFE_GPU "Build with Caffe with GPU support" ON)
-option(OPTION_CAFFE_NCCL "Multi-GPU support" ON)
+option(OPTION_AF_GPU "Build with ArrayFire with GPU support" OFF)
+option(OPTION_CAFFE_GPU "Build with Caffe with GPU support" OFF)
+option(OPTION_CAFFE_NCCL "Multi-GPU support" OFF)
 option(OPTION_GCC_O3 "Build using -O3 optimization" ON)
 option(OPTION_GCC_OFAST "Build using Ofast optimization" ON)
-option(OPTION_CHAI_BUILD_DDSL "Build chai ddsl interpreter with buildin DDSL support" ON)
+option(OPTION_CHAI_BUILD_DDSL "Build chai ddsl interpreter with buildin DDSL support" OFF)
 
 #Projects
 option(BUILD_DDSL_NO_EXT_LIB "Build vanilla DDSL" OFF) 						#Depend on: None
-option(BUILD_DDSL_TESTER "Build testing project for debugging DDSL" OFF) 	#Depend on: Any (See ddsl.hpp and ddsl.h)
+option(BUILD_DDSL_TESTER "Build testing project for debugging DDSL" ON) 	#Depend on: Any (See ddsl.hpp and ddsl.h)
 option(BUILD_LIBPNG_DDSL "Build a library for PNG" ON) 						#Depend on: DDSL_EXT_LIB_PNG
 option(BUILD_LIBSVM_DDSL "Build a library for SVM" ON) 						#Depend on: DDSL_EXT_LIB_SVM
-option(BUILD_LIBAF_DDSL "Build a library for ArrayFire" ON) 				#Depend on: DDSL_EXT_LIB_AF
-option(BUILD_LIBCAFFE_DDSL "Build a library for Caffe" ON) 					#Depend on: DDSL_EXT_LIB_CAFFE
+option(BUILD_LIBAF_DDSL "Build a library for ArrayFire" OFF) 				#Depend on: DDSL_EXT_LIB_AF
+option(BUILD_LIBCAFFE_DDSL "Build a library for Caffe" OFF) 					#Depend on: DDSL_EXT_LIB_CAFFE
 
 option(BUILD_DDSL_CHAISCRIPT "Build the ddsl chai script interpreter" OFF) 	#Depend on: DDSL_EXT_LIB_CHAISCRIPT
 option(BUILD_LIBCHAI_MODULE_DDSL "Build DDSL as a chai scipt module" OFF) 	#Depend on: DDSL_EXT_LIB_CHAISCRIPT
@@ -69,8 +69,8 @@ function(addExtLibPNG)
 		target_link_libraries(${EXE_NAME} debug ${PNG_LIBRARIES_DEBUG} optimized ${PNG_LIBRARIES})
 	else()
 		#sudo apt-get install libpng-dev
-		find_package(ZLIB REQUIRED)
-		find_package(PNG REQUIRED)		
+		#find_package(ZLIB REQUIRED)
+		find_package(PNG REQUIRED)
 		target_link_libraries(${EXE_NAME} ${PNG_LIBRARIES})
 	endif()
 	include_directories (${ZLIB_INCLUDE_DIRS})
@@ -83,7 +83,7 @@ function(addLibPNG)
 	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 		target_link_libraries(${EXE_NAME} debug ${DDSL_ROOT}/build/Debug/png_ddsl.lib optimized ${DDSL_ROOT}/build/Release/png_ddsl.lib)
 	else()
-		target_link_libraries(${EXE_NAME} ${PNG_LIBRARIES})
+		#target_link_libraries(${EXE_NAME} ${PNG_LIBRARIES})
 		target_link_libraries(${EXE_NAME} ${DDSL_ROOT}/build/libpng_ddsl.a)
 	endif()
 	include_directories (${DDSL_ROOT}/libpng_ddsl)
@@ -454,6 +454,9 @@ if (BUILD_DDSL_TESTER)
 	if (DDSL_EXT_LIB_PNG)
 		addExtLibPNG()
 		addLibPNG()
+		if (NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+			target_link_libraries(${EXE_NAME} "png")
+		endif()
 	endif()	
 	if (DDSL_EXT_LIB_SVM)
 		addExtLibSVM()
