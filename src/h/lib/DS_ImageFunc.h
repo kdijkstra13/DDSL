@@ -2,6 +2,23 @@
 #include "h/lib/DS_Image.h"
 
 namespace DSFunc {
+	//**********//
+	//** ENVI **//
+	//**********//
+	enum enviLayout { elBandSequential, elBandInterleaveByLine, elBandInterleaveByPixel };
+
+	//Convert the Band Interleaved Lines (BIL) to Tiled
+	template <typename T, typename TIdx> 
+	DSLib::Matrix<T, TIdx> BILToTiled(const DSLib::Matrix<T, TIdx> &bil, const TIdx tileCountX, const TIdx tileCountY);
+
+	//Read the ENVI cube as a buffer of T
+	template <typename T, typename TIdx>
+	void readRawENVI(DSLib::Matrix<T, TIdx> &dst, const String &filename, const TIdx width, const TIdx bands, const enviLayout cubeLayout);
+
+	//Perform a black and white level calibration (note: Use a Real type for T)
+	template <typename T, typename TIdx>
+	void normalizeENVI(DSLib::Matrix<T, TIdx> &cube, const DSLib::Matrix<T, TIdx> &black, const DSLib::Matrix<T, TIdx> &white, const TIdx bands, const enviLayout cubeLayout);
+
 	//********************//
 	//** Convert mosaic **//
 	//********************//

@@ -92,7 +92,8 @@ int readRawPNG(void * dst, const char * file) {
 	if (setjmp(png_jmpbuf(png_ptr)))
 		return PNG_DDSL_READ_IMG_ERROR;
 	png_read_image(png_ptr, dst);
-	free(png_ptr);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+
 	free(info_ptr);
 	fclose(f);
 	return PNG_OK;
