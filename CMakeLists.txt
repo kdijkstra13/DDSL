@@ -7,7 +7,7 @@ set(DDSL_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
 #Compiler flags for external library support
 #option(DDSL_EXT_LIB "Use external libraries" ON) #Disabling all external libraries in all projects is usually not a good idea
-option(DDSL_EXT_LIB_PNG "PNG support in DDSL_TESTER" ON)
+option(DDSL_EXT_LIB_PNG "PNG support in DDSL_TESTER" OFF)
 option(DDSL_EXT_LIB_SVM "SVM support in DDSL_TESTER" OFF)
 option(DDSL_EXT_LIB_AF "ArrayFire support in DDSL_TESTER" OFF)
 option(DDSL_EXT_LIB_CAFFE "Caffe support in DDSL_TESTER" OFF)
@@ -17,15 +17,16 @@ option(DDSL_EXT_LIB_CHAISCRIPT "Build with ChaiScript support in DDSL_TESTER" OF
 option(OPTION_AF_GPU "Build with ArrayFire with GPU support" OFF)
 option(OPTION_CAFFE_GPU "Build with Caffe with GPU support" OFF)
 option(OPTION_CAFFE_NCCL "Multi-GPU support" OFF)
-option(OPTION_GCC_O3 "Build using -O3 optimization" ON)
-option(OPTION_GCC_OFAST "Build using Ofast optimization" ON)
+option(OPTION_GCC_O3 "Build using -O3 optimization" OFF)
+option(OPTION_GCC_OFAST "Build using Ofast optimization" OFF)
 option(OPTION_CHAI_BUILD_DDSL "Build chai ddsl interpreter with buildin DDSL support" OFF)
 
 #Projects
 option(BUILD_DDSL_NO_EXT_LIB "Build vanilla DDSL" OFF) 						#Depend on: None
 option(BUILD_DDSL_TESTER "Build testing project for debugging DDSL" ON) 	#Depend on: Any (See ddsl.hpp and ddsl.h)
-option(BUILD_LIBPNG_DDSL "Build a library for PNG" ON) 						#Depend on: DDSL_EXT_LIB_PNG
-option(BUILD_LIBSVM_DDSL "Build a library for SVM" ON) 						#Depend on: DDSL_EXT_LIB_SVM
+option(BUILD_DDSL_PYTHON_TESTER "Build testing project for using Python with DDSL" ON) 	#Depend on: Any (See ddsl.hpp and ddsl.h)
+option(BUILD_LIBPNG_DDSL "Build a library for PNG" OFF) 						#Depend on: DDSL_EXT_LIB_PNG
+option(BUILD_LIBSVM_DDSL "Build a library for SVM" OFF) 						#Depend on: DDSL_EXT_LIB_SVM
 option(BUILD_LIBAF_DDSL "Build a library for ArrayFire" OFF) 				#Depend on: DDSL_EXT_LIB_AF
 option(BUILD_LIBCAFFE_DDSL "Build a library for Caffe" OFF) 					#Depend on: DDSL_EXT_LIB_CAFFE
 
@@ -471,4 +472,51 @@ if (BUILD_DDSL_TESTER)
 		addLibCaffe()
 	endif()
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")	
+endif()
+
+
+if (BUILD_DDSL_PYTHON_TESTER)
+	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_python_tester/main.cpp")
+    list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_tester/INIReader.cpp")
+    list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_tester/ini.c")
+
+    find_package(PythonLibs REQUIRED)
+    include_directories(${PYTHON_INCLUDE_DIRS})
+    target_link_libraries(${EXE_NAME} ${PYTHON_LIBRARIES})
+	#if (DDSL_EXT_LIB_CAFFE)
+	#	list(APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/libcaffe_ddsl/force_link.cpp")
+	#endif()
+	set (EXE_NAME "ddsl_python_tester")
+	message("Make exe ${EXE_NAME}")
+	include_directories (${CMAKE_CURRENT_LIST_DIR}/src)
+
+	add_ddsl_h_files()
+	add_ddsl_hpp_files()
+	add_executable(${EXE_NAME} ${SRC_FILES})
+	add_ddsl_h_groups()
+	add_ddsl_hpp_groups()
+
+	#set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "DDSL_TESTER")
+
+	set(DEFS ${DEFAULT_DEFS})
+	if (DDSL_EXT_LIB_PNG)
+		addExtLibPNG()
+		addLibPNG()
+		if (NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+			target_link_libraries(${EXE_NAME} "png")
+		endif()
+	endif()
+	if (DDSL_EXT_LIB_SVM)
+		addExtLibSVM()
+		addLibSVM()
+	endif()
+	if (DDSL_EXT_LIB_AF)
+		addExtLibAF()
+		addLibAF()
+	endif()
+	if (DDSL_EXT_LIB_CAFFE)
+		addExtLibCaffe()
+		addLibCaffe()
+	endif()
+	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")
 endif()
