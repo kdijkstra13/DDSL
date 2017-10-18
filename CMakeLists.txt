@@ -477,8 +477,8 @@ endif()
 
 if (BUILD_DDSL_PYTHON_TESTER)
 	set (SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_python_tester/main.cpp")
-    list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_tester/INIReader.cpp")
-    list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_tester/ini.c")
+    list (APPEND SRC_FILES "${CMAKE_CURRENT_LIST_DIR}/ddsl_tester/cnpy.cpp")
+
 
     find_package(PythonLibs REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
