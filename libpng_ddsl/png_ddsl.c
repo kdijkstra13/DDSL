@@ -72,7 +72,8 @@ int writeRawPNG(void * src, unsigned int h, unsigned int w, unsigned char c, uns
 		return PNG_DDSL_WRITE_FAILED;
 
 	png_write_end(png_ptr, NULL);	
-	free(png_ptr);
+	//free(png_ptr);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 	free(info_ptr);
 	fclose(f);
 	return PNG_OK;
