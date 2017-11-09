@@ -14,6 +14,7 @@ option(DDSL_EXT_LIB_CAFFE "Caffe support in DDSL_TESTER" OFF)
 option(DDSL_EXT_LIB_CHAISCRIPT "Build with ChaiScript support in DDSL_TESTER" OFF)
 
 #General options
+option(BUILD_DOC "Build documentation" ON)
 option(OPTION_AF_GPU "Build with ArrayFire with GPU support" OFF)
 option(OPTION_CAFFE_GPU "Build with Caffe with GPU support" OFF)
 option(OPTION_CAFFE_NCCL "Multi-GPU support" OFF)
@@ -337,6 +338,23 @@ function(add_ddsl_cpp_groups)
 		source_group(cpp/model FILES ${CPP_MODEL})
 	endif()
 endfunction()
+
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+    set(DOXYGEN_IN ${DDSL_ROOT}/Doxyfile.in)
+        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+        configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+        message("Doxygen build started")
+
+        file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+        # note the option ALL which allows to build the docs together with the application
+        add_custom_target( doc ALL
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating API documentation with Doxygen"
+            VERBATIM )
+endif()
 
 #Begin projects and libraries
 if (BUILD_DDSL_NO_EXT_LIB)
