@@ -1,6 +1,8 @@
+#ifdef MSVC
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
+#endif
 
 #include "ddsl.hpp"
 
@@ -48,5 +50,7 @@ int main(int argc, char *argv[]) {
 	}
 	cout << endl << "Done.";
 	cin.get();
+    #ifdef MSVC
 	_CrtDumpMemoryLeaks();
+    #endif
 }
