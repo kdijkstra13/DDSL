@@ -72,7 +72,7 @@ namespace DSTypes {
 	inline Error::Error (const ErrorCode code, std::string location, std::string message, const bool fatal) : loc_(location), msg_(message), ftl_(fatal), code_(code) {}
 
 	//Error handling
-	inline const char* Error::what() const throw() {
+    inline const char* Error::what() const noexcept {
 		std::stringstream ss;
 		ss << "[" << loc_ << "," << etos(code_) << (ftl_?"":",F") << "] " << msg_;
 		int size = (int)ss.str().size();
