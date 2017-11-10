@@ -42,7 +42,7 @@ namespace DSTypes {
 
 namespace DSFunc {
 
-	void startLogging(const String &name, const String &prefix) {
+	inline void startLogging(const String &name, const String &prefix) {
 		google::InitGoogleLogging(name.c_str());
 		google::SetLogDestination(google::GLOG_INFO, prefix.c_str());
 	}
