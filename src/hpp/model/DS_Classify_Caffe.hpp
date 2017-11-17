@@ -859,6 +859,10 @@ namespace DSModel {
 		String proto = DSUtil::readToString(filename);
 		if (!google::protobuf::TextFormat::ParseFromString(proto, &sp))
 			throw Error(ecGeneral, "Caffe::readSolver_()", "Invalid description for solver prototxt");	
+                else if (sp.has_snapshot())
+                    throw Error(ErrorCode::ecNotImplemented, "Caffe::readSolver_()", "DDSL currently doesn't support snapshots");
+		else if (sp.has_test_interval())
+		    throw Error(ErrorCode::ecNotImplemented, "Caffe::readSolver_()", "DDSL currently doesn't support intermediate testing");
 		Solver<Float> * s = caffe::SolverRegistry<Float>::CreateSolver(sp);
 		if (snapshot != "") s->Restore(snapshot.c_str());
 		return (s);
