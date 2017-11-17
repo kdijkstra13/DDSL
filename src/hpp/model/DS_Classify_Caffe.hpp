@@ -47,6 +47,11 @@ namespace DSFunc {
 		google::SetLogDestination(google::GLOG_INFO, prefix.c_str());
 	}
 
+        inline void initLogingToStdErr(const std::string &name) {
+            google::InitGoogleLogging(name.c_str());
+            google::LogToStderr();
+        }
+
 	inline DSLib::Matrix<Int32> getCaffeGPUs() {
 		Matrix<Int32> ret;
 #ifndef CPU_ONLY
