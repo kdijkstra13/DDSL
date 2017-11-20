@@ -104,7 +104,9 @@ namespace DSModel {
 		bool skipApply_;
 		bool skipTrain_;
 		bool skipCopy_;
+                #ifndef CPU_ONLY
 		bool skipGPUInit_;
+                #endif // CPU_ONLY
 
 		map<TClassType, DSTypes::Float> classToNum_;
 		Matrix<TClassType> classes_;		
@@ -211,7 +213,9 @@ namespace DSModel {
 		void skipTrain();
 		void skipApply();
 		void skipCopy();
+                #ifndef CPU_ONLY
 		void skipGPUInit();
+                #endif // CPU_ONLY
 		void resetSkips();
 		void copyWeightsFrom(const Caffe<TClassType, TIdx, TId> &other); //copy weights from another network (only if models are clones before training)
 		void setGPUDevices(const DSLib::Matrix<Int32, TIdx> &gpuDevices);

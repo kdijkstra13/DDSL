@@ -52,21 +52,19 @@ namespace DSFunc {
             google::LogToStderr();
         }
 
+        #ifndef CPU_ONLY
 	inline DSLib::Matrix<Int32> getCaffeGPUs() {
 		Matrix<Int32> ret;
-#ifndef CPU_ONLY
 		int count;
 		cudaGetDeviceCount(&count);
 		for (int i = 0; i < count; ++i) {
 		  ret | (Int32)i;
 		}
-#endif
 		return ret;
 	}
 
 	inline DSLib::Matrix<Int32> setCaffeGPUs(const DSLib::Matrix<Int32> &gpus, const bool details=true) {
 		Matrix<Int32> gpus2, gpus3;
-#ifndef CPU_ONLY
 		if (~gpus > 0) {
 			gpus2 = getCaffeGPUs();		
 			DSFunc::setIntersection(gpus3, const_cast<Matrix<Int32>&>(gpus), gpus2);
@@ -97,10 +95,6 @@ namespace DSFunc {
 		} else if (~gpus3 < ~gpus) {
 			cout << "Warning: Not all GPUs were available." << endl;	
 		}
-#else
-		cout << "Warning: Running CPU Only." << endl;
-		caffe::Caffe::set_mode(caffe::Caffe::CPU);
-#endif
 		return gpus3;
 	}
 
@@ -110,6 +104,7 @@ namespace DSFunc {
 			gpus = (dtInt32 | 0 || (amount - 1));
 		return setCaffeGPUs(gpus, details);
 	}
+        #endif // CPU_ONLY
 
 	inline DB * openDB(const String filename, const DBMode mode, const Backend be) {
 		const String f = "openDB";
@@ -861,7 +856,7 @@ namespace DSModel {
 			throw Error(ecGeneral, "Caffe::readSolver_()", "Invalid description for solver prototxt");	
                 else if (sp.has_snapshot())
                     throw Error(ErrorCode::ecNotImplemented, "Caffe::readSolver_()", "DDSL currently doesn't support snapshots");
-		else if (sp.has_test_interval())
+		else if (sp.test_iter_size() != 0)
 		    throw Error(ErrorCode::ecNotImplemented, "Caffe::readSolver_()", "DDSL currently doesn't support intermediate testing");
 		Solver<Float> * s = caffe::SolverRegistry<Float>::CreateSolver(sp);
 		if (snapshot != "") s->Restore(snapshot.c_str());
@@ -1851,17 +1846,21 @@ namespace DSModel {
 		skipCopy_ = true;
 	}
 
+        #ifndef CPU_ONLY
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::skipGPUInit() {
 		skipGPUInit_ = true;
 	}
+        #endif // CPU_ONLY
 
 	template<typename TClassType, typename TIdx, typename TId>
 	void Caffe<TClassType, TIdx, TId>::resetSkips() {
 		skipTrain_ = false;
 		skipApply_ = false;
 		skipCopy_ = false;
+                #ifndef CPU_ONLY
 		skipGPUInit_ = false;
+                #endif // CPU_ONLY
 	}
 
 	template<typename TClassType, typename TIdx, typename TId>
@@ -1869,12 +1868,14 @@ namespace DSModel {
 		if (solver_ == nullptr)
 			throw Error(ecIncompatible, "CaffeMLP::train()", "Cannot train without a solver");
 
+                #ifndef CPU_ONLY
 		if (!skipGPUInit_)
 			setCaffeGPUs(gpuDevices_, false);
 		else {
 			cout << "skipGPUInit" << endl;
 			skipGPUInit_ = false;
 		}
+                #endif // CPU_ONLY
 
 		//Keep batchsize for checking
 		batchSize_ = 0;
@@ -1943,9 +1944,10 @@ namespace DSModel {
 	void Caffe<TClassType, TIdx, TId>::apply(const Table<TIdx, TId> &table, Table<TIdx, TId> &input, Table<TIdx, TId> &output) {
 		if (net_ == nullptr)
 			throw Error(ecIncompatible, "apply", "Cannot apply without a network");
-
+                #ifndef CPU_ONLY
 		setCaffeGPUs(gpuDevices_, false);
-
+                #endif // CPU_ONLY
+		
 		boost::shared_ptr<caffe::Net<Float>> n(net_, [](caffe::Net<Float> *n){});
 		setActiveNet_(n);
 		setInputData_(input);
