@@ -1186,9 +1186,7 @@ namespace DSLib {
 		init_();
 		order_ = order;
 		resize(rowCount, colCount);
-		TInt i = 0;
-		for (auto it = data_.begin(); it != data_.end(); it++, i++)
-			*it = initArr[i];
+        std::copy(std::begin(initArr), std::end(initArr), data_.begin());
 	}
 
 	template<typename T, typename TInt>
@@ -1196,9 +1194,7 @@ namespace DSLib {
 		init_();
 		order_ = order;
 		resize(rowCount, colCount);
-		TInt i = 0;
-		for (auto it = data_.begin(); it != data_.end(); it++, i++)
-			*it = initVec[i];
+        std::copy(initVec.begin(), initVec.end(), data_.begin());
 	}
 
 	template<typename T, typename TInt>

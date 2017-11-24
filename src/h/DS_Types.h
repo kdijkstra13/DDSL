@@ -78,8 +78,8 @@ namespace DSTypes {
 	private:
 		void *p = nullptr;
 	public:
-		virtual void read(std::istream &) {};
-		virtual void write(std::ostream &) const {};
+        virtual void read(std::istream &) {}
+        virtual void write(std::ostream &) const {}
 
 		void * get() const { return p; }
 		void set(void * const pp) { this->p = pp; }
@@ -89,45 +89,45 @@ namespace DSTypes {
 		template<typename T>
 		void set(T &p) const { p = static_cast<void *>(&p);}
 
-		virtual bool operator==(const VoidPointer &other) const { return p == other.p; };
-		virtual bool operator!=(const VoidPointer &other) const { return p != other.p; };
-		virtual bool operator>(const VoidPointer &) const {return false; };
-		virtual bool operator<(const VoidPointer &) const { return false; };
-		virtual bool operator>=(const VoidPointer &) const { return false; };
-		virtual bool operator<=(const VoidPointer &) const { return false; };
-		virtual void print(std::ostream &output) const { output << (unsigned int *)p; };
+        virtual bool operator==(const VoidPointer &other) const { return p == other.p; }
+        virtual bool operator!=(const VoidPointer &other) const { return p != other.p; }
+        virtual bool operator>(const VoidPointer &) const {return false; }
+        virtual bool operator<(const VoidPointer &) const { return false; }
+        virtual bool operator>=(const VoidPointer &) const { return false; }
+        virtual bool operator<=(const VoidPointer &) const { return false; }
+        virtual void print(std::ostream &output) const { output << (unsigned int *)p; }
 
 
-		VoidPointer() {};
-		virtual ~VoidPointer() {};
-		VoidPointer(void * p) { this->p = p; };
+        VoidPointer() {}
+        virtual ~VoidPointer() {}
+        VoidPointer(void * p) { this->p = p; }
 
-		VoidPointer(const VoidPointer &other) { clone(other); };
-		VoidPointer(VoidPointer &&other) { clone(std::move(other)); };
-		VoidPointer & operator=(const VoidPointer &other) { clone(other); return *this;};
-		VoidPointer & operator=(VoidPointer &&other) { clone(std::move(other)); return *this;};
+        VoidPointer(const VoidPointer &other) { clone(other); }
+        VoidPointer(VoidPointer &&other) { clone(std::move(other)); }
+        VoidPointer & operator=(const VoidPointer &other) { clone(other); return *this;}
+        VoidPointer & operator=(VoidPointer &&other) { clone(std::move(other)); return *this;}
 
-		void clone(const VoidPointer &other) { p = other.p; };
-		void clone(VoidPointer &&other) { p = other.p;other.p = nullptr; };
+        void clone(const VoidPointer &other) { p = other.p; }
+        void clone(VoidPointer &&other) { p = other.p;other.p = nullptr; }
 	};
 	std::ostream& operator<<(std::ostream &os, const VoidPointer &vp);
 
 	//Wrapper class for caffe::Blob<Double>
 	class CaffeBlobDouble : public VoidPointer {
 	public:
-		CaffeBlobDouble() {};
-		~CaffeBlobDouble() {};
-		CaffeBlobDouble(void * p) : VoidPointer(p) {};
+        CaffeBlobDouble() {}
+        ~CaffeBlobDouble() {}
+        CaffeBlobDouble(void * p) : VoidPointer(p) {}
 		
-		CaffeBlobDouble(const CaffeBlobDouble &other) { clone(other); };
-		CaffeBlobDouble(CaffeBlobDouble &&other) { clone(std::move(other)); };
-		CaffeBlobDouble(const VoidPointer &other) { clone(other); };
-		CaffeBlobDouble(VoidPointer &&other) { clone(std::move(other)); };
-		CaffeBlobDouble & operator=(const CaffeBlobDouble &other) { clone(other); return *this;};
-		CaffeBlobDouble & operator=(CaffeBlobDouble &&other) { clone(std::move(other)); return *this;};
+        CaffeBlobDouble(const CaffeBlobDouble &other) { clone(other); }
+        CaffeBlobDouble(CaffeBlobDouble &&other) { clone(std::move(other)); }
+        CaffeBlobDouble(const VoidPointer &other) { clone(other); }
+        CaffeBlobDouble(VoidPointer &&other) { clone(std::move(other)); }
+        CaffeBlobDouble & operator=(const CaffeBlobDouble &other) { clone(other); return *this;}
+        CaffeBlobDouble & operator=(CaffeBlobDouble &&other) { clone(std::move(other)); return *this;}
 
-		void clone(const CaffeBlobDouble &other) { VoidPointer::clone(other); };
-		void clone(CaffeBlobDouble &&other) { VoidPointer::clone(std::move(other)); };
+        void clone(const CaffeBlobDouble &other) { VoidPointer::clone(other); }
+        void clone(CaffeBlobDouble &&other) { VoidPointer::clone(std::move(other)); }
 	};
 
 	enum ContentType {ctUnknown, ctFeature, ctTarget, ctResult, ctSplit, ctConfusion, ctIndex, ctParameter, ctConfidence, ctImage, ctError, ctCorrelation};
@@ -157,12 +157,12 @@ namespace DSTypes {
 	//Header code for streaming enums
 	template<typename T> struct enumRef {
 		T& value;
-		enumRef(T& value): value(value) {};
+        enumRef(T& value): value(value) {}
 	};
 
 	template<typename T> struct enumConstRef {
 		T const& value;
-		enumConstRef(T const& value): value(value) {};
+        enumConstRef(T const& value): value(value) {}
 	};
 
 	template<typename T> enumRef<T> stoe(T& e) {
@@ -185,7 +185,7 @@ namespace DSTypes {
 	class Error: public std::exception {
 	public:
 		Error (const ErrorCode code, std::string location, std::string message, const bool fatal=true);
-		virtual const char* what() const throw();
+        virtual const char* what() const noexcept;
 	private:
 		std::string loc_;
 		std::string msg_;
