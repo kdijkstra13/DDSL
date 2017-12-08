@@ -29,7 +29,7 @@ namespace DSLang {
 	//********************//
 
 	//Initialize with a matrix
-	template <typename T, typename TIdx, typename TId=DSTypes::TableId>
+	template <typename T, typename TIdx, typename TId>
 	DSLib::Table<TIdx> operator|(DSTypes::ContentType lhs, const DSLib::Matrix<T, TIdx> &rhs);
 
 	template <typename T, typename TIdx>

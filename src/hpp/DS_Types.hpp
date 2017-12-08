@@ -35,8 +35,8 @@ namespace DSTypes {
 			typeid(VoidPointer).name(),
 			typeid(CaffeBlobDouble).name(),
 			#ifndef DDSL_NO_EXT_LIB_PNG
-				typeid(ImagePNG<Double>).name(),
-				typeid(ImagePNG<Float>).name(),
+                typeid(DSImage::ImagePNG<Double>).name(),
+                typeid(DSImage::ImagePNG<Float>).name(),
 			#endif
 		};
 		size_t dataTypeHash_[] = {
@@ -63,8 +63,8 @@ namespace DSTypes {
 			typeid(VoidPointer).hash_code(),
 			typeid(CaffeBlobDouble).hash_code(),
 			#ifndef DDSL_NO_EXT_LIB_PNG
-				typeid(ImagePNG<Double>).hash_code(),
-				typeid(ImagePNG<Float>).hash_code()
+                typeid(DSImage::ImagePNG<Double>).hash_code(),
+                typeid(DSImage::ImagePNG<Float>).hash_code()
 			#endif
 		};
 	}
