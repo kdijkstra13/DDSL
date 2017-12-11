@@ -39,8 +39,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -bigobj -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS")
 	set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++14 -bigobj -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS")
 else()
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++14 -march=native -fPIC -Wno-unused-result")
-	set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pthread -std=c++14 -march=native -Wall -fPIC -Wno-unused-function -Wno-unused-result -Wno-switch -Wno-reorder" )
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++14 -march=native -pipe -fPIC -Wno-unused-result")
+	set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pthread -std=c++14 -march=native -pipe -Wall -fPIC -Wno-unused-function -Wno-unused-result -Wno-switch -Wno-reorder" )
 	if (OPTION_GCC_O3)
 		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 		set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -O3")
@@ -339,21 +339,23 @@ function(add_ddsl_cpp_groups)
 	endif()
 endfunction()
 
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
-    set(DOXYGEN_IN ${DDSL_ROOT}/Doxyfile.in)
-        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+if(BUILD_DOC)
+    find_package(Doxygen)
+    if (DOXYGEN_FOUND)
+        set(DOXYGEN_IN ${DDSL_ROOT}/Doxyfile.in)
+            set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-        configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-        message("Doxygen build started")
+            configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+            message("Doxygen build started")
 
-        file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
-        # note the option ALL which allows to build the docs together with the application
-        add_custom_target( doc ALL
-            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            COMMENT "Generating API documentation with Doxygen"
-            VERBATIM )
+            file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+            # note the option ALL which allows to build the docs together with the application
+            add_custom_target( doc ALL
+                COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMENT "Generating API documentation with Doxygen"
+                VERBATIM )
+    endif()
 endif()
 
 #Begin projects and libraries
@@ -442,6 +444,7 @@ if (BUILD_LIBPNG_DDSL)
     
 	set(DEFS ${DEFAULT_DEFS})
 	addExtLibPNG()
+        install(TARGETS ${EXE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")
 endif()
 
@@ -459,6 +462,7 @@ if (BUILD_LIBSVM_DDSL)
     
 	set(DEFS ${DEFAULT_DEFS})
 	addExtLibSVM()
+        install(TARGETS ${EXE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")
 endif()
 
@@ -476,6 +480,7 @@ if (BUILD_LIBAF_DDSL)
     
 	set(DEFS ${DEFAULT_DEFS})
         addExtAF()
+        install(TARGETS ${EXE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")	
 endif()
 
@@ -516,7 +521,8 @@ if (BUILD_DDSL_TESTER)
 	if (DDSL_EXT_LIB_CAFFE)
 		addExtLibCaffe()
 		addLibCaffe()
-	endif()
+        endif()
+        install(TARGETS ${EXE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")	
 endif()
 
@@ -563,6 +569,7 @@ if (BUILD_DDSL_PYTHON_TESTER)
 	if (DDSL_EXT_LIB_CAFFE)
 		addExtLibCaffe()
 		addLibCaffe()
-	endif()
+        endif()
+        install(TARGETS ${EXE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 	set_target_properties(${EXE_NAME} PROPERTIES COMPILE_DEFINITIONS "${DEFS}")
 endif()

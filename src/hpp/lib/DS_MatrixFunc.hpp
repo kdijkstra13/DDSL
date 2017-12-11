@@ -7,28 +7,25 @@
 #include "h/lib/DS_Image_PNG.h"
 #endif
 
-using namespace std;
-using namespace DSLib;
 using namespace DSTypes;
-using namespace DSLang;
-using namespace DSImage;
 
 namespace DSFunc {
 	template<typename TInt>
 	inline DSLib::MatrixBase * createFromDataType(DSTypes::DataType dt, TInt tint) {
 		switch (dt) {
-			case dtFloat: return new Matrix<Float, TInt>();
-			case dtDouble: return new Matrix<Double, TInt>();
-			case dtUInt32: return new Matrix<UInt32, TInt>();
-			case dtInt32:return new Matrix<Int32, TInt>();
-			case dtContentType: return new Matrix<ContentType, TInt>();
-			case dtDataType: return new Matrix<DataType, TInt>();
-			case dtString: return new Matrix<String, TInt>();
-			case dtMatrixString: return new Matrix<MatrixString, TInt>();
-			case dtMatrixInt32: return new Matrix<Matrix<Int32, TInt>, TInt>();
+            case dtFloat: return new DSLib::Matrix<Float, TInt>();
+            case dtDouble: return new DSLib::Matrix<Double, TInt>();
+            case dtUInt32: return new DSLib::Matrix<UInt32, TInt>();
+            case dtInt32:return new DSLib::Matrix<Int32, TInt>();
+            case dtContentType: return new DSLib::Matrix<ContentType, TInt>();
+            case dtDataType: return new DSLib::Matrix<DataType, TInt>();
+            case dtString: return new DSLib::Matrix<String, TInt>();
+            case dtMatrixString: return new DSLib::Matrix<MatrixString, TInt>();
+            case dtMatrixInt32: return new DSLib::Matrix<DSLib::Matrix<Int32, TInt>, TInt>();
+            case dtMatrixFloat: return new DSLib::Matrix<DSLib::Matrix<Float, TInt>, TInt>();
 #ifndef DDSL_NO_EXT_LIB_PNG
-			case dtImagePNGDouble: return new Matrix<ImagePNG<Double>, TInt>();
-			case dtImagePNGFloat: return new Matrix<ImagePNG<Float>, TInt>();
+            case dtImagePNGDouble: return new DSLib::Matrix<DSImage::ImagePNG<Double>, TInt>();
+            case dtImagePNGFloat: return new DSLib::Matrix<DSImage::ImagePNG<Float>, TInt>();
 #endif
 			default: throw Error(ecUnsupported, "create", "Unsupported DataType. Please add your own to DS_MatrixFunc.hpp -> DSLib::MatrixBase * createFromDataType(DSTypes::DataType dt, TInt tint)");
 		}
@@ -36,17 +33,17 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::MatrixBase * convertFromDataType(DSTypes::DataType dstType, DSLib::Matrix<T, TInt>& src) {
+    inline DSLib::MatrixBase * convertFromDataType(DSTypes::DataType dstType, DSLib::Matrix<T, TInt>& src) {
 		switch (dstType) {
-			case dtFloat: {Matrix<Float, TInt> * dst = new Matrix<Float, TInt>();convert(*dst, src);return dst;}
-			case dtDouble: {Matrix<Double, TInt> * dst = new Matrix<Double, TInt>();convert(*dst, src);return dst;}
-			case dtUInt32: {Matrix<UInt32, TInt> * dst = new Matrix<UInt32, TInt>();convert(*dst, src);return dst;}
-			case dtInt32: {Matrix<Int32, TInt> * dst = new Matrix<Int32, TInt>();convert(*dst, src);return dst;}
-			case dtContentType: {Matrix<ContentType, TInt> * dst = new Matrix<ContentType, TInt>();convert(*dst, src);return dst;}
-			case dtDataType: {Matrix<DataType, TInt> * dst = new Matrix<DataType, TInt>();convert<DataType, T, TInt>(*dst, src);return dst;}
-			case dtString: {Matrix<String, TInt> * dst = new Matrix<String, TInt>();convert(*dst, src);return dst;
+            case dtFloat: {DSLib::Matrix<Float, TInt> * dst = new DSLib::Matrix<Float, TInt>();convert(*dst, src);return dst;}
+            case dtDouble: {DSLib::Matrix<Double, TInt> * dst = new DSLib::Matrix<Double, TInt>();convert(*dst, src);return dst;}
+            case dtUInt32: {DSLib::Matrix<UInt32, TInt> * dst = new DSLib::Matrix<UInt32, TInt>();convert(*dst, src);return dst;}
+            case dtInt32: {DSLib::Matrix<Int32, TInt> * dst = new DSLib::Matrix<Int32, TInt>();convert(*dst, src);return dst;}
+            case dtContentType: {DSLib::Matrix<ContentType, TInt> * dst = new DSLib::Matrix<ContentType, TInt>();convert(*dst, src);return dst;}
+            case dtDataType: {DSLib::Matrix<DataType, TInt> * dst = new DSLib::Matrix<DataType, TInt>();convert<DataType, T, TInt>(*dst, src);return dst;}
+            case dtString: {DSLib::Matrix<String, TInt> * dst = new DSLib::Matrix<String, TInt>();convert(*dst, src);return dst;
 		} default:
-			throw Error(ecUnsupported, "convert", "Unsupported DataType. Please add your own to DS_MatrixFunc.hpp -> DSLib::MatrixBase * convertFromDataType(DSTypes::DataType dstType, DSLib::Matrix<T, TInt>& src)");
+            throw Error(ecUnsupported, "convert", "Unsupported DataType. Please add your own to DS_MatrixFunc.hpp -> DSLib::MatrixBase * convertFromDataType(DSTypes::DataType dstType, DSLib::Matrix<T, TInt>& src)");
 		}
 	}
 
@@ -55,19 +52,19 @@ namespace DSFunc {
 		throw Error(ecNotImplemented, "Convert", SS("Cannot convert from " << typeName(from) << " to " << typeName(to) << ". Please add your own convertValue() specialization to DS_MatrixFunc.hpp"));
 	}
 
-	template<> inline String & convertValue(const Float &from, String &to) { stringstream ss;ss << from;to = ss.str();return to; }
-	template<> inline String & convertValue(const Double &from, String &to) { stringstream ss;ss << from;to = ss.str();return to; }
-	template<> inline String & convertValue(const UInt32 &from, String &to) { stringstream ss;ss << from;to = ss.str();return to; }
-	template<> inline String & convertValue(const Int32 &from, String &to) { stringstream ss;ss << from;to = ss.str();return to; }
-	template<> inline String & convertValue(const ContentType &from, String &to) { stringstream ss;ss << etos(from);to = ss.str();return to; }
-	template<> inline String & convertValue(const DataType &from, String &to) { stringstream ss;ss << etos(from);to = ss.str();return to; }
+    template<> inline String & convertValue(const Float &from, String &to) { std::stringstream ss;ss << from;to = ss.str();return to; }
+    template<> inline String & convertValue(const Double &from, String &to) { std::stringstream ss;ss << from;to = ss.str();return to; }
+    template<> inline String & convertValue(const UInt32 &from, String &to) { std::stringstream ss;ss << from;to = ss.str();return to; }
+    template<> inline String & convertValue(const Int32 &from, String &to) { std::stringstream ss;ss << from;to = ss.str();return to; }
+    template<> inline String & convertValue(const ContentType &from, String &to) { std::stringstream ss;ss << etos(from);to = ss.str();return to; }
+    template<> inline String & convertValue(const DataType &from, String &to) { std::stringstream ss;ss << etos(from);to = ss.str();return to; }
 
-	template<> inline Float & convertValue(const String &from, Float &to) { stringstream ss; ss << from; ss >> to;return to; }
-	template<> inline Double & convertValue(const String &from, Double &to) { stringstream ss;ss << from;ss >> to;return to; }
-	template<> inline UInt32 & convertValue(const String &from, UInt32 &to) { stringstream ss;ss << from;ss >> to;return to; }
-	template<> inline Int32 & convertValue(const String &from, Int32 &to) { stringstream ss;ss << from;ss >> to;return to; }
-	template<> inline ContentType & convertValue(const String &from, ContentType &to) { stringstream ss;ss << from;ss >> stoe(to);return to; }
-	template<> inline DataType & convertValue(const String &from, DataType &to) { stringstream ss;ss << from;ss >> stoe(to);return to; }
+    template<> inline Float & convertValue(const String &from, Float &to) { std::stringstream ss; ss << from; ss >> to;return to; }
+    template<> inline Double & convertValue(const String &from, Double &to) { std::stringstream ss;ss << from;ss >> to;return to; }
+    template<> inline UInt32 & convertValue(const String &from, UInt32 &to) { std::stringstream ss;ss << from;ss >> to;return to; }
+    template<> inline Int32 & convertValue(const String &from, Int32 &to) { std::stringstream ss;ss << from;ss >> to;return to; }
+    template<> inline ContentType & convertValue(const String &from, ContentType &to) { std::stringstream ss;ss << from;ss >> stoe(to);return to; }
+    template<> inline DataType & convertValue(const String &from, DataType &to) { std::stringstream ss;ss << from;ss >> stoe(to);return to; }
 
 	template<> inline Double & convertValue(const UInt32 &from, Double &to) { to = from; return to; }
 	template<> inline Double & convertValue(const UInt16 &from, Double &to) { to = from; return to; }
@@ -78,14 +75,14 @@ namespace DSFunc {
 
 
 	template <typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> repeat(const DSLib::Matrix<T, TInt> &mat, const TInt n, const bool repeatAsRows) {
+    inline DSLib::Matrix<T, TInt> repeat(const DSLib::Matrix<T, TInt> &mat, const TInt n, const bool repeatAsRows) {
 		if (repeatAsRows) {
-			Matrix<T, TInt> ret(mat.rows.count() * n, mat.cols.count(), mat.order());
+            DSLib::Matrix<T, TInt> ret(mat.rows.count() * n, mat.cols.count(), mat.order());
 			for (TInt i=0;i<n;i++)
 				ret(i*mat.rows.count(), mat.rows.count(), TInt(0), mat.cols.count()) = mat; //DSA 
 			return ret;
 		} else {
-			Matrix<T, TInt> ret(mat.rows.count(), mat.cols.count() * n, mat.order());
+            DSLib::Matrix<T, TInt> ret(mat.rows.count(), mat.cols.count() * n, mat.order());
 			for (TInt i=0;i<n;i++)
 				ret(TInt(0), mat.rows.count(), i*mat.cols.count(), mat.cols.count()) = mat; //DSA 
 			return ret;
@@ -93,7 +90,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void test(Matrix<TInt, TInt> &dst, Matrix<T, TInt> &lhs, Matrix<T, TInt> &rhs, const function<bool(const T&, const T&)> &func) {
+    inline void test(DSLib::Matrix<TInt, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, DSLib::Matrix<T, TInt> &rhs, const std::function<bool(const T&, const T&)> &func) {
 		dst.clear();
 		if (!lhs.isInitialized() || !rhs.isInitialized())
 			return;
@@ -105,8 +102,8 @@ namespace DSFunc {
 			test(dst, lhs, rhs.val(0,0), func); //rhs is actually a scalar in disguise.
 		} else if (rhs.isVector()) {
 			TInt idx=0;
-			typename Matrix<T, TInt>::Index * lhsIndex;
-			typename Matrix<TInt, TInt>::Index * dstIndex;
+            typename DSLib::Matrix<T, TInt>::Index * lhsIndex;
+            typename DSLib::Matrix<TInt, TInt>::Index * dstIndex;
 
 			if (rhs.isColVector()) {
 				lhsIndex = &(lhs.cols);
@@ -115,7 +112,7 @@ namespace DSFunc {
 				lhsIndex = &(lhs.rows);
 				dstIndex = &(dst.rows);
 			}
-			vector<TInt> idxs;
+            std::vector<TInt> idxs;
 			for (auto lhsIndexIt=lhsIndex->begin();lhsIndexIt!=lhsIndex->end();lhsIndexIt++) {
 				if (equal(lhsIndexIt->begin(), lhsIndexIt->end(), rhs.vec().begin(), func))
 					idxs.push_back(idx);
@@ -134,13 +131,13 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void test(Matrix<TInt, TInt> &dst, Matrix<T, TInt> &lhs, const T &rhs, const function<bool(const T&, const T&)> &func) {
+    inline void test(DSLib::Matrix<TInt, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, const T &rhs, const std::function<bool(const T&, const T&)> &func) {
 		dst.clear();
 		if (!lhs.isInitialized())
 			return;
 
-		typename Matrix<T, TInt>::Index * majorIndex;
-		typename Matrix<T, TInt>::Index * minorIndex;
+        typename DSLib::Matrix<T, TInt>::Index * majorIndex;
+        typename DSLib::Matrix<T, TInt>::Index * minorIndex;
 
 		if (lhs.order() == oRowMajor) {
 			majorIndex = &(lhs.rows);
@@ -149,9 +146,9 @@ namespace DSFunc {
 			majorIndex = &(lhs.cols);
 			minorIndex = &(lhs.rows);
 		}
-		vector<TInt> majorIndices;
-		vector<TInt> minorIndices;
-		typename CellsRegion<T, TInt>::Iterator lhsCellsIt = (*majorIndex)->begin();
+        std::vector<TInt> majorIndices;
+        std::vector<TInt> minorIndices;
+        typename DSLib::CellsRegion<T, TInt>::Iterator lhsCellsIt = (*majorIndex)->begin();
 
 		for (TInt majorCnt=0;majorCnt<majorIndex->count();majorCnt++) {
 			for (TInt minorCnt=0;minorCnt<minorIndex->count();minorCnt++) {
@@ -192,7 +189,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void apply(Matrix<T, TInt> &dst, Matrix<T, TInt> &lhs, Matrix<T, TInt> &rhs, const function<T(T&, const T&)> &func) {
+    inline void apply(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, DSLib::Matrix<T, TInt> &rhs, const std::function<T(T&, const T&)> &func) {
 		if (~lhs == 0 || ~rhs == 0)
 			throw Error(ecSizeMismatch, "apply", "The lhs or rhs matrix is empty");
 		//rhs is a scalar in disguise!
@@ -217,35 +214,35 @@ namespace DSFunc {
 			 throw Error(ecIncompatible, "apply()", "lhs/rhs Matrix/ColVector/RowVector incompatible.");
 		if (rhs.isVector()) {
 			if (rhs.isColVector()) {
-				for (typename Matrix<T, TInt>::Index::Iterator dstIndexIt=dst.cols.begin();dstIndexIt!=dst.cols.end();dstIndexIt++) {
-					typename CellsContinuous<T, TInt>::Iterator dstIt = dstIndexIt->begin();
+                for (typename DSLib::Matrix<T, TInt>::Index::Iterator dstIndexIt=dst.cols.begin();dstIndexIt!=dst.cols.end();dstIndexIt++) {
+                    typename DSLib::CellsContinuous<T, TInt>::Iterator dstIt = dstIndexIt->begin();
 					//lambda magic and for_each					
-					function<void(const T&)> f2 = [&dstIt, &func] (const T &a) {*dstIt = func(*dstIt, a); dstIt++;};					
+                    std::function<void(const T&)> f2 = [&dstIt, &func] (const T &a) {*dstIt = func(*dstIt, a); dstIt++;};
 					for_each(rhs.vec().begin(), rhs.vec().end(), f2);
 				}
 			} else {
-				for (typename Matrix<T, TInt>::Index::Iterator dstIndexIt=dst.rows.begin();dstIndexIt!=dst.rows.end();dstIndexIt++) {
-					typename CellsContinuous<T, TInt>::Iterator dstIt = dstIndexIt->begin();
+                for (typename DSLib::Matrix<T, TInt>::Index::Iterator dstIndexIt=dst.rows.begin();dstIndexIt!=dst.rows.end();dstIndexIt++) {
+                    typename DSLib::CellsContinuous<T, TInt>::Iterator dstIt = dstIndexIt->begin();
 					//lambda magic and for_each					
-					function<void(const T&)> f2 = [&dstIt, &func] (const T &a) {*dstIt = func(*dstIt, a); dstIt++;};					
+                    std::function<void(const T&)> f2 = [&dstIt, &func] (const T &a) {*dstIt = func(*dstIt, a); dstIt++;};
 					for_each(rhs.vec().begin(), rhs.vec().end(), f2);
 				}
 			}
 		} else {
 			if (dst.order() == oRowMajor) {
-				typename CellsRegion<T, TInt>::Iterator dstIt = dst.rows->begin();
-				function<void(const T&)> f2 = [&dstIt, &func] (const T &a){*dstIt = func(*dstIt, a); dstIt++;};
+                typename DSLib::CellsRegion<T, TInt>::Iterator dstIt = dst.rows->begin();
+                std::function<void(const T&)> f2 = [&dstIt, &func] (const T &a){*dstIt = func(*dstIt, a); dstIt++;};
 				for_each(rhs.rows->begin(), rhs.rows->end(), f2);
 			} else {
-				typename CellsRegion<T, TInt>::Iterator dstIt = rhs.cols->begin();
-				function<void(const T&)> f2 = [&dstIt, &func] (const T &a){*dstIt = func(*dstIt, a); dstIt++;};
+                typename DSLib::CellsRegion<T, TInt>::Iterator dstIt = rhs.cols->begin();
+                std::function<void(const T&)> f2 = [&dstIt, &func] (const T &a){*dstIt = func(*dstIt, a); dstIt++;};
 				for_each(rhs.cols->begin(), rhs.cols->end(), f2);
 			}
 		}
 	}
 
 	template <typename T, typename TInt>
-	inline void apply(Matrix<T, TInt> &dst, Matrix<T, TInt> &lhs, const T &rhs, const function<T(T&, const T&)> &func) {
+    inline void apply(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, const T &rhs, const std::function<T(T&, const T&)> &func) {
 		if (~lhs == 0)
 			throw Error(ecSizeMismatch, "apply", "The lhs Matrix is empty");
 		if (!dst.isSameData(lhs))
@@ -262,12 +259,12 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt> 
-	inline void range(Matrix<T, TInt> &dst, Matrix<T, TInt> &lhs, const T &rhs) {
+    inline void range(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, const T &rhs) {
 		dst = lhs;
 		T last = *(lhs.vec()[lhs.vec().count()-1]);
 		if (last == rhs)
 			return;
-		vector<T> vec;
+        std::vector<T> vec;
 		if (last < rhs) {
 			for (T i=last+1;i<=rhs;i++)
 				vec.push_back(i);
@@ -276,24 +273,24 @@ namespace DSFunc {
 				vec.push_back(i);
 		}
 		if (dst.isRowVector()) {
-			Matrix<T, TInt> m(lhs.order());
+            DSLib::Matrix<T, TInt> m(lhs.order());
 			m.rows.add(vec);
 			dst.cols.add(m);
 		} else if (dst.isColVector()) {
-			Matrix<T, TInt> m(lhs.order());
+            DSLib::Matrix<T, TInt> m(lhs.order());
 			m.cols.add(vec);
 			dst.rows.add(m);
 		}
 	}
 
 	template <typename T, typename TInt> 
-	inline void setIntersection(Matrix<T, TInt> &dst, Matrix<T, TInt> &lhs, Matrix<T, TInt> &rhs) {
+    inline void setIntersection(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, DSLib::Matrix<T, TInt> &rhs) {
 		if (!rhs.isInitialized() || !lhs.isInitialized()) {
 			dst.clear();
 			return;
 		} else if ((lhs.isColVector() && rhs.isColVector()) || (lhs.isRowVector() && rhs.isRowVector())) {
 			dst.clear();
-			vector<T> lhsVec, rhsVec, dstVec;
+            std::vector<T> lhsVec, rhsVec, dstVec;
 			lhsVec.resize(lhs.vec().count());
 			rhsVec.resize(rhs.vec().count());
 			copy(lhs.vec().begin(), lhs.vec().end(), lhsVec.begin());
@@ -313,7 +310,7 @@ namespace DSFunc {
 
 
 	template <typename T, typename TInt>
-	inline void setDifference(Matrix<T, TInt> &dst, Matrix<T, TInt> &lhs, Matrix<T, TInt> &rhs) {
+    inline void setDifference(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, DSLib::Matrix<T, TInt> &rhs) {
 		dst.clear();
 		if (lhs.isEmpty()) {
 			dst = rhs;
@@ -325,7 +322,7 @@ namespace DSFunc {
 		}
 		if (!lhs.isVector() || !rhs.isVector())
 			throw Error(ecIncompatible, "setDifference", "incompatible vectors.");
-		vector<T> lhsVec, rhsVec, dstVec;
+        std::vector<T> lhsVec, rhsVec, dstVec;
 		lhsVec.resize(lhs.vec().count());
 		rhsVec.resize(rhs.vec().count());
 		copy(lhs.vec().begin(), lhs.vec().end(), lhsVec.begin());
@@ -343,7 +340,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt> 
-	inline void setUnion(Matrix<T, TInt> &dst, Matrix<T, TInt> &lhs, Matrix<T, TInt> &rhs) {		
+    inline void setUnion(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &lhs, DSLib::Matrix<T, TInt> &rhs) {
 //		if (~lhs == 1 && ~rhs == 1)
 //			throw Error(ecIncompatible, "setUnion", "Ambiguous vectors. Both lhs and rhs are scalars."); //Default behaviour of || is to produce a rowvector
 		if (!rhs.isInitialized()) {
@@ -352,8 +349,8 @@ namespace DSFunc {
 			dst = rhs;
 		} else if (lhs.isRowVector() && rhs.isRowVector()) {
 			dst.resize(1, lhs.vec().count() + rhs.vec().count());
-			vector<T> lhsVec(lhs.vec().count());
-			vector<T> rhsVec(rhs.vec().count());
+            std::vector<T> lhsVec(lhs.vec().count());
+            std::vector<T> rhsVec(rhs.vec().count());
 			copy(lhs.vec().begin(), lhs.vec().end(), lhsVec.begin());
 			copy(rhs.vec().begin(), rhs.vec().end(), rhsVec.begin());			
 			sort(lhsVec.begin(), lhsVec.end());
@@ -362,8 +359,8 @@ namespace DSFunc {
 			dst.resize(1, (TInt)distance(dst.vec().begin(), last));
 		} else if (lhs.isColVector() && rhs.isColVector()) {
 			dst.resize(lhs.vec().count() + rhs.vec().count(), 1);
-			vector<T> lhsVec(lhs.vec().count());
-			vector<T> rhsVec(rhs.vec().count());
+            std::vector<T> lhsVec(lhs.vec().count());
+            std::vector<T> rhsVec(rhs.vec().count());
 			copy(lhs.vec().begin(), lhs.vec().end(), lhsVec.begin());
 			copy(rhs.vec().begin(), rhs.vec().end(), rhsVec.begin());			
 			sort(lhsVec.begin(), lhsVec.end());
@@ -375,8 +372,8 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> randomInt(TInt rows, TInt cols, T min, T max, const Int32 seed=-1) {
-		Matrix<T, TInt> m(rows, cols);		
+    inline DSLib::Matrix<T, TInt> randomInt(TInt rows, TInt cols, T min, T max, const Int32 seed=-1) {
+        DSLib::Matrix<T, TInt> m(rows, cols);
 		std::mt19937 gen;
 		if (seed >= 0) {
 			gen.seed(seed);
@@ -392,8 +389,8 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> randomReal(TInt rows, TInt cols, T min, T max, const Int32 seed=-1) {
-		Matrix<T, TInt> m(rows, cols);
+    inline DSLib::Matrix<T, TInt> randomReal(TInt rows, TInt cols, T min, T max, const Int32 seed=-1) {
+        DSLib::Matrix<T, TInt> m(rows, cols);
 		std::random_device rd;
 		std::mt19937 gen(rd());
 		std::uniform_real_distribution<> dis(min, max);
@@ -403,8 +400,8 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> random(TInt rows, TInt cols, const Matrix<T> & vec, const Int32 seed=-1) {
-		Matrix<T, TInt> m(rows, cols);
+    inline DSLib::Matrix<T, TInt> random(TInt rows, TInt cols, const DSLib::Matrix<T> & vec, const Int32 seed=-1) {
+        DSLib::Matrix<T, TInt> m(rows, cols);
 		std::random_device rd;
 		std::mt19937 gen;
 		std::uniform_int_distribution<> dis(0, vec.vec().count() - 1);
@@ -414,7 +411,7 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> & shuffle(DSLib::Matrix<T, TInt> &mat, Double amount) {
+    inline DSLib::Matrix<T, TInt> & shuffle(DSLib::Matrix<T, TInt> &mat, Double amount) {
 		std::random_device rd;
 		std::mt19937 gen(rd());		
 		std::uniform_int_distribution<> r(0, mat.rows.count()-1);
@@ -432,33 +429,33 @@ namespace DSFunc {
 	}
 
 	template <typename ToT, typename FromT, typename TInt>
-	inline Matrix<ToT, TInt> & convert(Matrix<ToT, TInt> &dst, const Matrix<FromT, TInt> &src) {
+    inline DSLib::Matrix<ToT, TInt> & convert(DSLib::Matrix<ToT, TInt> &dst, const DSLib::Matrix<FromT, TInt> &src) {
 		if ((void *)&src == (void *)&dst)
 			throw Error(ecIncompatible, "convert", "src and dst should be different");
-		Matrix<FromT, TInt> & src2 = const_cast<Matrix<FromT, TInt>&>(src);
+        DSLib::Matrix<FromT, TInt> & src2 = const_cast<DSLib::Matrix<FromT, TInt>&>(src);
 		dst.resize(src.rows.count(), src.cols.count());
 		if (src.isRegion()) {
-			CellsRegion<FromT, TInt> srcCells;
-			CellsRegion<ToT, TInt> dstCells;
+            DSLib::CellsRegion<FromT, TInt> srcCells;
+            DSLib::CellsRegion<ToT, TInt> dstCells;
 			if (src.rows.isAligned()) {
-				srcCells = static_cast<CellsRegion<FromT, TInt>&>(src2.rows.cells(citRegion));
-				dstCells = static_cast<CellsRegion<ToT, TInt>&>(dst.rows.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsRegion<FromT, TInt>&>(src2.rows.cells(citRegion));
+                dstCells = static_cast<DSLib::CellsRegion<ToT, TInt>&>(dst.rows.cells(citRegion));
 			} else if (src.cols.isAligned()) {
-				srcCells = static_cast<CellsRegion<FromT, TInt>&>(src2.cols.cells(citRegion));
-				dstCells = static_cast<CellsRegion<ToT, TInt>&>(dst.cols.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsRegion<FromT, TInt>&>(src2.cols.cells(citRegion));
+                dstCells = static_cast<DSLib::CellsRegion<ToT, TInt>&>(dst.cols.cells(citRegion));
 			};
 			auto dstCell = dstCells.begin();
 			for (auto srcCell = srcCells.begin(); srcCell != srcCells.end(); srcCell++, dstCell++)
 				convertValue(*srcCell, *dstCell);
 		} else {
-			CellsContinuous<FromT, TInt> srcCells;
-			CellsRegion<ToT, TInt> dstCells;
+            DSLib::CellsContinuous<FromT, TInt> srcCells;
+            DSLib::CellsRegion<ToT, TInt> dstCells;
 			if (src.rows.isAligned()) {
-				srcCells = static_cast<CellsContinuous<FromT, TInt>&>(src2.rows.cells(citContinuous));
-				dstCells = static_cast<CellsRegion<ToT, TInt>&>(dst.rows.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsContinuous<FromT, TInt>&>(src2.rows.cells(citContinuous));
+                dstCells = static_cast<DSLib::CellsRegion<ToT, TInt>&>(dst.rows.cells(citRegion));
 			} else if (src.cols.isAligned()) {
-				srcCells = static_cast<CellsContinuous<FromT, TInt>&>(src2.cols.cells(citContinuous));
-				dstCells = static_cast<CellsRegion<ToT, TInt>&>(dst.cols.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsContinuous<FromT, TInt>&>(src2.cols.cells(citContinuous));
+                dstCells = static_cast<DSLib::CellsRegion<ToT, TInt>&>(dst.cols.cells(citRegion));
 			};
 			auto dstCell = dstCells.begin();
 			for (auto srcCell = srcCells.begin(); srcCell != srcCells.end(); srcCell++, dstCell++)
@@ -468,39 +465,39 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline Matrix<T, TInt> & convert(Matrix<T, TInt> &dst, const Matrix<T, TInt> &src) {
+    inline DSLib::Matrix<T, TInt> & convert(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src) {
 		if ((void *)&src == (void *)&dst)
 			throw Error(ecIncompatible, "convert", "src and dst should be different");
-		Matrix<T, TInt> & src2 = const_cast<Matrix<T, TInt>&>(src);
+        DSLib::Matrix<T, TInt> & src2 = const_cast<DSLib::Matrix<T, TInt>&>(src);
 		if (src2.order() == dst.order()) {
 			dst = src2; //Ref
 			return dst;
 		}
 		dst.resize(src.rows.count(), src.cols.count());
 		if (src.isRegion()) {
-			CellsRegion<T, TInt> srcCells;
-			CellsRegion<T, TInt> dstCells;
+            DSLib::CellsRegion<T, TInt> srcCells;
+            DSLib::CellsRegion<T, TInt> dstCells;
 			if (src.rows.isAligned()) {
-				srcCells = static_cast<CellsRegion<T, TInt>&>(src2.rows.cells(citRegion));
-				dstCells = static_cast<CellsRegion<T, TInt>&>(dst.rows.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsRegion<T, TInt>&>(src2.rows.cells(citRegion));
+                dstCells = static_cast<DSLib::CellsRegion<T, TInt>&>(dst.rows.cells(citRegion));
 			}
 			else if (src.cols.isAligned()) {
-				srcCells = static_cast<CellsRegion<T, TInt>&>(src2.cols.cells(citRegion));
-				dstCells = static_cast<CellsRegion<T, TInt>&>(dst.cols.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsRegion<T, TInt>&>(src2.cols.cells(citRegion));
+                dstCells = static_cast<DSLib::CellsRegion<T, TInt>&>(dst.cols.cells(citRegion));
 			};
 			auto dstCell = dstCells.begin();
 			for (auto srcCell = srcCells.begin(); srcCell != srcCells.end(); srcCell++, dstCell++)
 				*dstCell = *srcCell;
 		}else {
-			CellsContinuous<T, TInt> srcCells;
-			CellsRegion<T, TInt> dstCells;
+            DSLib::CellsContinuous<T, TInt> srcCells;
+            DSLib::CellsRegion<T, TInt> dstCells;
 			if (src.rows.isAligned()) {
-				srcCells = static_cast<CellsContinuous<T, TInt>&>(src2.rows.cells(citContinuous));
-				dstCells = static_cast<CellsRegion<T, TInt>&>(dst.rows.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsContinuous<T, TInt>&>(src2.rows.cells(citContinuous));
+                dstCells = static_cast<DSLib::CellsRegion<T, TInt>&>(dst.rows.cells(citRegion));
 			}
 			else if (src.cols.isAligned()) {
-				srcCells = static_cast<CellsContinuous<T, TInt>&>(src2.cols.cells(citContinuous));
-				dstCells = static_cast<CellsRegion<T, TInt>&>(dst.cols.cells(citRegion));
+                srcCells = static_cast<DSLib::CellsContinuous<T, TInt>&>(src2.cols.cells(citContinuous));
+                dstCells = static_cast<DSLib::CellsRegion<T, TInt>&>(dst.cols.cells(citRegion));
 			};
 			auto dstCell = dstCells.begin();
 			for (auto srcCell = srcCells.begin(); srcCell != srcCells.end(); srcCell++, dstCell++)
@@ -511,7 +508,7 @@ namespace DSFunc {
 	
 
 	template <typename T, typename TInt>
-	inline void transpose(Matrix<T, TInt> &dst, Matrix<T, TInt> &src) {
+    inline void transpose(DSLib::Matrix<T, TInt> &dst, DSLib::Matrix<T, TInt> &src) {
 		if (!src.isInitialized())
 			return;
 
@@ -525,12 +522,12 @@ namespace DSFunc {
 					std::copy(src.cols->begin(), src.cols->end(), dst.rows->begin());
 				};
 			} else {
-				CellsContinuous<T, TInt> srcCells;
+                DSLib::CellsContinuous<T, TInt> srcCells;
 				if (src.rows.isAligned()) {
-					srcCells = static_cast<CellsContinuous<T, TInt>&>(src.rows.cells(citContinuous)); //can only get this is isAligned() and !isRegion()
+                    srcCells = static_cast<DSLib::CellsContinuous<T, TInt>&>(src.rows.cells(citContinuous)); //can only get this is isAligned() and !isRegion()
 					std::copy(srcCells.begin(), srcCells.end(), dst.cols->begin());
 				} else if (src.cols.isAligned()) {
-					srcCells = static_cast<CellsContinuous<T, TInt>&>(src.cols.cells(citContinuous));
+                    srcCells = static_cast<DSLib::CellsContinuous<T, TInt>&>(src.cols.cells(citContinuous));
 					std::copy(srcCells.begin(), srcCells.end(), dst.rows->begin());
 				};
 			}
@@ -538,15 +535,15 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline Matrix<T, TInt> t(const Matrix<T, TInt> &src) {
-		Matrix<T, TInt> ret;
-		Matrix<T, TInt> src2 = const_cast<Matrix<T, TInt>&>(src);
+    inline DSLib::Matrix<T, TInt> t(const DSLib::Matrix<T, TInt> &src) {
+        DSLib::Matrix<T, TInt> ret;
+        DSLib::Matrix<T, TInt> src2 = const_cast<DSLib::Matrix<T, TInt>&>(src);
 		transpose(ret, src2);
 		return ret;
 	}
 
 	template <typename T, typename TInt>
-	inline void multiplyBase(Matrix<T, TInt>& dst, Matrix<T, TInt>& src1, Matrix<T, TInt>& src2) {
+    inline void multiplyBase(DSLib::Matrix<T, TInt>& dst, DSLib::Matrix<T, TInt>& src1, DSLib::Matrix<T, TInt>& src2) {
 		if (!src1.isInitialized() || !src2.isInitialized())
 			return;
 
@@ -577,7 +574,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void multiplyFast(Matrix<T, TInt>& dst, Matrix<T, TInt>& src1, Matrix<T, TInt>& src2) {
+    inline void multiplyFast(DSLib::Matrix<T, TInt>& dst, DSLib::Matrix<T, TInt>& src1, DSLib::Matrix<T, TInt>& src2) {
 		if (!src1.isInitialized() || !src2.isInitialized())
 			return;
 
@@ -630,7 +627,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void multiply(Matrix<T, TInt>& dst, Matrix<T, TInt>& src1, Matrix<T, TInt>& src2) {
+    inline void multiply(DSLib::Matrix<T, TInt>& dst, DSLib::Matrix<T, TInt>& src1, DSLib::Matrix<T, TInt>& src2) {
 		if (src1.order() == oRowMajor && src2.order() == oColMajor) {
 			multiplyFast(dst, src1, src2);
 		} else {
@@ -639,7 +636,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void inverse(Matrix<T, TInt>& dst, Matrix<T, TInt>& src) {
+    inline void inverse(DSLib::Matrix<T, TInt>& dst, DSLib::Matrix<T, TInt>& src) {
 		if (!src.isInitialized())
 			return;
 
@@ -664,13 +661,13 @@ namespace DSFunc {
 		T a32 = *cell++;
 		T a33 = *cell;
 		DataType dt = dataType(a11);
-		Matrix<T> a22a23a32a33 = 	(dt | a22	| a23 ) ^
+        DSLib::Matrix<T> a22a23a32a33 = 	(dt | a22	| a23 ) ^
 									(dt | a32	| a33 );
 
-		Matrix<T> a21a23a31a33 = 	(dt | a21	| a23 ) ^
+        DSLib::Matrix<T> a21a23a31a33 = 	(dt | a21	| a23 ) ^
 									(dt | a31	| a33 );
 
-		Matrix<T> a21a22a31a32 = 	(dt | a21	| a22 ) ^
+        DSLib::Matrix<T> a21a22a31a32 = 	(dt | a21	| a22 ) ^
 									(dt | a31	| a32 );
 
 		T detSrc = 0;
@@ -690,43 +687,43 @@ namespace DSFunc {
 		if(detSrc == (T)0)
 			throw Error(ecUnexpected, "inverse", "det(src) == 0");
 
-		Matrix<T> a13a12a33a32 = 	(dt | a13	| a12 ) ^
+        DSLib::Matrix<T> a13a12a33a32 = 	(dt | a13	| a12 ) ^
 									(dt | a33	| a32 );
 
 		T det_a13a12a33a32;
 		determinant(det_a13a12a33a32, a13a12a33a32);
 
-		Matrix<T> a12a13a22a23 = 	(dt | a12	| a13 ) ^
+        DSLib::Matrix<T> a12a13a22a23 = 	(dt | a12	| a13 ) ^
 									(dt | a22	| a23 );
 
 		T det_a12a13a22a23;
 		determinant(det_a12a13a22a23, a12a13a22a23);
 
-		Matrix<T> a23a21a33a31 = 	(dt | a23	| a21 ) ^
+        DSLib::Matrix<T> a23a21a33a31 = 	(dt | a23	| a21 ) ^
 									(dt | a33	| a31 );
 
 		T det_a23a21a33a31;
 		determinant(det_a23a21a33a31, a23a21a33a31);
 
-		Matrix<T> a11a13a31a33 = 	(dt | a11	| a13 ) ^
+        DSLib::Matrix<T> a11a13a31a33 = 	(dt | a11	| a13 ) ^
 										(dt | a31	| a33 );
 
 		T det_a11a13a31a33;
 		determinant(det_a11a13a31a33, a11a13a31a33);
 
-		Matrix<T> a13a11a23a21 = 	(dt | a13	| a11 ) ^
+        DSLib::Matrix<T> a13a11a23a21 = 	(dt | a13	| a11 ) ^
 										(dt | a23	| a21 );
 
 		T det_a13a11a23a21;
 		determinant(det_a13a11a23a21, a13a11a23a21);
 
-		Matrix<T> a12a11a32a31 = 	(dt | a12	| a11 ) ^
+        DSLib::Matrix<T> a12a11a32a31 = 	(dt | a12	| a11 ) ^
 										(dt | a32	| a31 );
 
 		T det_a12a11a32a31;
 		determinant(det_a12a11a32a31, a12a11a32a31);
 
-		Matrix<T> a11a12a21a22 = 	(dt | a11	| a12 ) ^
+        DSLib::Matrix<T> a11a12a21a22 = 	(dt | a11	| a12 ) ^
 										(dt | a21	| a22 );
 
 		T det_a11a12a21a22;
@@ -738,7 +735,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void determinant(T& dst, Matrix<T, TInt>& src) {
+    inline void determinant(T& dst, DSLib::Matrix<T, TInt>& src) {
 		if (!src.isInitialized())
 			return;
 
@@ -758,8 +755,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void colMean(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src) {
-		Matrix<T, TInt> & src2 = const_cast<Matrix<T, TInt> &> (src);
+    inline void colMean(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src) {
+        DSLib::Matrix<T, TInt> & src2 = const_cast<DSLib::Matrix<T, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt rc = src.rows.count();		
 		TInt colIdx = 0;
@@ -773,13 +770,13 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void colSD(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src, const DSLib::Matrix<T, TInt> &mean) {
-		Matrix<T, TInt> mean2 = mean;
+    inline void colSD(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src, const DSLib::Matrix<T, TInt> &mean) {
+        DSLib::Matrix<T, TInt> mean2 = mean;
 		if (!mean2.isInitialized())
 			colMean(mean2, src);
 		if (mean2.cols.count() != src.cols.count())
 			throw Error(ecRangeError, "colSD()", "Wrong col count for 'mean' matrix");
-		Matrix<T, TInt> & src2 = const_cast<Matrix<T, TInt> &> (src);
+        DSLib::Matrix<T, TInt> & src2 = const_cast<DSLib::Matrix<T, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt rc = src.rows.count();
 		TInt colIdx = 0;
@@ -793,16 +790,16 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt, template <typename, typename> class TMat>
-	inline void colMean(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src) {
+    inline void colMean(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src) {
 		//Note: DDSL side effects on + and /
-		Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<Matrix<TMat<T, TInt>, TInt> &> (src);
+        DSLib::Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<DSLib::Matrix<TMat<T, TInt>, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt rc = src.rows.count();		
 		TInt colIdx = 0;
 		for (auto col = src2.cols.begin(); col != src2.cols.end(); col++, colIdx++) {
 			TMat<T, TInt> sum = *(col->begin()); //force copy of existing TMat inherited object
 			sum.breakUp();
-			static_cast<Matrix<T, TInt>>(sum) = (T)0; //set internal matrix elements to zero
+            static_cast<DSLib::Matrix<T, TInt>>(sum) = (T)0; //set internal matrix elements to zero
 			for  (auto cell = col->begin(); cell != col->end(); cell++) {
 				sum + *cell;
 			}
@@ -812,21 +809,21 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt, template <typename, typename> class TMat>
-	inline void colSD(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src, const DSLib::Matrix<TMat<T, TInt>, TInt> &mean) {
+    inline void colSD(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src, const DSLib::Matrix<TMat<T, TInt>, TInt> &mean) {
 		//Note: DDSL side effects on + and /
-		Matrix<TMat<T, TInt>, TInt> mean2 = mean;
+        DSLib::Matrix<TMat<T, TInt>, TInt> mean2 = mean;
 		if (!mean2.isInitialized())
 			colMean(mean2, src);
 		if (mean2.cols.count() != src.cols.count())
 			throw Error(ecRangeError, "colSD()", "Wrong col count for 'mean' matrix");
-		Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<Matrix<TMat<T, TInt>, TInt> &> (src);
+        DSLib::Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<DSLib::Matrix<TMat<T, TInt>, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt rc = src.rows.count();		
 		TInt colIdx = 0;
 		for (auto col = src2.cols.begin(); col != src2.cols.end(); col++, colIdx++) {
 			TMat<T, TInt> sum = *(col->begin()); //force copy of existing TMat inherited object
 			sum.breakUp();
-			static_cast<Matrix<T, TInt>&>(sum) = (T)0; //set internal matrix elements to zero
+            static_cast<DSLib::Matrix<T, TInt>&>(sum) = (T)0; //set internal matrix elements to zero
 			for (auto cell = col->begin(); cell != col->end(); cell++) {
 				TMat<T, TInt> c = *cell;
 				c.breakUp();
@@ -841,13 +838,13 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline void colVar(DSLib::Matrix<T, TInt>& dst, const DSLib::Matrix<T, TInt>& src, const DSLib::Matrix<T, TInt> &mean) {
-		Matrix<T, TInt> mean2 = mean;
+    inline void colVar(DSLib::Matrix<T, TInt>& dst, const DSLib::Matrix<T, TInt>& src, const DSLib::Matrix<T, TInt> &mean) {
+        DSLib::Matrix<T, TInt> mean2 = mean;
 		if (!mean2.isInitialized())
 			colMean(mean2, src);
 		if (mean2.cols.count() != src.cols.count())
 			throw Error(ecRangeError, "colSD()", "Wrong col count for 'mean' matrix");
-		Matrix<T, TInt> & src2 = const_cast<Matrix<T, TInt> &> (src);
+        DSLib::Matrix<T, TInt> & src2 = const_cast<DSLib::Matrix<T, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt rc = src.rows.count();
 		TInt colIdx = 0;
@@ -861,20 +858,20 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt, template <typename, typename> class TMat>
-	inline void colVar(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src, const DSLib::Matrix<TMat<T, TInt>, TInt> &mean) {
-		Matrix<TMat<T, TInt>, TInt> mean2 = mean;
+    inline void colVar(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src, const DSLib::Matrix<TMat<T, TInt>, TInt> &mean) {
+        DSLib::Matrix<TMat<T, TInt>, TInt> mean2 = mean;
 		if (!mean2.isInitialized())
 			colMean(mean2, src);
 		if (mean2.cols.count() != src.cols.count())
 			throw Error(ecRangeError, "colSD()", "Wrong col count for 'mean' matrix");
-		Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<Matrix<TMat<T, TInt>, TInt> &> (src);
+        DSLib::Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<DSLib::Matrix<TMat<T, TInt>, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt rc = src.rows.count();		
 		TInt colIdx = 0;
 		for (auto col = src2.cols.begin(); col != src2.cols.end(); col++, colIdx++) {
 			TMat<T, TInt> sum = *(col->begin()); //force copy of existing TMat inherited object
 			sum.breakUp();
-			static_cast<Matrix<T, TInt>&>(sum) = (T)0; //set internal matrix elements to zero
+            static_cast<DSLib::Matrix<T, TInt>&>(sum) = (T)0; //set internal matrix elements to zero
 			for (auto cell = col->begin(); cell != col->end(); cell++) {
 				TMat<T, TInt> c = *cell;
 				c.breakUp();
@@ -888,8 +885,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt, template <typename, typename> class TMat>
-	inline void colMin(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src) {
-		Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<Matrix<TMat<T, TInt>, TInt> &> (src);
+    inline void colMin(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src) {
+        DSLib::Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<DSLib::Matrix<TMat<T, TInt>, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt colIdx = 0;
 		for (auto col = src2.cols.begin(); col != src2.cols.end(); col++, colIdx++) {
@@ -902,8 +899,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt, template <typename, typename> class TMat>
-	inline void colMax(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src) {
-		Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<Matrix<TMat<T, TInt>, TInt> &> (src);
+    inline void colMax(DSLib::Matrix<TMat<T, TInt>, TInt> &dst, const DSLib::Matrix<TMat<T, TInt>, TInt> &src) {
+        DSLib::Matrix<TMat<T, TInt>, TInt> & src2 = const_cast<DSLib::Matrix<TMat<T, TInt>, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt colIdx = 0;
 		for (auto col = src2.cols.begin(); col != src2.cols.end(); col++, colIdx++) {
@@ -916,8 +913,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void colMin(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src) {
-		Matrix<T, TInt> & src2 = const_cast<Matrix<T, TInt> &> (src);
+    inline void colMin(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src) {
+        DSLib::Matrix<T, TInt> & src2 = const_cast<DSLib::Matrix<T, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt colIdx = 0;
 		for (auto col = src2.cols.begin(); col != src2.cols.end(); col++, colIdx++) {
@@ -931,8 +928,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	inline void colMax(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src) {
-		Matrix<T, TInt> & src2 = const_cast<Matrix<T, TInt> &> (src);
+    inline void colMax(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt> &src) {
+        DSLib::Matrix<T, TInt> & src2 = const_cast<DSLib::Matrix<T, TInt> &> (src);
 		dst.resize(1, src.cols.count());
 		TInt colIdx = 0;
 		for (auto col = src2.cols.begin(); col != src2.cols.end(); col++, colIdx++) {
@@ -946,7 +943,7 @@ namespace DSFunc {
 	}
 	
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> & eye(DSLib::Matrix<T, TInt> &dst, const TInt n) {
+    inline DSLib::Matrix<T, TInt> & eye(DSLib::Matrix<T, TInt> &dst, const TInt n) {
 		dst.resize(n, n);
 		dst = (T)0;
 		for (TInt i=0;i<n;i++)
@@ -955,7 +952,7 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline DSLib::Matrix<T, TInt> & diag(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt>& v) {
+    inline DSLib::Matrix<T, TInt> & diag(DSLib::Matrix<T, TInt> &dst, const DSLib::Matrix<T, TInt>& v) {
 		if (!v.isVector())
 			throw Error(ecParameter, "diag", "v should be a vector");		
 		dst.resize(v.vec().count(), v.vec().count());
@@ -966,8 +963,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	T sum(const DSLib::Matrix<T, TInt> &src) {
-		Matrix<T, TInt> & src2 = const_cast<Matrix<T, TInt>&>(src);
+    T sum(const DSLib::Matrix<T, TInt> &src) {
+        DSLib::Matrix<T, TInt> & src2 = const_cast<DSLib::Matrix<T, TInt>&>(src);
 		T s=0;
 		for (auto it=src2.rows->begin();it!=src2.rows->end();it++)
 			s += *it;
@@ -975,16 +972,16 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	void round(DSLib::Matrix<T, TInt> &dst, TInt digits) {
+    void round(DSLib::Matrix<T, TInt> &dst, TInt digits) {
 		T d = (digits==0)?1:digits*10;		
 		for (auto it=dst.rows->begin();it!=dst.rows->end();it++)			
 			*it = std::round(*it*d)/d;
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> uniqueValues(const Matrix<T, TInt> &mat, const T ignoreValue) {
-		Matrix<T, TInt> & mat2 = const_cast<Matrix<T, TInt>&>(mat);
-		Matrix<T, TInt> u;
+    DSLib::Matrix<T, TInt> uniqueValues(const DSLib::Matrix<T, TInt> &mat, const T ignoreValue) {
+        DSLib::Matrix<T, TInt> & mat2 = const_cast<DSLib::Matrix<T, TInt>&>(mat);
+        DSLib::Matrix<T, TInt> u;
 		for (auto it = mat2.rows->begin(); it != mat2.rows->end(); it++)			
 			if (*it != ignoreValue && ~(u == *it) == 0)
 				u | *it;
@@ -992,9 +989,9 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> uniqueValues(const Matrix<T, TInt> &mat) {
-		Matrix<T, TInt> & mat2 = const_cast<Matrix<T, TInt>&>(mat);
-		Matrix<T, TInt> u;
+    DSLib::Matrix<T, TInt> uniqueValues(const DSLib::Matrix<T, TInt> &mat) {
+        DSLib::Matrix<T, TInt> & mat2 = const_cast<DSLib::Matrix<T, TInt>&>(mat);
+        DSLib::Matrix<T, TInt> u;
 		for (auto it = mat2.rows->begin(); it != mat2.rows->end(); it++)			
 			if (~(u == *it) == 0)
 				u | *it;
@@ -1002,9 +999,9 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<TInt, TInt> indexLUT(const DSLib::Matrix<T, TInt> &mat, const DSLib::Matrix<T, TInt> &lut) {
-		Matrix<T, TInt> & mat2 = const_cast<Matrix<T, TInt>&>(mat);
-		Matrix<TInt, TInt> r(mat.rows.count(), mat.cols.count());
+    DSLib::Matrix<TInt, TInt> indexLUT(const DSLib::Matrix<T, TInt> &mat, const DSLib::Matrix<T, TInt> &lut) {
+        DSLib::Matrix<T, TInt> & mat2 = const_cast<DSLib::Matrix<T, TInt>&>(mat);
+        DSLib::Matrix<TInt, TInt> r(mat.rows.count(), mat.cols.count());
 		auto it_dst = r.rows->begin();
 		for (auto it = mat2.rows->begin(); it != mat2.rows->end(); it++, it_dst++)
 			*it_dst = (TInt)(lut == *it);
@@ -1012,9 +1009,9 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> valueLUT(const DSLib::Matrix<TInt, TInt> &mat, const DSLib::Matrix<T, TInt> &lut) {
-		Matrix<T, TInt> & mat2 = const_cast<Matrix<T, TInt>&>(mat);
-		Matrix<T, TInt> r(mat.rows.count(), mat.cols.count());
+    DSLib::Matrix<T, TInt> valueLUT(const DSLib::Matrix<TInt, TInt> &mat, const DSLib::Matrix<T, TInt> &lut) {
+        DSLib::Matrix<T, TInt> & mat2 = const_cast<DSLib::Matrix<T, TInt>&>(mat);
+        DSLib::Matrix<T, TInt> r(mat.rows.count(), mat.cols.count());
 		auto it_dst = r.rows->begin();
 		for (auto it = mat2.rows->begin(); it != mat2.rows->end(); it++, it_dst++) {
 			 *it_dst = *(lut.vec()[*it]);
@@ -1023,7 +1020,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TInt>
-	DSLib::Matrix<T, TInt> & scale(DSLib::Matrix<T, TInt> &mat, const T minSrc, const T maxSrc, const T minDst, const T maxDst) {
+    DSLib::Matrix<T, TInt> & scale(DSLib::Matrix<T, TInt> &mat, const T minSrc, const T maxSrc, const T minDst, const T maxDst) {
 		//if (mat.order() == oRowMajor) {
 			for (auto it = mat.rows->begin(); it != mat.rows->end(); it++) {
 				if (*it < minSrc)
@@ -1045,32 +1042,32 @@ namespace DSFunc {
 	}
 
 	template<typename T, typename TInt>
-	inline std::ostream & operator<<(std::ostream & str, const DSLib::Matrix<T, TInt>& mat) {
+    inline std::ostream & operator<<(std::ostream & str, const DSLib::Matrix<T, TInt>& mat) {
 		mat.write(str);
 		return(str);
 	}
 
 	template<typename T, typename TInt>
-	inline std::ostream && operator<<(std::ostream && str, const DSLib::Matrix<T, TInt>& mat) {
+    inline std::ostream && operator<<(std::ostream && str, const DSLib::Matrix<T, TInt>& mat) {
 		mat.write(str);
 		return std::move(str);
 	}
 
 	template <typename T, typename TInt>
-	std::istream & operator>> (std::istream &str, DSLib::Matrix<T, TInt> &mat) {
+    std::istream & operator>> (std::istream &str, DSLib::Matrix<T, TInt> &mat) {
 		mat.read(str);
 		return(str);
 	}
 
 	template <typename T, typename TInt>
-	std::istream && operator>> (std::istream &&str, DSLib::Matrix<T, TInt> &mat) {
+    std::istream && operator>> (std::istream &&str, DSLib::Matrix<T, TInt> &mat) {
 		mat.read(str);
 		return std::move(str);
 	}
 
 	template <typename T, typename TIdx>
-	T mean(const Matrix<T, TIdx> &mat) {
-		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+    T mean(const DSLib::Matrix<T, TIdx> &mat) {
+        DSLib::Matrix<T, TIdx> mat2 = const_cast<DSLib::Matrix<T, TIdx>&>(mat);
 		T sum = (T)0;
 		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
 			sum += *it;
@@ -1078,8 +1075,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TIdx>
-	T sd(const Matrix<T, TIdx> &mat) {
-		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+    T sd(const DSLib::Matrix<T, TIdx> &mat) {
+        DSLib::Matrix<T, TIdx> mat2 = const_cast<DSLib::Matrix<T, TIdx>&>(mat);
 		T mn = mean(mat);
 		T sum = (T)0;
 		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
@@ -1088,8 +1085,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TIdx>
-	T min(const Matrix<T, TIdx> &mat) {
-		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+    T min(const DSLib::Matrix<T, TIdx> &mat) {
+        DSLib::Matrix<T, TIdx> mat2 = const_cast<DSLib::Matrix<T, TIdx>&>(mat);
 		T min = (T)mat.val(0, 0);
 		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
 			if (*it<min)
@@ -1098,8 +1095,8 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TIdx>
-	T max(const Matrix<T, TIdx> &mat) {
-		Matrix<T, TIdx> mat2 = const_cast<Matrix<T, TIdx>&>(mat);
+    T max(const DSLib::Matrix<T, TIdx> &mat) {
+        DSLib::Matrix<T, TIdx> mat2 = const_cast<DSLib::Matrix<T, TIdx>&>(mat);
 		T max = (T)mat.val(0, 0);
 		for (auto it = mat2.rows->begin();it != mat2.rows->end();it++)
 			if (*it>max)
@@ -1108,7 +1105,7 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TIdx>
-	Matrix<T, TIdx> & scaleAndCenter(Matrix<T, TIdx> &mat) {
+    DSLib::Matrix<T, TIdx> & scaleAndCenter(DSLib::Matrix<T, TIdx> &mat) {
 		T m = mean(mat);
 		T s = sd(mat);
 		(mat - m) / s;
@@ -1116,13 +1113,13 @@ namespace DSFunc {
 	}
 
 	template <typename T, typename TIdx>
-	Matrix<T, TIdx> & scaleMinMax(Matrix<T, TIdx> &mat) {
+    DSLib::Matrix<T, TIdx> & scaleMinMax(DSLib::Matrix<T, TIdx> &mat) {
 		scale(mat, min(mat), max(mat), (T)0, (T)1);
 		return mat;
 	}
 
 	template <typename T, typename TIdx>
-	Matrix<T, TIdx> & abs(Matrix<T, TIdx> &mat) {
+    DSLib::Matrix<T, TIdx> & abs(DSLib::Matrix<T, TIdx> &mat) {
 		for (auto it = mat.rows->begin();it != mat.rows->end();it++)
 			if (*it < (T)0)
 				*it = (T)0;
