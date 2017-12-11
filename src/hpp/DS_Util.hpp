@@ -199,11 +199,11 @@ namespace DSUtil {
 	template<> inline void fmt(std::ostream& str, const MatrixString & data) { stringstream ss;data.print(ss);str << "(" << replaceString(replaceString(ss.str(), "\n", ""), " ", "") << ")"; }
 
 	#ifndef DDSL_NO_EXT_LIB_PNG
-		template<> inline void write(ostream &s, const ImagePNG<Double> &data) {data.write(s); }
-		template<> inline void read(istream &s, ImagePNG<Double> &data) {data.read(s);}	
-		template<> inline void fmt(std::ostream& str, const ImagePNG<Double> & data) {str << "ImagePNG<Double>(String(\"" << data.getFilename() << "\"))"; }
-		template<> inline void write(ostream &s, const ImagePNG<Float> &data) {data.write(s); }
-		template<> inline void read(istream &s, ImagePNG<Float> &data) {data.read(s);}	
-		template<> inline void fmt(std::ostream& str, const ImagePNG<Float> & data) {str << "ImagePNG<Float>(String(\"" << data.getFilename() << "\"))"; }
+        template<> inline void write(ostream &s, const DSImage::ImagePNG<Double> &data) {data.write(s); }
+        template<> inline void read(istream &s, DSImage::ImagePNG<Double> &data) {data.read(s);}
+        template<> inline void fmt(std::ostream& str, const DSImage::ImagePNG<Double> & data) {str << "DSImage::ImagePNG<Double>(String(\"" << data.getFilename() << "\"))"; }
+        template<> inline void write(ostream &s, const DSImage::ImagePNG<Float> &data) {data.write(s); }
+        template<> inline void read(istream &s, DSImage::ImagePNG<Float> &data) {data.read(s);}
+        template<> inline void fmt(std::ostream& str, const DSImage::ImagePNG<Float> & data) {str << "DSImage::ImagePNG<Float>(String(\"" << data.getFilename() << "\"))"; }
 	#endif
 }

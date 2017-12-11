@@ -218,7 +218,7 @@ namespace DSLib {
 		template<typename T> Matrix<T, TIdx> & mat(TIdx index=0) {
 			try {
 				return dynamic_cast<Matrix<T, TIdx>&>(mat(index));
-			} catch (exception &e) {				
+            } catch (std::exception &e) {
 				throw Error(ecGeneral, "Table<>.mat<T>()", e.what() + SS(" to " << typeid(Matrix<T, TIdx>).name() << " from " << typeid(mat(index)).name()));
 			}
 		};
