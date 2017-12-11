@@ -20,3 +20,6 @@
 #ignore temp files
 **/*.TMP
 **/*.swp
+
+#ignore contrib
+**/contrib/
