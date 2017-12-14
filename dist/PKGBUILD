@@ -1,0 +1,73 @@
+pkgbase=ddsl-git
+_srcname=DSL
+pkgname=("ddsl-git" "ddsl-arrayfire-git" "ddsl-png-git" "ddsl-svm-git")
+pkgver=ddsl_tester_for_ENVI_conversion.r13.g1abb749b
+pkgrel=1
+pkgdesc="Dijkstra's Data Science Language"
+licence=("proprietary")
+arch=("x86_64")
+makedepends=("arrayfire" "libpng" "zlib")
+
+source=("DSL::git+https://github.com/kdijkstra13/DDSL.git#branch=dev" "ddsl.astyle")
+sha256sums=("SKIP"
+            "d5be4db93883776beaa6468d80741e6529c15d40ec58e95282febc9a9ac03359")
+
+pkgver() {
+    cd ${srcdir}/${_srcname}
+    git describe --long --tags | sed "s/\([^-]*-g\)/r\1/;s/-/./g"
+}
+
+build() {
+    cd ${srcdir}/${_srcname}
+
+    if [[ ! -d build ]]; then
+        mkdir build
+    fi
+
+    echo "Running astyle"
+    find ./ddsl ./lib{arrayfire,png,caffe}_ddsl ./src -type f -name \*.h -or -name \*.hpp -or -name \*.c -or -name \*.cpp -exec astyle --options=${srcdir}/ddsl.astyle {} +
+
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=RELWITHDEBINFO -DBUILD_DOC=OFF -DBUILD_DOC=OFF -DBUILD_DDSL_TESTER=OFF -DBUILD_DDSL_PYTHON_TESTER=OFF -DBUILD_DOC=OFF -DDDSL_EXT_LIB_PNG=ON -DDDSL_EXT_LIB_SVM=ON -DDDSL_EXT_LIB_AF=ON -DBUILD_LIBPNG_DDSL=ON -DBUILD_LIBSVM_DDSL=ON -DBUILD_LIBCAFFE_DDSL=ON -DBUILD_LIBAF_DDSL=ON -DOPTION_CAFFE_GPU=OFF -DOPTION_GCC_O3=OFF -DOPTION_GCC_OFAST=OFF ..
+
+    make
+}
+
+package_ddsl-git() {
+    depends=("ddsl-arrayfire-git" "ddsl-png-git" "ddsl-svm-git")
+
+    cd ${srcdir}/${_srcname}/build
+    mkdir -p ${pkgdir}/usr/include/ddsl
+
+    cp -r ../src/ddsl.h{,pp} ../src/h{,pp} ${pkgdir}/usr/include/ddsl
+}
+
+package_ddsl-arrayfire-git() {
+    options=(staticlibs strip debug)
+
+    cd ${srcdir}/${_srcname}/build
+    mkdir -p ${pkgdir}/usr/{include/ddsl,lib}
+
+    cp ./libaf_ddsl.a ${pkgdir}/usr/lib/
+    cp ../libarrayfire_ddsl/ArrayFire_ddsl.h ${pkgdir}/usr/include/ddsl
+}
+
+package_ddsl-png-git() {
+    options=(staticlibs strip debug)
+
+    cd ${srcdir}/${_srcname}/build
+    mkdir -p ${pkgdir}/usr/{include/ddsl,lib}
+
+    cp ./libpng_ddsl.a ${pkgdir}/usr/lib/
+    cp ../libpng_ddsl/png_ddsl.h ${pkgdir}/usr/include/ddsl/
+}
+
+package_ddsl-svm-git() {
+    options=(staticlibs strip debug)
+
+    cd ${srcdir}/${_srcname}/build
+    mkdir -p ${pkgdir}/usr/{include/ddsl/libsvm,lib}
+
+    cp -r ../contrib/libsvm-3.21/svm.h ${pkgdir}/usr/include/ddsl/libsvm/
+    cp ./libsvm_ddsl.a ${pkgdir}/usr/lib/
+}
