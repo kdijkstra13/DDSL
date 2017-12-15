@@ -347,7 +347,7 @@ namespace DSImage {
 		ImagePNG<T, TIdx> ret(getImageHeight(), getImageWidth(), (T)0, (getBitsPerChannel() == 8)?itM8:itM16);
 		if (it_ == itRGB8Planar || it_ == itRGB16Planar) {
 			ret.mat() = mat()(TIdx(0), getImageHeight(), n * getImageWidth(), getImageWidth());  
-		} else if (it_ == itRGB8Planar || it_ == itRGB16Planar) {
+        } else if (it_ == itRGB8PlanarV || it_ == itRGB16PlanarV) {
 			ret.mat() = mat()(n * getImageHeight(), getImageHeight(), TIdx(0), getImageWidth());  
 		} else {
 			TIdx channels = getChannelCount();
