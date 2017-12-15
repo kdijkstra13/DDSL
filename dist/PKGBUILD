@@ -8,9 +8,9 @@ licence=("proprietary")
 arch=("x86_64")
 makedepends=("arrayfire" "libpng" "zlib")
 
-source=("DSL::git+https://github.com/kdijkstra13/DDSL.git#branch=dev" "ddsl.astyle")
-sha256sums=("SKIP"
-            "d5be4db93883776beaa6468d80741e6529c15d40ec58e95282febc9a9ac03359")
+source=("DSL::git+https://github.com/kdijkstra13/DDSL.git#branch=dev")# "ddsl.astyle")
+sha256sums=("SKIP")
+#            "d5be4db93883776beaa6468d80741e6529c15d40ec58e95282febc9a9ac03359")
 
 pkgver() {
     cd ${srcdir}/${_srcname}
@@ -24,11 +24,11 @@ build() {
         mkdir build
     fi
 
-    echo "Running astyle"
-    find ./ddsl ./lib{arrayfire,png,caffe}_ddsl ./src -type f -name \*.h -or -name \*.hpp -or -name \*.c -or -name \*.cpp -exec astyle --options=${srcdir}/ddsl.astyle {} +
+    #echo "Running astyle"
+    #find ./ddsl ./lib{arrayfire,png,caffe}_ddsl ./src -type f -name \*.h -or -name \*.hpp -or -name \*.c -or -name \*.cpp -exec astyle --options=${srcdir}/ddsl.astyle {} +
 
     cd build
-    cmake -DCMAKE_BUILD_TYPE=RELWITHDEBINFO -DBUILD_DOC=OFF -DBUILD_DOC=OFF -DBUILD_DDSL_TESTER=OFF -DBUILD_DDSL_PYTHON_TESTER=OFF -DBUILD_DOC=OFF -DDDSL_EXT_LIB_PNG=ON -DDDSL_EXT_LIB_SVM=ON -DDDSL_EXT_LIB_AF=ON -DBUILD_LIBPNG_DDSL=ON -DBUILD_LIBSVM_DDSL=ON -DBUILD_LIBCAFFE_DDSL=ON -DBUILD_LIBAF_DDSL=ON -DOPTION_CAFFE_GPU=OFF -DOPTION_GCC_O3=OFF -DOPTION_GCC_OFAST=OFF ..
+    cmake -DCMAKE_BUILD_TYPE=RELWITHDEBINFO -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_DOC=OFF -DBUILD_DOC=OFF -DBUILD_DDSL_TESTER=OFF -DBUILD_DDSL_PYTHON_TESTER=OFF -DBUILD_DOC=OFF -DDDSL_EXT_LIB_PNG=ON -DDDSL_EXT_LIB_SVM=ON -DDDSL_EXT_LIB_AF=ON -DBUILD_LIBPNG_DDSL=ON -DBUILD_LIBSVM_DDSL=ON -DBUILD_LIBCAFFE_DDSL=ON -DBUILD_LIBAF_DDSL=ON -DOPTION_CAFFE_GPU=OFF -DOPTION_GCC_O3=OFF -DOPTION_GCC_OFAST=OFF ..
 
     make
 }
