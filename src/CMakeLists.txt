@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(DDSL_HEADERS)
+
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/ddsl.h ${CMAKE_CURRENT_LIST_DIR}/ddsl.hpp DESTINATION include/ddsl)
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/h/ DESTINATION include/ddsl FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/hpp/ DESTINATION include/ddsl FILES_MATCHING PATTERN "*.hpp")

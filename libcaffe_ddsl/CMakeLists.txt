@@ -1,0 +1,57 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(LIBCAFFE_DDSL)
+
+option(DDSL_EXT_LIB_CAFFE "Caffe support in DDSL_TESTER" OFF)
+option(BUILD_LIBCAFFE_DDSL "Build a library for Caffe" OFF) 					#Depend on: DDSL_EXT_LIB_CAFFE
+option(OPTION_CAFFE_GPU "Build with Caffe with GPU support" OFF)
+option(OPTION_CAFFE_NCCL "Multi-GPU support" OFF)
+
+
+#function (addExtLibCaffe)
+#        message("* addExtLibCaffe")
+#        list(REMOVE_ITEM DEFS "DDSL_NO_EXT_LIB_CAFFE")
+#        if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+#                set (OpenBLAS_DIR ${DDSL_ROOT}/contrib/openblas/lib/cmake/openblas)
+#                find_package(OpenBLAS REQUIRED)
+#                set (OpenCV_DIR $ENV{ProgramFiles}/opencv/build)
+#                #set (OpenCV_DIR ${DDSL_ROOT}/contrib/opencv/build)
+#                find_package(OpenCV REQUIRED)
+#                set (Caffe_DIR ${DDSL_ROOT}/contrib/caffe/build)
+#                find_package(Caffe REQUIRED)
+
+#                #Add some extra libs
+#                set(Caffe_LIBRARIES ${Caffe_LIBRARIES} ntdll.lib)
+#                set(Caffe_LIBRARIES ${Caffe_LIBRARIES} shlwapi.lib)
+#        else()
+#                find_package(OpenCV REQUIRED)
+#                set (Caffe_DIR ${DDSL_ROOT}/contrib/caffe/build)
+#                find_package(Caffe REQUIRED)
+#        endif()
+#        if (NOT OPTION_CAFFE_GPU)
+#                message("** OPTION_CAFFE_GPU=0")
+#                list(APPEND DEFS "CPU_ONLY")
+#        else()
+#                message("** OPTION_CAFFE_GPU=1")
+#                if (OPTION_CAFFE_NCCL)
+#                        message("** OPTION_CAFFE_NCCL=1")
+#                        list(APPEND DEFS "USE_NCCL")
+#                else()
+#                        message("** OPTION_CAFFE_NCCL=0")
+#                endif()
+#        endif()
+#        include_directories (${Caffe_INCLUDE_DIRS})
+#        include_directories (${DDSL_ROOT}/contrib/caffe/build/install/include) #for caffe.pb.h
+#        include_directories (${DDSL_ROOT}/contrib/caffe/build) #for export.hpp
+
+#        target_link_libraries(${EXE_NAME} ${Caffe_LIBRARIES})
+#        list(APPEND DEFS "USE_OPENCV")
+#        list(APPEND SRC_FILES ${DDSL_ROOT}/libcaffe/force_link.cpp)
+#        set(SRC_FILES ${SRC_FILES} PARENT_SCOPE)
+#        set(DEFS ${DEFS} PARENT_SCOPE)
+#endfunction()
+#function (addLibCaffe)
+#        message("* addLibCaffe")
+#        list(REMOVE_ITEM DEFS "DDSL_NO_EXT_LIB_CAFFE")
+#        set(DEFS ${DEFS} PARENT_SCOPE)
+#endfunction()
